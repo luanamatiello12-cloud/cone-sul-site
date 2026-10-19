@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONE SUL | Fronteiras que conectam a Cristo</title>
+    <meta name="description" content="Conheça o CONE SUL, uma iniciativa missionária da Igreja Renovar em Cristo. Faça parte da missão, seja mantenedor e contribua para levar o Evangelho além das fronteiras.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body data-pagina="inicio">
+
+    <!-- SECAO 01 - ABERTURA -->
+    <section class="hero">
+        <div class="wrap">
+            <span class="hero-kicker">Cone Sul | Fronteiras que conectam a Cristo</span>
+            <h1>Até os confins<br>da terra.</h1>
+            <p class="hero-lead">Há fronteiras que ainda precisam ser atravessadas. Há vidas que precisam conhecer Jesus. E existe uma missão que nos chama a ir além.</p>
+            <p class="hero-complemento">O CONE SUL nasce para levar o Evangelho além das fronteiras, formar discípulos, desenvolver lideranças e estabelecer comunidades de fé.</p>
+
+            <blockquote class="versiculo">
+                “...e até aos confins da terra.”
+                <cite>Atos 1:8</cite>
+            </blockquote>
+
+            <div class="cta-buttons">
+                <a href="contato.html" class="btn btn-primary">Faça parte da missão</a>
+                <a href="#o-que-e" class="btn btn-secondary">Conheça o Cone Sul</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 02 - O QUE E O CONE SUL? -->
+    <section class="sec-clara" id="o-que-e">
+        <div class="wrap">
+            <span class="sec-kicker">O que é o Cone Sul?</span>
+            <h2>Uma missão que ultrapassa fronteiras.</h2>
+
+            <div class="texto-bloco">
+                <p>O CONE SUL é uma iniciativa missionária da Igreja Renovar em Cristo, que nasce com um propósito: anunciar Jesus Cristo, fazer discípulos e contribuir para o desenvolvimento de comunidades de fé em diferentes territórios.</p>
+                <p>Nossa visão vai além de ações pontuais. Queremos construir um trabalho missionário contínuo, com presença local, discipulado, formação de lideranças e multiplicação de igrejas.</p>
+                <p>Porque a missão não termina quando chegamos a um novo lugar. É ali que uma nova história começa.</p>
+            </div>
+
+            <p class="destaque">Não queremos apenas chegar a novos lugares. Queremos que o Evangelho crie raízes.</p>
+
+            <div class="cta-buttons acoes-secao">
+                <a href="nossa-missao.html" class="btn btn-secondary">Conheça nossa missão</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 03 - ONDE TUDO COMECA -->
+    <section class="sec-escura" id="onde">
+        <div class="wrap">
+            <span class="sec-kicker">Onde tudo começa</span>
+            <h2>De uma fronteira para as nações.</h2>
+            <p class="sec-intro">Uma visão missionária que começa no Brasil e se estende por diferentes países da América do Sul.</p>
+
+            <div class="texto-bloco" style="margin-bottom: 3rem;">
+                <p>Nossa jornada tem como ponto de partida Foz do Iguaçu, uma região estratégica de conexão entre países, culturas e pessoas.</p>
+                <p>A partir dessa base, nossa visão contempla o avanço missionário pelo Paraguai, Argentina e Chile, desenvolvendo relacionamentos, formando discípulos e preparando lideranças locais.</p>
+                <p>Cada território representa uma nova oportunidade de anunciar o Evangelho e construir comunidades que permaneçam.</p>
+            </div>
+
+            <div class="mapa-container">
+                <div id="mapa-leaflet" class="mapa-leaflet"></div>
+
+                <div class="info-paises">
+                    <div class="card-info">
+                        <div class="card-header">
+                            <svg class="bandeira" id="card-bandeira" viewBox="0 0 30 20" style="visibility:hidden"><use href="#flag-ar"/></svg>
+                            <h3 id="pasta-titulo">Selecione um território</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="pasta-info" style="white-space: pre-line;">Clique em um território no mapa ou na lista ao lado.</div>
+                        </div>
+                    </div>
+
+                    <div class="info-items-list">
+                        <div class="info-item base" data-info="Paraná">
+                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                            <div class="info-text"><h4>Paraná</h4><p>Foz do Iguaçu — ponto de partida</p></div>
+                        </div>
+                        <div class="info-item base" data-info="Santa Catarina">
+                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                            <div class="info-text"><h4>Santa Catarina</h4><p>Sul do Brasil</p></div>
+                        </div>
+                        <div class="info-item base" data-info="Rio Grande do Sul">
+                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                            <div class="info-text"><h4>Rio Grande do Sul</h4><p>Sul do Brasil</p></div>
+                        </div>
+                        <div class="info-item" data-info="Paraguai">
+                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg>
+                            <div class="info-text"><h4>Paraguai</h4><p>Santa Rita — próxima etapa</p></div>
+                        </div>
+                        <div class="info-item" data-info="Argentina">
+                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg>
+                            <div class="info-text"><h4>Argentina</h4><p>Visão de expansão</p></div>
+                        </div>
+                        <div class="info-item" data-info="Chile">
+                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg>
+                            <div class="info-text"><h4>Chile</h4><p>Visão de expansão</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="territorios">
+                <div class="territorio ativo">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                        <h4>Brasil</h4>
+                    </div>
+                    <span class="territorio-etapa">Foz do Iguaçu</span>
+                    <p>Ponto de partida da missão.</p>
+                </div>
+                <div class="territorio ativo">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg>
+                        <h4>Paraguai</h4>
+                    </div>
+                    <span class="territorio-etapa">Santa Rita</span>
+                    <p>Próxima etapa da expansão missionária.</p>
+                </div>
+                <div class="territorio">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg>
+                        <h4>Argentina</h4>
+                    </div>
+                    <span class="territorio-etapa">Visão de expansão</span>
+                    <p>Parte da visão de expansão do CONE SUL.</p>
+                </div>
+                <div class="territorio">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg>
+                        <h4>Chile</h4>
+                    </div>
+                    <span class="territorio-etapa">Visão de expansão</span>
+                    <p>Parte da visão de expansão do CONE SUL.</p>
+                </div>
+            </div>
+
+            <p class="destaque">Uma missão. Diferentes territórios. O mesmo Evangelho.</p>
+
+            <div class="cta-buttons acoes-secao">
+                <a href="onde-atuamos.html" class="btn btn-primary">Conheça onde atuamos</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 04 - COMO FUNCIONA -->
+    <section class="sec-branca" id="como">
+        <div class="wrap">
+            <span class="sec-kicker">Como funciona</span>
+            <h2>Não queremos apenas chegar. Queremos permanecer.</h2>
+            <p class="sec-intro">Uma missão de longo prazo precisa de estrutura, pessoas e continuidade.</p>
+
+            <div class="texto-bloco">
+                <p>O CONE SUL trabalha com uma visão de desenvolvimento missionário que conecta a presença no território à formação de discípulos e lideranças.</p>
+                <p>Nosso objetivo é contribuir para o estabelecimento de comunidades de fé que possam crescer, amadurecer e se multiplicar.</p>
+            </div>
+
+            <div class="etapas">
+                <div class="etapa">
+                    <span class="etapa-num">01</span>
+                    <div><h3>Base missionária</h3><p>Estruturação de um ponto de apoio para organizar e desenvolver as atividades missionárias.</p></div>
+                </div>
+                <div class="etapa">
+                    <span class="etapa-num">02</span>
+                    <div><h3>Missionários</h3><p>Pessoas comprometidas com o anúncio do Evangelho, o relacionamento com as comunidades e o discipulado.</p></div>
+                </div>
+                <div class="etapa">
+                    <span class="etapa-num">03</span>
+                    <div><h3>Pequenos grupos</h3><p>Ambientes de relacionamento, ensino bíblico, comunhão e crescimento espiritual.</p></div>
+                </div>
+                <div class="etapa">
+                    <span class="etapa-num">04</span>
+                    <div><h3>Formação de líderes</h3><p>Desenvolvimento de pessoas preparadas para servir e conduzir suas comunidades.</p></div>
+                </div>
+                <div class="etapa">
+                    <span class="etapa-num">05</span>
+                    <div><h3>Multiplicação de igrejas</h3><p>Uma visão de continuidade, crescimento e estabelecimento de novas comunidades de fé.</p></div>
+                </div>
+            </div>
+
+            <p class="destaque">O verdadeiro avanço missionário não é medido apenas pelos lugares alcançados, mas pelas vidas discipuladas e pelas comunidades estabelecidas.</p>
+
+            <div class="cta-buttons acoes-secao">
+                <a href="como-funciona.html" class="btn btn-secondary">Entenda nossa missão</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 05 - FACA PARTE -->
+    <section class="sec-escura" id="faca-parte">
+        <div class="wrap">
+            <span class="sec-kicker">Faça parte</span>
+            <h2>Alguns são chamados para ir. Outros, para enviar.</h2>
+            <p class="sec-intro">Todos podem fazer parte de uma missão que vai além das fronteiras.</p>
+
+            <div class="texto-bloco" style="margin-bottom: 3rem;">
+                <p>O avanço do Evangelho é construído por pessoas que decidem responder ao chamado. Algumas estarão diretamente no campo missionário. Outras participarão por meio da mobilização, do serviço e do compromisso financeiro com a continuidade da missão.</p>
+                <p>Existem diferentes formas de fazer parte dessa história. O importante é compreender que cada participação contribui para algo maior.</p>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card-acao">
+                    <h3>Seja mantenedor</h3>
+                    <p>Assuma um compromisso mensal e contribua para a continuidade do trabalho missionário.</p>
+                    <a href="seja-mantenedor.html" class="btn btn-primary">Quero ser mantenedor</a>
+                </div>
+                <div class="card-acao">
+                    <h3>Mobilize pessoas</h3>
+                    <p>Compartilhe a visão do CONE SUL e ajude mais pessoas a conhecerem essa missão.</p>
+                    <button type="button" class="btn btn-primary" id="btn-compartilhar">Compartilhar a missão</button>
+                </div>
+                <div class="card-acao">
+                    <h3>Parceria empresarial</h3>
+                    <p>Conecte sua empresa a uma missão de longo prazo e faça parte de uma comunidade de empresários com propósito.</p>
+                    <a href="empresarios.html" class="btn btn-primary">Conheça o programa empresarial</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 06 - MANTENEDORES -->
+    <section class="sec-clara" id="mantenedores">
+        <div class="wrap">
+            <span class="sec-kicker">Mantenedores</span>
+            <h2>Uma missão de longo prazo precisa de pessoas comprometidas.</h2>
+
+            <div class="texto-bloco">
+                <p>A continuidade do trabalho missionário depende de planejamento, estrutura e recursos.</p>
+                <p>Ao se tornar mantenedor do CONE SUL, você assume um compromisso mensal que contribui para o desenvolvimento da missão e para a construção dos próximos passos.</p>
+                <p>Sua participação ajuda a sustentar uma visão que não se limita a um evento, uma viagem ou uma ação temporária.</p>
+            </div>
+
+            <p class="destaque">Sua contribuição não é apenas para o momento presente. É um compromisso com tudo aquilo que ainda será construído.</p>
+
+            <div class="cta-buttons acoes-secao">
+                <a href="seja-mantenedor.html" class="btn btn-primary" style="background: var(--verde-700); color: #fff;">Torne-se um mantenedor</a>
+                <a href="como-funciona.html" class="btn btn-secondary">Saiba como funciona</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 07 - EMPRESARIOS COM PROPOSITO -->
+    <section class="sec-escura" id="empresarios">
+        <div class="wrap">
+            <span class="sec-kicker">Empresários com Propósito</span>
+            <h2>Negócios que crescem. Uma missão que avança.</h2>
+            <p class="sec-intro">Sua empresa pode fazer parte de algo maior.</p>
+
+            <div class="texto-bloco">
+                <p>O Empresários com Propósito é uma comunidade que reúne empresários comprometidos com o avanço do Evangelho e interessados em crescer juntos em conhecimento, liderança, negócios e relacionamentos.</p>
+                <p>Por meio de uma parceria mensal com o CONE SUL, empresários passam a integrar um ambiente de desenvolvimento, conexões e valores compartilhados.</p>
+                <p>Uma oportunidade de unir crescimento empresarial e compromisso missionário.</p>
+            </div>
+
+            <ul class="lista-destaques">
+                <li>Workshops empresariais</li>
+                <li>Networking e conexões</li>
+                <li>Desenvolvimento pessoal e familiar</li>
+                <li>Summit anual de empresários</li>
+                <li>Conteúdos e encontros exclusivos</li>
+                <li>Acompanhamento da missão</li>
+            </ul>
+
+            <div class="cta-buttons acoes-secao">
+                <a href="empresarios.html" class="btn btn-primary">Conheça Empresários com Propósito</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 08 - NOTICIAS E ATUALIZACOES -->
+    <section class="sec-branca" id="noticias">
+        <div class="wrap">
+            <span class="sec-kicker">Notícias e atualizações</span>
+            <h2>A missão está em movimento.</h2>
+            <p class="sec-intro">Acompanhe as histórias, os acontecimentos e os próximos passos do CONE SUL.</p>
+
+            <div class="texto-bloco">
+                <p>Cada etapa dessa jornada merece ser compartilhada.</p>
+                <p>Aqui você acompanha registros do campo missionário, visitas, encontros, projetos em desenvolvimento e histórias que revelam o avanço da missão.</p>
+            </div>
+
+            <div class="cta-buttons acoes-secao">
+                <a href="noticias.html" class="btn btn-secondary">Acompanhe as novidades</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 09 - CHAMADA FINAL -->
+    <section class="sec-escura chamada-final">
+        <div class="wrap">
+            <h2>O chamado continua. A missão também.</h2>
+
+            <div class="texto-bloco">
+                <p>O Evangelho nos chama a ir além.</p>
+                <p>Além das nossas cidades. Além das nossas fronteiras. Além daquilo que conseguimos realizar sozinhos.</p>
+                <p>O CONE SUL é um convite para fazer parte de uma missão que deseja alcançar novos territórios e contribuir para a transformação de vidas por meio de Jesus Cristo.</p>
+            </div>
+
+            <p class="destaque">A missão começa com um chamado. E continua com quem decide responder.</p>
+
+            <div class="cta-buttons acoes-secao">
+                <a href="contato.html" class="btn btn-primary">Faça parte do Cone Sul</a>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="app.js?v=7"></script>
+</body>
+</html>

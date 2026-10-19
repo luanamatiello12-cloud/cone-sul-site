@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notícias | CONE SUL</title>
+    <meta name="description" content="Acompanhe as novidades, os registros de campo e os próximos passos do CONE SUL.">
+    <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body data-pagina="noticias">
+
+    <!-- SECAO 01 - ABERTURA -->
+    <section class="hero hero-pagina">
+        <div class="wrap">
+            <span class="hero-kicker">Notícias</span>
+            <h1>Histórias de uma missão em movimento.</h1>
+            <p class="hero-lead">Acompanhe as novidades, os registros de campo e os próximos passos do CONE SUL.</p>
+        </div>
+    </section>
+
+    <!-- SECAO 02 - PUBLICACOES -->
+    <section class="sec-clara">
+        <div class="wrap">
+            <span class="sec-kicker">Publicações</span>
+            <div class="texto-bloco">
+                <p>Cada etapa da missão representa uma oportunidade de compartilhar o que está sendo construído.</p>
+                <p>Aqui você encontra registros, notícias, histórias e atualizações sobre o desenvolvimento do CONE SUL.</p>
+            </div>
+
+            <ul class="categorias filtro-categorias">
+                <li><button type="button" data-cat="todas" class="ativo">Todas</button></li>
+                <li><button type="button" data-cat="diario">Diário de Campo</button></li>
+                <li><button type="button" data-cat="noticias">Notícias da Missão</button></li>
+                <li><button type="button" data-cat="historias">Histórias e Testemunhos</button></li>
+                <li><button type="button" data-cat="projetos">Projetos e Expansão</button></li>
+                <li><button type="button" data-cat="contas">Prestação de Contas</button></li>
+            </ul>
+
+            <div class="aviso-implantacao" style="opacity: 1;">
+                <strong>Modelo de layout.</strong> Ainda não há publicações. Os cards abaixo mostram como as notícias vão aparecer e devem ser substituídos pelas publicações reais.
+            </div>
+
+            <div class="noticias-grid">
+                <article class="noticia-card" data-cat="diario">
+                    <div class="noticia-imagem">Foto da publicação</div>
+                    <div class="noticia-corpo">
+                        <span class="noticia-cat">Diário de Campo</span>
+                        <h3>[Título da publicação]</h3>
+                        <p>[Resumo de duas ou três linhas sobre o registro do campo missionário.]</p>
+                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
+                    </div>
+                </article>
+                <article class="noticia-card" data-cat="noticias">
+                    <div class="noticia-imagem">Foto da publicação</div>
+                    <div class="noticia-corpo">
+                        <span class="noticia-cat">Notícias da Missão</span>
+                        <h3>[Título da publicação]</h3>
+                        <p>[Resumo de duas ou três linhas sobre um acontecimento da missão.]</p>
+                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
+                    </div>
+                </article>
+                <article class="noticia-card" data-cat="historias">
+                    <div class="noticia-imagem">Foto da publicação</div>
+                    <div class="noticia-corpo">
+                        <span class="noticia-cat">Histórias e Testemunhos</span>
+                        <h3>[Título da publicação]</h3>
+                        <p>[Resumo de duas ou três linhas sobre uma história ou testemunho.]</p>
+                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
+                    </div>
+                </article>
+                <article class="noticia-card" data-cat="projetos">
+                    <div class="noticia-imagem">Foto da publicação</div>
+                    <div class="noticia-corpo">
+                        <span class="noticia-cat">Projetos e Expansão</span>
+                        <h3>[Título da publicação]</h3>
+                        <p>[Resumo de duas ou três linhas sobre um projeto em desenvolvimento.]</p>
+                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
+                    </div>
+                </article>
+                <article class="noticia-card" data-cat="contas">
+                    <div class="noticia-imagem">Documento</div>
+                    <div class="noticia-corpo">
+                        <span class="noticia-cat">Prestação de Contas</span>
+                        <h3>[Título da publicação]</h3>
+                        <p>[Resumo de duas ou três linhas sobre a aplicação dos recursos.]</p>
+                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
+                    </div>
+                </article>
+            </div>
+
+            <div class="cta-buttons acoes-secao" style="justify-content: center;">
+                <button type="button" class="btn btn-secondary" disabled>Ver mais notícias</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 03 - RECEBA ATUALIZACOES -->
+    <section class="sec-escura">
+        <div class="wrap">
+            <span class="sec-kicker">Receba atualizações</span>
+            <h2>Fique por dentro da missão.</h2>
+            <p class="sec-intro">Cadastre-se para receber notícias, atualizações e informações sobre os próximos passos do CONE SUL.</p>
+
+            <form class="formulario" data-assunto="Quero receber atualizações do CONE SUL" novalidate>
+                <div class="campo campo-largo">
+                    <label for="n-nome">Nome</label>
+                    <input type="text" id="n-nome" name="nome" data-rotulo="Nome" required>
+                </div>
+                <div class="campo">
+                    <label for="n-whats">WhatsApp</label>
+                    <input type="tel" id="n-whats" name="whatsapp" data-rotulo="WhatsApp">
+                </div>
+                <div class="campo">
+                    <label for="n-email">E-mail</label>
+                    <input type="email" id="n-email" name="email" data-rotulo="E-mail" required>
+                </div>
+                <div class="campo campo-largo consentimento">
+                    <label>
+                        <input type="checkbox" required>
+                        <span>Autorizo o CONE SUL a me enviar notícias e atualizações e a tratar meus dados para essa finalidade. Posso cancelar quando quiser.</span>
+                    </label>
+                </div>
+                <div class="campo campo-largo">
+                    <button type="submit" class="btn btn-primary">Quero receber atualizações</button>
+                    <p class="form-retorno" role="status"></p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <script src="app.js?v=7"></script>
+</body>
+</html>

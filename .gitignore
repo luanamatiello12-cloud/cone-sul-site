@@ -1,0 +1,5 @@
+# Versoes antigas do site (backups locais)
+*.bak
+
+# Configuracoes locais do Claude Code
+.claude/

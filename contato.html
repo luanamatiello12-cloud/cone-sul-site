@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato | CONE SUL</title>
+    <meta name="description" content="Quer conhecer melhor o CONE SUL, tornar-se mantenedor ou conversar sobre uma parceria? Entre em contato com nossa equipe.">
+    <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body data-pagina="contato">
+
+    <!-- SECAO 01 - ABERTURA -->
+    <section class="hero hero-pagina">
+        <div class="wrap">
+            <span class="hero-kicker">Contato</span>
+            <h1>Vamos conversar sobre a missão?</h1>
+            <p class="hero-lead">Quer conhecer melhor o CONE SUL, tornar-se mantenedor ou conversar sobre uma parceria? Entre em contato com nossa equipe.</p>
+        </div>
+    </section>
+
+    <!-- SECAO 02 - FORMULARIO -->
+    <section class="sec-clara">
+        <div class="wrap">
+            <span class="sec-kicker">Formulário</span>
+            <h2>Entre em contato.</h2>
+
+            <form class="formulario" id="form-contato" data-assunto="Contato pelo site do CONE SUL" novalidate>
+                <div class="campo campo-largo">
+                    <label for="f-nome">Nome completo</label>
+                    <input type="text" id="f-nome" name="nome" data-rotulo="Nome completo" required>
+                </div>
+                <div class="campo">
+                    <label for="f-email">E-mail</label>
+                    <input type="email" id="f-email" name="email" data-rotulo="E-mail" required>
+                </div>
+                <div class="campo">
+                    <label for="f-whats">WhatsApp</label>
+                    <input type="tel" id="f-whats" name="whatsapp" data-rotulo="WhatsApp">
+                </div>
+                <div class="campo campo-largo">
+                    <label for="f-cidade">Cidade e estado</label>
+                    <input type="text" id="f-cidade" name="cidade" data-rotulo="Cidade e estado">
+                </div>
+                <div class="campo campo-largo">
+                    <label for="f-interesse">Qual é o seu interesse?</label>
+                    <select id="f-interesse" name="interesse" data-rotulo="Interesse">
+                        <option value="Conhecer melhor o CONE SUL">Conhecer melhor o CONE SUL</option>
+                        <option value="Tornar-me mantenedor" data-chave="mantenedor">Tornar-me mantenedor</option>
+                        <option value="Parceria empresarial" data-chave="empresarial">Parceria empresarial</option>
+                        <option value="Participar das iniciativas">Participar das iniciativas</option>
+                        <option value="Outro assunto">Outro assunto</option>
+                    </select>
+                </div>
+                <div class="campo campo-largo">
+                    <label for="f-msg">Mensagem</label>
+                    <textarea id="f-msg" name="mensagem" data-rotulo="Mensagem" rows="5" placeholder="Conte um pouco sobre como podemos ajudar."></textarea>
+                </div>
+                <div class="campo campo-largo consentimento">
+                    <label>
+                        <input type="checkbox" required>
+                        <span>Autorizo o contato da equipe do CONE SUL e o tratamento dos meus dados para responder a esta mensagem.</span>
+                    </label>
+                </div>
+                <div class="campo campo-largo">
+                    <button type="submit" class="btn btn-primary" style="background: var(--verde-700); color: #fff;">Enviar mensagem</button>
+                    <p class="form-retorno" role="status"></p>
+                </div>
+            </form>
+
+            <div class="aviso-implantacao" style="opacity: 1;">
+                <strong>Em implantação.</strong> Ainda não há servidor recebendo os envios: o botão abre o seu programa de e-mail com a mensagem pronta. Quando o envio automático estiver ativo, a confirmação será “Recebemos sua mensagem! Nossa equipe entrará em contato assim que possível.”
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js?v=7"></script>
+</body>
+</html>

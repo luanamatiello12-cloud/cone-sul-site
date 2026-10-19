@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onde Atuamos | CONE SUL</title>
+    <meta name="description" content="Do Brasil para o Cone Sul: o CONE SUL parte de Foz do Iguaçu, com visão de expansão missionária para Paraguai, Argentina e Chile.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body data-pagina="onde">
+
+    <!-- SECAO 01 - ABERTURA -->
+    <section class="hero hero-pagina">
+        <div class="wrap">
+            <span class="hero-kicker">Onde Atuamos</span>
+            <h1>Uma visão que atravessa países.</h1>
+            <p class="hero-lead">Do Brasil para o Cone Sul. Uma jornada missionária de relacionamento, discipulado e expansão.</p>
+        </div>
+    </section>
+
+    <!-- SECAO 02 - NOSSA JORNADA -->
+    <section class="sec-clara">
+        <div class="wrap">
+            <span class="sec-kicker">Nossa jornada</span>
+            <h2>O ponto de partida é apenas o começo.</h2>
+            <div class="texto-bloco">
+                <p>O CONE SUL tem como ponto de partida Foz do Iguaçu, no Paraná.</p>
+                <p>A região de fronteira representa uma oportunidade estratégica para desenvolver conexões entre diferentes países e culturas.</p>
+                <p>Nossa visão de expansão contempla o Paraguai, a Argentina e o Chile, com um trabalho missionário estruturado para avançar por etapas.</p>
+                <p>Mais do que ampliar nossa presença geográfica, queremos contribuir para a formação de comunidades de fé em cada território.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECAO 03 - TERRITORIOS -->
+    <section class="sec-escura">
+        <div class="wrap">
+            <span class="sec-kicker">Territórios</span>
+            <h2>De uma fronteira para as nações.</h2>
+            <p class="sec-intro">Clique em um território no mapa ou na lista.</p>
+
+            <div class="mapa-container">
+                <div id="mapa-leaflet" class="mapa-leaflet"></div>
+
+                <div class="info-paises">
+                    <div class="card-info">
+                        <div class="card-header">
+                            <svg class="bandeira" id="card-bandeira" viewBox="0 0 30 20" style="visibility:hidden"><use href="#flag-ar"/></svg>
+                            <h3 id="pasta-titulo">Selecione um território</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="pasta-info" style="white-space: pre-line;">Clique em um território no mapa ou na lista ao lado.</div>
+                        </div>
+                    </div>
+
+                    <div class="info-items-list">
+                        <div class="info-item base" data-info="Paraná">
+                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                            <div class="info-text"><h4>Paraná</h4><p>Foz do Iguaçu — ponto de partida</p></div>
+                        </div>
+                        <div class="info-item base" data-info="Santa Catarina">
+                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                            <div class="info-text"><h4>Santa Catarina</h4><p>Sul do Brasil</p></div>
+                        </div>
+                        <div class="info-item base" data-info="Rio Grande do Sul">
+                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                            <div class="info-text"><h4>Rio Grande do Sul</h4><p>Sul do Brasil</p></div>
+                        </div>
+                        <div class="info-item" data-info="Paraguai">
+                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg>
+                            <div class="info-text"><h4>Paraguai</h4><p>Santa Rita — o próximo passo</p></div>
+                        </div>
+                        <div class="info-item" data-info="Argentina">
+                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg>
+                            <div class="info-text"><h4>Argentina</h4><p>Uma visão de expansão</p></div>
+                        </div>
+                        <div class="info-item" data-info="Chile">
+                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg>
+                            <div class="info-text"><h4>Chile</h4><p>Fronteiras a atravessar</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="territorios">
+                <div class="territorio ativo">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
+                        <h4>Brasil</h4>
+                    </div>
+                    <span class="territorio-etapa">O ponto de partida</span>
+                    <p>Foz do Iguaçu representa o início da estruturação da nossa jornada missionária.</p>
+                </div>
+                <div class="territorio ativo">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg>
+                        <h4>Paraguai</h4>
+                    </div>
+                    <span class="territorio-etapa">O próximo passo</span>
+                    <p>Santa Rita está entre as localidades contempladas para a próxima etapa do desenvolvimento missionário.</p>
+                </div>
+                <div class="territorio">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg>
+                        <h4>Argentina</h4>
+                    </div>
+                    <span class="territorio-etapa">Uma visão de expansão</span>
+                    <p>O avanço para a Argentina integra a visão de longo prazo do CONE SUL.</p>
+                </div>
+                <div class="territorio">
+                    <div class="territorio-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg>
+                        <h4>Chile</h4>
+                    </div>
+                    <span class="territorio-etapa">Fronteiras que ainda queremos atravessar</span>
+                    <p>O Chile também faz parte da visão de expansão missionária.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DADOS DO CAMPO (fornecidos a parte, nao constam na copy oficial) -->
+    <section class="numeros">
+        <div class="numeros-grid">
+            <div class="numero-item">
+                <span class="numero-valor">3</span>
+                <span class="numero-label">países na visão de expansão</span>
+            </div>
+            <div class="numero-item">
+                <span class="numero-valor">74,3 mi</span>
+                <span class="numero-label">de habitantes</span>
+            </div>
+            <div class="numero-item">
+                <span class="numero-valor">67,2 mi</span>
+                <span class="numero-label">com acesso à internet</span>
+            </div>
+            <div class="numero-item">
+                <span class="numero-valor">91,5%</span>
+                <span class="numero-label">de penetração digital</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec-branca">
+        <div class="wrap">
+            <span class="sec-kicker">O campo</span>
+            <h2>Três barreiras distintas.</h2>
+            <p class="sec-intro">Cada país da visão apresenta um obstáculo próprio. Não é o mesmo desafio repetido três vezes.</p>
+
+            <div class="barreiras-grid">
+                <article class="barreira">
+                    <div class="barreira-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg>
+                        <span class="barreira-pais">Paraguai</span>
+                    </div>
+                    <h3>Tradicionalismo rígido</h3>
+                    <p>Forte identidade cultural ligada ao catolicismo; resistência a mudanças de “placa”.</p>
+                    <div class="barreira-dados">
+                        <div class="dado-linha"><span class="dado-valor">6,7%</span> evangélicos</div>
+                        <div class="dado-linha"><span class="dado-valor">80%</span> católicos</div>
+                        <div class="dado-linha"><span class="dado-valor">13,3%</span> sem religião</div>
+                    </div>
+                </article>
+                <article class="barreira">
+                    <div class="barreira-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg>
+                        <span class="barreira-pais">Argentina</span>
+                    </div>
+                    <h3>Nominalismo &amp; desgaste político</h3>
+                    <p>Desgaste da imagem da igreja associada à política partidária; cristianismo raso.</p>
+                    <div class="barreira-dados">
+                        <div class="dado-linha"><span class="dado-valor">9%</span> evangélicos</div>
+                        <div class="dado-linha"><span class="dado-valor">57%</span> católicos</div>
+                        <div class="dado-linha"><span class="dado-valor">34%</span> sem religião</div>
+                    </div>
+                </article>
+                <article class="barreira">
+                    <div class="barreira-topo">
+                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg>
+                        <span class="barreira-pais">Chile</span>
+                    </div>
+                    <h3>Ceticismo e secularização</h3>
+                    <p>Juventude desiludida com instituições religiosas; pós-modernismo ativo. Alto índice de ensino superior.</p>
+                    <div class="barreira-dados">
+                        <div class="dado-linha"><span class="dado-valor">12%</span> evangélicos</div>
+                        <div class="dado-linha"><span class="dado-valor">54%</span> católicos</div>
+                        <div class="dado-linha"><span class="dado-valor">34%</span> sem religião</div>
+                    </div>
+                </article>
+            </div>
+            <p class="sub-intro" style="margin-top: 2rem; font-size: 0.85rem;">Fontes: INDEC (Argentina), ONU (Paraguai), INE (Chile).</p>
+        </div>
+    </section>
+
+    <!-- SECAO 04 - CHAMADA FINAL -->
+    <section class="sec-escura chamada-final">
+        <div class="wrap">
+            <h2>Cada fronteira representa uma nova oportunidade.</h2>
+            <div class="texto-bloco">
+                <p>Faça parte de uma missão que deseja levar o Evangelho a novos territórios e contribuir para o desenvolvimento de comunidades de fé.</p>
+            </div>
+            <div class="cta-buttons acoes-secao">
+                <a href="seja-mantenedor.html" class="btn btn-primary">Contribua com a missão</a>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="app.js?v=7"></script>
+</body>
+</html>

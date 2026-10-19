@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área do Mantenedor | CONE SUL</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body data-pagina="portal">
+
+    <!-- Aparece enquanto o login estiver em modo demonstracao (ver PORTAL em app.js) -->
+    <div class="faixa-aviso" id="aviso-demo" hidden>
+        Modo demonstração: qualquer e-mail e senha entram. Não use dados reais até o sistema de contas ser ativado.
+    </div>
+
+    <!-- TELA DE ACESSO -->
+    <section class="hero hero-pagina" id="tela-login">
+        <div class="wrap">
+            <span class="hero-kicker">Área exclusiva — Portal do Mantenedor</span>
+            <h1>Bem-vindo à comunidade Cone Sul.</h1>
+            <p class="hero-lead">Acompanhe de perto a missão da qual você faz parte.</p>
+
+            <div class="portal-acesso">
+                <form class="formulario" id="form-login" novalidate>
+                    <div class="campo">
+                        <label for="p-email">E-mail</label>
+                        <input type="email" id="p-email" autocomplete="username" required>
+                    </div>
+                    <div class="campo">
+                        <label for="p-senha">Senha</label>
+                        <input type="password" id="p-senha" autocomplete="current-password" required>
+                    </div>
+                    <div class="campo">
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                        <p class="form-retorno" id="login-retorno" role="status"></p>
+                    </div>
+                    <a href="contato.html?interesse=mantenedor" class="link-discreto">Esqueci minha senha</a>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGINA INICIAL DO PORTAL (so aparece depois do login) -->
+    <section class="hero hero-pagina" id="tela-portal-topo" hidden>
+        <div class="wrap">
+            <span class="hero-kicker">Área do Mantenedor</span>
+            <h1>Você faz parte dessa missão.</h1>
+            <p class="hero-lead">Obrigado por caminhar conosco.</p>
+            <p class="hero-complemento">Conectado como <strong id="usuario-email"></strong></p>
+            <div class="cta-buttons" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary" id="btn-sair">Sair</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec-clara" id="tela-portal" hidden>
+        <div class="wrap">
+            <div class="texto-bloco">
+                <p>Este é o seu espaço para acompanhar o desenvolvimento do CONE SUL, conhecer os projetos em andamento e acessar informações exclusivas para mantenedores.</p>
+            </div>
+
+            <div class="cards-grid" style="margin-top: 2.5rem;">
+                <div class="card-acao">
+                    <h3>Notícias do campo</h3>
+                    <p>Acompanhe os acontecimentos e as novidades da missão.</p>
+                    <a href="noticias.html" class="btn btn-secondary">Abrir</a>
+                </div>
+                <div class="card-acao">
+                    <h3>Projetos missionários</h3>
+                    <p>Conheça os projetos em desenvolvimento e os próximos passos planejados.</p>
+                    <span class="em-breve">Em breve</span>
+                </div>
+                <div class="card-acao">
+                    <h3>Relatórios e transparência</h3>
+                    <p>Acesse as informações disponibilizadas sobre as atividades e a aplicação dos recursos.</p>
+                    <span class="em-breve">Em breve</span>
+                </div>
+                <div class="card-acao">
+                    <h3>Conteúdos exclusivos</h3>
+                    <p>Materiais e atualizações preparados para a comunidade de mantenedores.</p>
+                    <span class="em-breve">Em breve</span>
+                </div>
+                <div class="card-acao">
+                    <h3>Minha contribuição</h3>
+                    <p>Consulte as informações do seu compromisso e as opções de gerenciamento disponíveis.</p>
+                    <span class="em-breve">Em breve</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js?v=7"></script>
+</body>
+</html>
