@@ -1448,3 +1448,164 @@ nav ul.menu a { font-size: 0.84rem; }
     nav ul.menu a { font-size: 0.95rem; }
     .nav-cta, .nav-acesso { display: inline-block !important; }
 }
+
+/* =========================================================
+   FLUIDEZ — transicoes e movimento do site todo
+   ========================================================= */
+:root {
+    --ease-suave: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* O cabecalho fixo nao cobre o titulo ao seguir um link #ancora */
+html { scroll-padding-top: 6rem; }
+
+/* Troca de pagina com fade (Chrome, Edge e Safari recentes; os demais ignoram) */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.35s;
+    animation-timing-function: var(--ease-suave);
+}
+
+/* Entrada dos blocos ao rolar (classes postas pelo app.js) */
+html .revelar {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+        opacity 0.8s var(--ease-suave) var(--atraso, 0s),
+        transform 0.8s var(--ease-suave) var(--atraso, 0s);
+}
+
+html .revelar.visivel {
+    opacity: 1;
+    transform: none;
+}
+
+/* Cabecalho: sombra suave depois que a pagina sai do topo */
+header { transition: box-shadow 0.35s ease, background-color 0.35s ease; }
+header.rolou {
+    background: rgba(22, 40, 26, 0.985);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+}
+
+/* Botoes e cards: curva mais macia e resposta ao clique */
+.btn,
+.contato-button,
+.card-acao,
+.barreira,
+.info-item,
+.nav-cta,
+.nav-acesso {
+    transition-timing-function: var(--ease-suave);
+    transition-duration: 0.35s;
+}
+
+.btn:active,
+.contato-button:active { transform: translateY(0) scale(0.98); transition-duration: 0.1s; }
+
+.btn-primary:hover { box-shadow: 0 10px 24px rgba(201, 173, 106, 0.28); }
+
+.sec-clara .card-acao:hover,
+.sec-branca .card-acao:hover { box-shadow: 0 16px 36px rgba(22, 40, 26, 0.12); }
+
+.noticia-card { transition: transform 0.35s var(--ease-suave), box-shadow 0.35s var(--ease-suave); }
+.noticia-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(22, 40, 26, 0.12); }
+
+.info-item:hover { transform: translateX(4px); }
+
+/* Sublinhado dos links do menu cresce a partir da esquerda */
+nav ul.menu a:not(.nav-cta):not(.nav-acesso) {
+    position: relative;
+    padding-bottom: 3px;
+}
+nav ul.menu a:not(.nav-cta):not(.nav-acesso)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--ease-suave);
+}
+nav ul.menu a:not(.nav-cta):not(.nav-acesso):hover::after,
+nav ul.menu a.ativo:not(.nav-cta):not(.nav-acesso)::after { transform: scaleX(1); }
+
+/* Foco visivel para quem navega pelo teclado */
+a:focus-visible,
+button:focus-visible,
+.info-item:focus-visible {
+    outline: 2px solid var(--areia);
+    outline-offset: 3px;
+}
+
+/* Menu do celular abre e fecha deslizando, em vez de aparecer de uma vez */
+@media (max-width: 1280px) {
+    nav ul.menu {
+        display: flex;
+        max-height: 0;
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+        padding-top: 0;
+        padding-bottom: 0;
+        transition:
+            max-height 0.45s var(--ease-suave),
+            opacity 0.25s ease,
+            padding 0.45s var(--ease-suave),
+            visibility 0s linear 0.45s;
+    }
+    nav.aberto ul.menu {
+        max-height: 34rem;
+        opacity: 1;
+        visibility: visible;
+        padding-top: 1.2rem;
+        padding-bottom: 0.4rem;
+        transition:
+            max-height 0.5s var(--ease-suave),
+            opacity 0.35s ease 0.05s,
+            padding 0.5s var(--ease-suave),
+            visibility 0s;
+    }
+    nav ul.menu li {
+        opacity: 0;
+        transform: translateY(-6px);
+        transition: opacity 0.3s ease, transform 0.4s var(--ease-suave);
+    }
+    nav.aberto ul.menu li { opacity: 1; transform: none; }
+    nav.aberto ul.menu li:nth-child(2) { transition-delay: 0.03s; }
+    nav.aberto ul.menu li:nth-child(3) { transition-delay: 0.06s; }
+    nav.aberto ul.menu li:nth-child(4) { transition-delay: 0.09s; }
+    nav.aberto ul.menu li:nth-child(5) { transition-delay: 0.12s; }
+    nav.aberto ul.menu li:nth-child(6) { transition-delay: 0.15s; }
+    nav.aberto ul.menu li:nth-child(7) { transition-delay: 0.18s; }
+    nav.aberto ul.menu li:nth-child(n+8) { transition-delay: 0.21s; }
+}
+
+/* Filtro de noticias: os cards somem e voltam em vez de pular */
+.noticias-grid { transition: opacity 0.2s ease, transform 0.2s ease; }
+.noticias-grid.filtrando { opacity: 0; transform: translateY(8px); }
+
+/* Portal: troca entre login e area do mantenedor com fade */
+@keyframes telaEntrando {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: none; }
+}
+.tela-entrando { animation: telaEntrando 0.55s var(--ease-suave); }
+
+/* Respeita quem pediu menos movimento no sistema */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0s !important;
+    }
+    @view-transition { navigation: none; }
+}
