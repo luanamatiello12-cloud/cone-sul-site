@@ -319,22 +319,20 @@ if (document.getElementById('mapa-leaflet')) {
         enquadrar();
         window.addEventListener('resize', enquadrar);
 
-        // Fundo SEM nomes: os nomes do mapa padrao ficavam cortados na borda
-        // do recorte. Os nomes das cidades sao escritos por cima (CIDADES).
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap contributors © CARTO',
-            subdomains: 'abcd',
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
             maxZoom: 19
         }).addTo(map);
 
-        // Recorte: tudo que nao e a regiao do projeto fica coberto pela cor
-        // da secao, e a regiao ganha um contorno em areia. Vem antes dos
-        // marcadores para ficar por baixo deles.
+        // Recorte suave: o que nao e a regiao do projeto fica sob um veu da
+        // cor da secao, apagado mas ainda legivel (nada sai cortado), e a
+        // regiao ganha um contorno em areia. Vem antes dos marcadores para
+        // ficar por baixo deles.
         if (temContorno) {
             const fundo = getComputedStyle(document.getElementById('mapa-leaflet').closest('section')).backgroundColor;
             const mundo = [[-85, -180], [-85, 180], [85, 180], [85, -180]];
             L.polygon([mundo, ...REGIAO_CONTORNO], {
-                stroke: false, fillColor: fundo, fillOpacity: 1, interactive: false
+                stroke: false, fillColor: fundo, fillOpacity: 0.6, interactive: false
             }).addTo(map);
             L.polygon(REGIAO_CONTORNO, {
                 color: '#c9ad6a', weight: 1.5, opacity: 0.9, fill: false, interactive: false
@@ -394,30 +392,6 @@ if (document.getElementById('mapa-leaflet')) {
                 alvo.circle.openPopup();
             }
         };
-
-        // Nomes das cidades, por cima do recorte para nunca sairem cortados
-        // lado: onde o nome fica em relacao ao ponto. secundaria: some no
-        // celular, onde o mapa e pequeno e os nomes se sobrepoem.
-        const CIDADES = [
-            { nome: 'Foz do Iguaçu', lat: -25.547, lng: -54.588, lado: 'abaixo' },
-            { nome: 'Assunção',      lat: -25.264, lng: -57.576, lado: 'esquerda' },
-            { nome: 'Curitiba',      lat: -25.429, lng: -49.271, secundaria: true },
-            { nome: 'Florianópolis', lat: -27.595, lng: -48.548, secundaria: true },
-            { nome: 'Porto Alegre',  lat: -30.035, lng: -51.218 },
-            { nome: 'Buenos Aires',  lat: -34.604, lng: -58.382 },
-            { nome: 'Santiago',      lat: -33.449, lng: -70.669 }
-        ];
-        CIDADES.forEach(c => {
-            L.marker([c.lat, c.lng], {
-                interactive: false,
-                keyboard: false,
-                icon: L.divIcon({
-                    className: ['rotulo-cidade', c.lado, c.secundaria && 'secundaria'].filter(Boolean).join(' '),
-                    html: `<span>${c.nome}</span>`,
-                    iconSize: [0, 0]
-                })
-            }).addTo(map);
-        });
 
         document.querySelector('.leaflet-container').style.filter = 'saturate(1.1) brightness(0.95)';
     });

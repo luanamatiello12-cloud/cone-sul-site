@@ -1609,35 +1609,3 @@ button:focus-visible,
     }
     @view-transition { navigation: none; }
 }
-
-/* Nomes das cidades no mapa (o fundo do mapa vem sem nomes) */
-.rotulo-cidade { position: relative; }
-.rotulo-cidade::before {
-    content: '';
-    position: absolute;
-    left: -3px;
-    top: -3px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--verde-900);
-    box-shadow: 0 0 0 1.5px #fff;
-}
-.rotulo-cidade span {
-    position: absolute;
-    left: 7px;
-    top: -8px;
-    white-space: nowrap;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--verde-900);
-    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff;
-    pointer-events: none;
-}
-.rotulo-cidade.abaixo span { left: 0; top: 5px; transform: translateX(-50%); }
-.rotulo-cidade.esquerda span { left: auto; right: 7px; }
-
-@media (max-width: 560px) {
-    .rotulo-cidade.secundaria { display: none; }
-}
