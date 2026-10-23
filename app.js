@@ -19,7 +19,7 @@ const MENU = [
     { id: 'onde',        rotulo: 'Onde Atuamos',              href: 'onde-atuamos.html' },
     { id: 'como',        rotulo: 'Como Funciona',             href: 'como-funciona.html' },
     { id: 'mantenedor',  rotulo: 'Seja Mantenedor',           href: 'seja-mantenedor.html' },
-    { id: 'empresarios', rotulo: 'Empresários com Propósito', href: 'empresarios.html' },
+    { id: 'empresarios', rotulo: 'Expansores com Propósito', href: 'empresarios.html' },
     { id: 'noticias',    rotulo: 'Notícias',                  href: 'noticias.html' }
 ];
 
@@ -120,26 +120,89 @@ document.body.insertAdjacentHTML('afterbegin', SPRITE_BANDEIRAS + montarCabecalh
 document.body.insertAdjacentHTML('beforeend', montarRodape());
 
 // Menu recolhido no celular
+const nav = document.querySelector('nav');
 const toggle = document.querySelector('.menu-toggle');
+
+function fecharMenu() {
+    nav.classList.remove('aberto');
+    toggle.setAttribute('aria-expanded', 'false');
+}
+
 toggle?.addEventListener('click', () => {
-    const aberto = document.querySelector('nav').classList.toggle('aberto');
+    const aberto = nav.classList.toggle('aberto');
     toggle.setAttribute('aria-expanded', aberto);
 });
 
-// ---------- Scroll reveal ----------
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
-            observer.unobserve(entry.target);
-        }
-    });
-}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-document.querySelectorAll('.barreira, .numero-item, .card-acao, .mvp-item, .territorio, .beneficio, .noticia-card').forEach(el => {
-    el.style.opacity = '0';
-    observer.observe(el);
+// Fecha com Esc e ao tocar fora do cabecalho
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && nav.classList.contains('aberto')) {
+        fecharMenu();
+        toggle.focus();
+    }
 });
+document.addEventListener('click', (e) => {
+    if (nav.classList.contains('aberto') && !e.target.closest('header')) fecharMenu();
+});
+
+// Cabecalho ganha sombra quando a pagina sai do topo
+const header = document.querySelector('header');
+const marcarRolagem = () => header.classList.toggle('rolou', window.scrollY > 8);
+marcarRolagem();
+window.addEventListener('scroll', marcarRolagem, { passive: true });
+
+// Pre-carrega a pagina interna quando o mouse passa ou o dedo toca no link,
+// para a troca de pagina ser quase instantanea.
+const preCarregadas = new Set([location.pathname]);
+function preCarregar(e) {
+    const link = e.target.closest?.('a[href]');
+    if (!link || link.origin !== location.origin || preCarregadas.has(link.pathname)) return;
+    preCarregadas.add(link.pathname);
+    const pre = document.createElement('link');
+    pre.rel = 'prefetch';
+    pre.href = link.pathname;
+    document.head.appendChild(pre);
+}
+document.addEventListener('pointerover', preCarregar, { passive: true });
+document.addEventListener('touchstart', preCarregar, { passive: true });
+
+const MOVIMENTO_REDUZIDO = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- Scroll reveal ----------
+// Os elementos so ficam escondidos depois que o JS roda: sem JS, tudo aparece.
+// Quem entra junto na tela aparece em cascata. Ao terminar, as classes saem
+// para nao atrapalhar o hover proprio de cada card.
+const REVELAVEIS = [
+    '.sec-kicker', 'section h2', '.sec-intro', '.texto-bloco', '.destaque', '.sub-titulo', '.sub-intro',
+    '.lista-destaques', '.valor-destaque', '.etapa', '.categorias',
+    '.barreira', '.numero-item', '.card-acao', '.mvp-item', '.territorio', '.beneficio', '.noticia-card',
+    '.formulario', '.contato-buttons', '.acoes-secao'
+].join(', ');
+
+function terminarRevelacao(el) {
+    el.classList.remove('revelar', 'visivel');
+    el.style.removeProperty('--atraso');
+}
+
+const observer = new IntersectionObserver((entries) => {
+    entries.filter(e => e.isIntersecting).forEach((entry, i) => {
+        const el = entry.target;
+        el.style.setProperty('--atraso', `${Math.min(i * 0.08, 0.4)}s`);
+        el.classList.add('visivel');
+        el.addEventListener('transitionend', () => terminarRevelacao(el), { once: true });
+        setTimeout(() => terminarRevelacao(el), 1500); // garantia se o transitionend nao vier
+        observer.unobserve(el);
+    });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+if (!MOVIMENTO_REDUZIDO) {
+    const alvos = [...document.querySelectorAll(REVELAVEIS)]
+        .filter(el => !el.closest('.hero'))
+        .filter((el, _, todos) => !todos.some(outro => outro !== el && outro.contains(el)));
+    alvos.forEach(el => {
+        el.classList.add('revelar');
+        observer.observe(el);
+    });
+}
 
 /* =========================================================
    MAPA — so roda na pagina que tem #mapa-leaflet
@@ -382,9 +445,18 @@ document.querySelectorAll('.filtro-categorias button').forEach(botao => {
         document.querySelectorAll('.filtro-categorias button').forEach(b => b.classList.remove('ativo'));
         botao.classList.add('ativo');
         const cat = botao.dataset.cat;
-        document.querySelectorAll('.noticia-card').forEach(card => {
+        const grade = document.querySelector('.noticias-grid');
+        const aplicar = () => document.querySelectorAll('.noticia-card').forEach(card => {
             card.style.display = (cat === 'todas' || card.dataset.cat === cat) ? '' : 'none';
         });
+
+        if (MOVIMENTO_REDUZIDO || !grade) return aplicar();
+        // Some, troca os cards e volta, em vez de pular de uma vez
+        grade.classList.add('filtrando');
+        setTimeout(() => {
+            aplicar();
+            grade.classList.remove('filtrando');
+        }, 200);
     });
 });
 
@@ -427,11 +499,20 @@ if (PAGINA === 'portal') {
 
     document.getElementById('aviso-demo').hidden = !PORTAL.MODO_DEMO;
 
-    const mostrar = (usuario) => {
+    const mostrar = (usuario, animar = false) => {
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
         if (usuario) document.getElementById('usuario-email').textContent = usuario.email;
         window.scrollTo(0, 0);
+
+        // Troca de tela com fade, sem salto seco
+        if (animar && !MOVIMENTO_REDUZIDO) {
+            [telaLogin, ...telasPortal].filter(t => !t.hidden).forEach(t => {
+                t.classList.remove('tela-entrando');
+                void t.offsetWidth; // reinicia a animacao
+                t.classList.add('tela-entrando');
+            });
+        }
     };
 
     mostrar(PORTAL.sessao());
@@ -455,7 +536,7 @@ if (PAGINA === 'portal') {
             );
             PORTAL.salvar(usuario);
             formLogin.reset();
-            mostrar(usuario);
+            mostrar(usuario, true);
         } catch (erro) {
             retorno.textContent = erro.message;
         }
@@ -463,7 +544,7 @@ if (PAGINA === 'portal') {
 
     document.getElementById('btn-sair').addEventListener('click', () => {
         PORTAL.sair();
-        mostrar(null);
+        mostrar(null, true);
     });
 }
 
