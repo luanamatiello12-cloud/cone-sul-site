@@ -308,12 +308,13 @@ if (document.getElementById('mapa-leaflet')) {
             zoomSnap: 0.25
         });
 
-        // Enquadra os seis marcadores com o menor zoom possivel. Como o mapa
-        // e travado, precisa caber em qualquer largura de tela; reenquadra
-        // quando a janela muda de tamanho.
+        // Enquadra a regiao inteira (ou, sem o contorno, os seis marcadores).
+        // Como o mapa e travado, precisa caber em qualquer largura de tela;
+        // reenquadra quando a janela muda de tamanho.
+        const temContorno = typeof REGIAO_CONTORNO !== 'undefined';
         const enquadrar = () => map.fitBounds(
-            L.latLngBounds(paises.map(p => [p.lat, p.lng])),
-            { padding: [40, 40], animate: false }
+            L.latLngBounds(temContorno ? REGIAO_CONTORNO.flat() : paises.map(p => [p.lat, p.lng])),
+            { padding: [24, 24], animate: false }
         );
         enquadrar();
         window.addEventListener('resize', enquadrar);
@@ -322,6 +323,20 @@ if (document.getElementById('mapa-leaflet')) {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
         }).addTo(map);
+
+        // Recorte: tudo que nao e a regiao do projeto fica coberto pela cor
+        // da secao, e a regiao ganha um contorno em areia. Vem antes dos
+        // marcadores para ficar por baixo deles.
+        if (temContorno) {
+            const fundo = getComputedStyle(document.getElementById('mapa-leaflet').closest('section')).backgroundColor;
+            const mundo = [[-85, -180], [-85, 180], [85, 180], [85, -180]];
+            L.polygon([mundo, ...REGIAO_CONTORNO], {
+                stroke: false, fillColor: fundo, fillOpacity: 1, interactive: false
+            }).addTo(map);
+            L.polygon(REGIAO_CONTORNO, {
+                color: '#c9ad6a', weight: 1.5, opacity: 0.9, fill: false, interactive: false
+            }).addTo(map);
+        }
 
         const estiloBase = (pais) => ({
             radius: pais.base ? 9 : 12,
