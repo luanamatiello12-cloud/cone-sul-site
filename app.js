@@ -207,21 +207,24 @@ if (!MOVIMENTO_REDUZIDO) {
 /* =========================================================
    MAPA — so roda na pagina que tem #mapa-leaflet
    ========================================================= */
+// Estados do Sul: populacao e religiao do Censo 2022 (IBGE; religiao sobre
+// a populacao de 10 anos ou mais). Sem linha de internet: a PNAD TIC por
+// estado nao foi encontrada numa fonte conferivel.
 const dadosPaises = {
     'Paraná': {
         titulo: 'Paraná',
         flag: '#flag-br',
-        info: 'FOZ DO IGUAÇU\nO ponto de partida\n\nFoz do Iguaçu representa o início da estruturação da nossa jornada missionária. Uma região estratégica de conexão entre países, culturas e pessoas.'
+        info: 'FOZ DO IGUAÇU\nO ponto de partida\n\nFoz do Iguaçu representa o início da estruturação da nossa jornada missionária. Uma região estratégica de conexão entre países, culturas e pessoas.\n\n11,4 milhões de habitantes\n26,1% evangélicos · 62,9% católicos · 6% sem religião'
     },
     'Santa Catarina': {
         titulo: 'Santa Catarina',
         flag: '#flag-br',
-        info: 'SUL DO BRASIL\n\n[A preencher: papel de Santa Catarina no projeto.]'
+        info: 'SUL DO BRASIL\n\n[A preencher: papel de Santa Catarina no projeto.]\n\n7,6 milhões de habitantes\n23,4% evangélicos · 64,3% católicos · 6,3% sem religião'
     },
     'Rio Grande do Sul': {
         titulo: 'Rio Grande do Sul',
         flag: '#flag-br',
-        info: 'SUL DO BRASIL\n\n[A preencher: papel do Rio Grande do Sul no projeto.]'
+        info: 'SUL DO BRASIL\n\n[A preencher: papel do Rio Grande do Sul no projeto.]\n\n10,9 milhões de habitantes\n21,4% evangélicos · 60,6% católicos · 8,8% sem religião'
     },
     'Paraguai': {
         titulo: 'Paraguai',
