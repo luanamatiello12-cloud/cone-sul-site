@@ -1368,16 +1368,6 @@ nav ul.menu a.nav-cta.ativo { color: var(--verde-900) !important; }
 .portal-acesso button:disabled { opacity: 0.45; cursor: not-allowed; }
 .link-discreto { color: var(--areia); font-size: 0.85rem; }
 
-/* Aviso de destaque no topo de uma pagina */
-.faixa-aviso {
-    background: var(--areia);
-    color: var(--verde-900);
-    text-align: center;
-    padding: 0.8rem 24px;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
 /* Filtro de categorias (noticias) */
 .filtro-categorias li { padding: 0; border: none; }
 .filtro-categorias button {

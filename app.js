@@ -513,8 +513,6 @@ if (PAGINA === 'portal') {
     const telaLogin = document.getElementById('tela-login');
     const telasPortal = [document.getElementById('tela-portal-topo'), document.getElementById('tela-portal')];
 
-    document.getElementById('aviso-demo').hidden = !PORTAL.MODO_DEMO;
-
     const mostrar = (usuario, animar = false) => {
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
