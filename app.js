@@ -174,7 +174,7 @@ const MOVIMENTO_REDUZIDO = window.matchMedia('(prefers-reduced-motion: reduce)')
 const REVELAVEIS = [
     '.sec-kicker', 'section h2', '.sec-intro', '.texto-bloco', '.destaque', '.sub-titulo', '.sub-intro',
     '.lista-destaques', '.valor-destaque', '.etapa', '.categorias',
-    '.barreira', '.numero-item', '.card-acao', '.mvp-item', '.territorio', '.beneficio', '.noticia-card',
+    '.barreira', '.numero-item', '.card-acao', '.campanha-card', '.pilar', '.campanha-assinatura', '.mvp-item', '.territorio', '.beneficio', '.noticia-card',
     '.formulario', '.contato-buttons', '.acoes-secao'
 ].join(', ');
 

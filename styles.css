@@ -1730,3 +1730,204 @@ footer::before {
 .campo.escolha input { width: 1.05rem; height: 1.05rem; accent-color: var(--areia); }
 .campo input[type="date"] { color-scheme: dark; }
 .formulario.validar .escolha:has(input:invalid) legend { color: #e7a08f; }
+
+/* =========================================================
+   CAMPANHA INTERNA (seja-mantenedor.html):
+   "Eu faco parte dessa missao" — Semeadores, Construtores, Expansores
+   ========================================================= */
+.campanha-topo {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 2rem 4rem;
+    align-items: end;
+    margin-bottom: 3rem;
+}
+.campanha-topo .sec-intro { margin-bottom: 0; }
+.campanha-topo .versiculo { margin: 0; }
+.campanha h2 { max-width: 16ch; }
+.campanha h2 .realce { color: var(--areia); display: block; }
+
+.campanhas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1.6rem;
+}
+
+.campanha-card {
+    background: var(--creme);
+    color: #2a2e2a;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-top: 4px solid var(--areia);
+    transition: transform 0.35s var(--ease-suave), box-shadow 0.35s var(--ease-suave);
+}
+.campanha-card:hover { transform: translateY(-6px); box-shadow: 0 22px 44px rgba(0, 0, 0, 0.35); }
+.campanha-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 1;
+    object-fit: cover;
+}
+.campanha-corpo {
+    padding: 1.6rem 1.6rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.campanha-num {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--verde-800);
+}
+.campanha-num::after { content: ''; width: 1.8rem; height: 2px; background: var(--areia); }
+.campanha-card h3 {
+    font-family: var(--fonte-titulo);
+    font-weight: 400;
+    font-size: clamp(1.9rem, 3vw, 2.4rem);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: var(--verde-800);
+    margin: 0.6rem 0 0.4rem;
+}
+.campanha-lema { font-weight: 700; color: var(--verde-800); margin-bottom: 1.2rem; }
+
+.campanha-valor {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: rgba(201, 215, 128, 0.45);
+    padding: 0.6rem 1rem 0.6rem 0.6rem;
+    margin-bottom: 1.2rem;
+}
+.campanha-icone,
+.pilar-icone {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+}
+.campanha-icone {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--verde-800);
+    color: var(--creme);
+}
+.campanha-icone svg,
+.pilar-icone svg {
+    width: 55%;
+    height: 55%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.campanha-valor strong {
+    display: block;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--verde-800);
+    line-height: 1.2;
+}
+.campanha-valor small {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #55594f;
+}
+.campanha-desc { font-size: 0.93rem; color: #4a4f4a; margin-bottom: 1.2rem; }
+
+.campanha-lista {
+    list-style: none;
+    border-top: 1px solid #e3dccb;
+    padding-top: 1rem;
+    margin-bottom: 1.6rem;
+    flex-grow: 1;
+}
+.campanha-lista li {
+    position: relative;
+    padding-left: 1.8rem;
+    font-size: 0.9rem;
+    color: #3d423d;
+    margin-bottom: 0.45rem;
+}
+.campanha-lista li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.2rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: #7fa33a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 8.3 2.6 2.5L12 5.4' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat;
+}
+
+.campanha-btn {
+    background: var(--verde-800);
+    color: var(--creme);
+    text-align: center;
+    border-radius: 999px;
+    padding: 0.95rem 1.4rem;
+    font-size: 0.8rem;
+}
+.campanha-btn span { display: inline-block; margin-left: 0.4rem; transition: transform 0.3s var(--ease-suave); }
+.campanha-btn:hover { background: var(--verde-900); color: var(--areia); transform: translateY(-2px); }
+.campanha-btn:hover span { transform: translateX(4px); }
+
+.pilares {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+.pilar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.4rem 1.2rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+.pilar:last-child { border-right: none; }
+.pilar-icone { width: 2.8rem; height: 2.8rem; color: var(--creme); }
+.pilar-icone svg { width: 100%; height: 100%; stroke-width: 1.3; }
+.pilar strong {
+    display: block;
+    font-size: 0.76rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #fff;
+}
+.pilar small {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.campanha-assinatura {
+    text-align: center;
+    margin-top: 2.2rem;
+    font-family: var(--fonte-rotulo);
+    font-size: 1.3rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--areia);
+}
+
+@media (max-width: 900px) {
+    .campanha-topo { grid-template-columns: 1fr; }
+    .pilar { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+    .pilar:last-child { border-bottom: none; }
+}
