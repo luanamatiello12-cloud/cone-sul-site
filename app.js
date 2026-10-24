@@ -67,7 +67,7 @@ function montarCabecalho() {
         <ul class="menu">
             ${itens}
             <li><a href="portal.html" class="nav-acesso${PAGINA === 'portal' ? ' ativo' : ''}">Área do Mantenedor</a></li>
-            <li><a href="portal.html#cadastro" class="nav-cta">Faça Parte</a></li>
+            <li><a href="fazer-parte.html" class="nav-cta${PAGINA === 'fazer-parte' ? ' ativo' : ''}">Faça Parte</a></li>
         </ul>
     </nav>
 </header>`;
@@ -536,6 +536,11 @@ function cpfValido(cpf) {
 }
 
 if (PAGINA === 'portal') {
+    // Endereco antigo do cadastro (portal.html#cadastro) leva a pagina nova
+    const irParaCadastro = () => { if (location.hash === '#cadastro') location.replace('fazer-parte.html'); };
+    irParaCadastro();
+    window.addEventListener('hashchange', irParaCadastro);
+
     const telaLogin = document.getElementById('tela-login');
     const telasPortal = [document.getElementById('tela-portal-topo'), document.getElementById('tela-portal')];
 
@@ -582,28 +587,18 @@ if (PAGINA === 'portal') {
         }
     });
 
-    // Abas "Ja sou mantenedor" / "Fazer parte". portal.html#cadastro abre direto
-    // no cadastro (e para onde leva o "Faca Parte" do menu).
-    const abas = { entrar: document.getElementById('aba-entrar'), cadastro: document.getElementById('aba-cadastro') };
-    const paineis = { entrar: formLogin, cadastro: document.getElementById('form-cadastro') };
-    const abrirAba = (qual) => {
-        Object.keys(abas).forEach(k => {
-            abas[k].setAttribute('aria-selected', k === qual);
-            paineis[k].hidden = k !== qual;
-        });
-        document.getElementById('portal-acesso').classList.toggle('largo', qual === 'cadastro');
-    };
-    abas.entrar.addEventListener('click', () => { abrirAba('entrar'); history.replaceState(null, '', '#entrar'); });
-    abas.cadastro.addEventListener('click', () => { abrirAba('cadastro'); history.replaceState(null, '', '#cadastro'); });
-    const abaDoEndereco = () => abrirAba(location.hash === '#cadastro' ? 'cadastro' : 'entrar');
-    abaDoEndereco();
-    // "Faca Parte" clicado de dentro do proprio portal so troca o #
-    window.addEventListener('hashchange', () => {
-        abaDoEndereco();
-        if (location.hash === '#cadastro' && !telaLogin.hidden) document.getElementById('portal-acesso').scrollIntoView({ block: 'start' });
+    document.getElementById('btn-sair').addEventListener('click', () => {
+        PORTAL.sair();
+        mostrar(null, true);
     });
+}
 
-    const formCadastro = paineis.cadastro;
+/* =========================================================
+   FACA PARTE (fazer-parte.html): cadastro de mantenedor.
+   Ao concluir, abre a sessao e leva a Area do Mantenedor.
+   ========================================================= */
+if (PAGINA === 'fazer-parte') {
+    const formCadastro = document.getElementById('form-cadastro');
     const cpf = document.getElementById('c-cpf');
     const campoIgreja = document.getElementById('campo-igreja');
 
@@ -654,20 +649,9 @@ if (PAGINA === 'portal') {
                 senha: document.getElementById('c-senha').value
             });
             PORTAL.salvar(usuario);
-            formCadastro.reset();
-            formCadastro.classList.remove('validar');
-            campoIgreja.hidden = true;
-            retorno.textContent = '';
-            history.replaceState(null, '', location.pathname);
-            mostrar(usuario, true);
+            location.href = 'portal.html';
         } catch (erro) {
             retorno.textContent = erro.message;
         }
-    });
-
-    document.getElementById('btn-sair').addEventListener('click', () => {
-        PORTAL.sair();
-        abrirAba('entrar');
-        mostrar(null, true);
     });
 }
