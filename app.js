@@ -210,6 +210,10 @@ if (!MOVIMENTO_REDUZIDO) {
 // Estados do Sul: populacao e religiao do Censo 2022 (IBGE; religiao sobre
 // a populacao de 10 anos ou mais). Sem linha de internet: a PNAD TIC por
 // estado nao foi encontrada numa fonte conferivel.
+// Paises: populacao e religiao do estudo do projeto (docs/DADOS-E-FONTES.md
+// no repositorio cone-sul). O % de internet e o da versao anterior, de
+// origem nao documentada; a contagem em milhoes saiu porque usava a
+// populacao antiga.
 const dadosPaises = {
     'Paraná': {
         titulo: 'Paraná',
@@ -229,17 +233,17 @@ const dadosPaises = {
     'Paraguai': {
         titulo: 'Paraguai',
         flag: '#flag-py',
-        info: 'O PRÓXIMO PASSO\nSanta Rita está entre as localidades contempladas para a próxima etapa do desenvolvimento missionário.\n\n7,7 milhões de habitantes\n93,3% (7,2 mi) com acesso à internet\n6,7% evangélicos · 80% católicos · 13,3% sem religião'
+        info: 'O PRÓXIMO PASSO\nSanta Rita está entre as localidades contempladas para a próxima etapa do desenvolvimento missionário.\n\n6,1 milhões de habitantes\n93,3% com acesso à internet\n6% a 9,6% evangélicos · 88% católicos'
     },
     'Argentina': {
         titulo: 'Argentina',
         flag: '#flag-ar',
-        info: 'UMA VISÃO DE EXPANSÃO\nO avanço para a Argentina integra a visão de longo prazo do CONE SUL.\n\n46,4 milhões de habitantes\n91% (42,2 mi) com acesso à internet\n9% evangélicos · 57% católicos · 34% sem religião'
+        info: 'UMA VISÃO DE EXPANSÃO\nO avanço para a Argentina integra a visão de longo prazo do CONE SUL.\n\n45,9 milhões de habitantes\n91% com acesso à internet\n17,4% evangélicos · 57,7% católicos · 22,4% sem religião'
     },
     'Chile': {
         titulo: 'Chile',
         flag: '#flag-cl',
-        info: 'FRONTEIRAS QUE AINDA QUEREMOS ATRAVESSAR\nO Chile também faz parte da visão de expansão missionária.\n\n20,2 milhões de habitantes\n88% (17,8 mi) com acesso à internet\n12% evangélicos · 54% católicos · 34% sem religião'
+        info: 'FRONTEIRAS QUE AINDA QUEREMOS ATRAVESSAR\nO Chile também faz parte da visão de expansão missionária.\n\n18,5 milhões de habitantes\n88% com acesso à internet\n16,3% evangélicos · 54% católicos · 25,8% sem religião (15 anos ou mais)'
     }
 };
 
