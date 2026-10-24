@@ -28,11 +28,20 @@ const MENU = [
     { id: 'onde',        rotulo: 'Onde Atuamos',              href: 'onde-atuamos.html' },
     { id: 'como',        rotulo: 'Como Funciona',             href: 'como-funciona.html' },
     { id: 'mantenedor',  rotulo: 'Seja Mantenedor',           href: 'seja-mantenedor.html' },
-    { id: 'empresarios', rotulo: 'Expansores com Propósito', href: 'empresarios.html' },
+    { id: 'empresarios', rotulo: 'Expansores com Propósito', href: 'empresarios.html', soLogado: true },
     { id: 'noticias',    rotulo: 'Notícias',                  href: 'noticias.html' }
 ];
 
 const PAGINA = document.body.dataset.pagina || '';
+
+// Ha sessao de mantenedor aberta? (mesma chave usada por PORTAL, definida adiante)
+function sessaoAtiva() {
+    try { return !!sessionStorage.getItem('conesul-sessao'); } catch { return false; }
+}
+
+// Expansores com Proposito e area de mantenedor: sem login, a pagina
+// redireciona para o acesso e o menu nem mostra o item.
+if (PAGINA === 'empresarios' && !sessaoAtiva()) location.replace('portal.html');
 
 // ---------- Bandeiras em SVG ----------
 // Emoji de bandeira nao renderiza no Windows (vira "BR", "AR"...).
@@ -64,7 +73,7 @@ const SPRITE_BANDEIRAS = `
 </svg>`;
 
 function montarCabecalho() {
-    const itens = MENU.map(m =>
+    const itens = MENU.filter(m => !m.soLogado || sessaoAtiva()).map(m =>
         `<li><a href="${m.href}"${m.id === PAGINA ? ' class="ativo" aria-current="page"' : ''}>${m.rotulo}</a></li>`
     ).join('');
 
@@ -94,7 +103,7 @@ function montarRodape() {
         <div class="footer-col">
             <h5>Navegação</h5>
             <ul>
-                ${MENU.map(m => `<li><a href="${m.href}">${m.rotulo}</a></li>`).join('')}
+                ${MENU.filter(m => !m.soLogado || sessaoAtiva()).map(m => `<li><a href="${m.href}">${m.rotulo}</a></li>`).join('')}
                 <li><a href="contato.html">Contato</a></li>
             </ul>
         </div>
@@ -565,7 +574,20 @@ if (PAGINA === 'portal') {
     const telaLogin = document.getElementById('tela-login');
     const telasPortal = ['tela-portal-topo', 'tela-portal', 'tela-portal-expansores'].map(id => document.getElementById(id));
 
+    // Poe ou tira "Expansores com Proposito" do menu conforme o login
+    const atualizarMenu = (logado) => {
+        const menuUl = document.querySelector('nav ul.menu');
+        const existente = menuUl.querySelector('a[href="empresarios.html"]');
+        if (logado && !existente) {
+            const li = document.createElement('li');
+            li.innerHTML = '<a href="empresarios.html">Expansores com Propósito</a>';
+            menuUl.insertBefore(li, menuUl.querySelector('.nav-acesso').parentElement);
+        }
+        if (!logado && existente) existente.parentElement.remove();
+    };
+
     const mostrar = (usuario, animar = false) => {
+        atualizarMenu(!!usuario);
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
         if (usuario) document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
