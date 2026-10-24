@@ -29,15 +29,6 @@ const PAGINA = document.body.dataset.pagina || '';
 // Emoji de bandeira nao renderiza no Windows (vira "BR", "AR"...).
 const SPRITE_BANDEIRAS = `
 <svg class="bandeira-sprite" xmlns="http://www.w3.org/2000/svg">
-    <!-- Duotone da estampa: escuro -> limao -> creme, pela luminosidade -->
-    <filter id="duotone-estampa" color-interpolation-filters="sRGB">
-        <feColorMatrix type="matrix" values="0.3 0.59 0.11 0 0  0.3 0.59 0.11 0 0  0.3 0.59 0.11 0 0  0 0 0 1 0"/>
-        <feComponentTransfer>
-            <feFuncR type="table" tableValues="0.204 0.784 0.984"/>
-            <feFuncG type="table" tableValues="0.243 0.843 0.957"/>
-            <feFuncB type="table" tableValues="0.212 0.510 0.886"/>
-        </feComponentTransfer>
-    </filter>
     <symbol id="flag-br" viewBox="0 0 30 21">
         <rect width="30" height="21" fill="#009b3a"/>
         <path d="M15 2.2 27.2 10.5 15 18.8 2.8 10.5Z" fill="#fedf00"/>

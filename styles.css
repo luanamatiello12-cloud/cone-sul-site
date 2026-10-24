@@ -1607,7 +1607,7 @@ button:focus-visible,
 /* =========================================================
    IDENTIDADE VISUAL — estampa "Fronteiras que conectam a Cristo"
    Verde-escuro, verde-limao e creme; serifa de alto contraste nos
-   titulos; arcos concentricos, rosa dos ventos e bandeiras em duotone.
+   titulos; arcos concentricos, rosa dos ventos e bandeiras nas cores reais.
    ========================================================= */
 
 /* Fundo branco das secoes vira creme mais claro, para casar com a paleta */
@@ -1701,8 +1701,8 @@ footer::before {
     opacity: 0.85;
 }
 
-/* Bandeiras em duotone (filtro definido no app.js) */
-.bandeira { filter: url(#duotone-estampa); box-shadow: 0 0 0 1.5px var(--creme); border-radius: 0; }
+/* Bandeiras nas cores reais, com o contorno creme da estampa */
+.bandeira { box-shadow: 0 0 0 1.5px var(--creme); border-radius: 0; }
 
 /* Faixa de numeros: valores em limao */
 .numero-valor { color: var(--areia); }
