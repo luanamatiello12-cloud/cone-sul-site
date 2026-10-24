@@ -1,12 +1,16 @@
 :root {
-    --verde-900: #16281a;
-    --verde-800: #1e3522;
-    --verde-700: #2b4a30;
-    --verde-600: #3d5a3d;
-    --areia: #c9ad6a;
-    --areia-clara: #e4d3a6;
-    --creme: #f5f3ec;
+    /* Identidade visual "Fronteiras que conectam a Cristo" (estampa) */
+    --verde-900: #2b342d;
+    --verde-800: #343e36;
+    --verde-700: #3f4b41;
+    --verde-600: #56664f;
+    --areia: #c8d782;        /* verde-limao da estampa */
+    --areia-clara: #fbf4e2;  /* creme da estampa */
+    --creme: #fbf4e2;
+    --limao-escuro: #687a2c; /* limao legivel sobre o creme */
     --texto: #22262220;
+    --fonte-titulo: 'DM Serif Display', Georgia, 'Times New Roman', serif;
+    --fonte-rotulo: 'Instrument Serif', Georgia, 'Times New Roman', serif;
 }
 
 * {
@@ -94,7 +98,7 @@ section {
 /* Em fundo claro o areia fica fraco: usa um tom mais escuro */
 .sec-clara .sec-kicker,
 .sec-branca .sec-kicker {
-    color: #9c7f3c;
+    color: var(--limao-escuro);
 }
 
 .chamada-final .sec-kicker { justify-content: center; }
@@ -121,7 +125,7 @@ section h2 {
 
 /* ===== HEADER ===== */
 header {
-    background: rgba(22, 40, 26, 0.96);
+    background: rgba(43, 52, 45, 0.96);
     backdrop-filter: blur(8px);
     color: white;
     padding: 1.1rem 0;
@@ -178,8 +182,8 @@ nav a:hover { color: var(--areia-clara); }
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse at 15% 20%, rgba(201, 173, 106, 0.14) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 90%, rgba(61, 90, 61, 0.5) 0%, transparent 55%);
+        radial-gradient(ellipse at 15% 20%, rgba(200, 215, 130, 0.14) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 90%, rgba(86, 102, 79, 0.5) 0%, transparent 55%);
     pointer-events: none;
 }
 
@@ -519,7 +523,7 @@ nav a:hover { color: var(--areia-clara); }
 
 .barreira:hover {
     transform: translateY(-6px);
-    box-shadow: 0 18px 40px rgba(22, 40, 26, 0.12);
+    box-shadow: 0 18px 40px rgba(43, 52, 45, 0.12);
     border-top-color: var(--areia);
 }
 
@@ -947,7 +951,7 @@ footer .wrap {
 .sec-clara .card-acao,
 .sec-branca .card-acao {
     background: #fff;
-    box-shadow: 0 2px 14px rgba(22, 40, 26, 0.06);
+    box-shadow: 0 2px 14px rgba(43, 52, 45, 0.06);
 }
 
 .card-acao:hover { transform: translateY(-5px); }
@@ -1113,7 +1117,7 @@ footer .wrap {
     margin-top: 2.5rem;
     padding: 1.1rem 1.3rem;
     border-left: 3px solid var(--areia);
-    background: rgba(201, 173, 106, 0.09);
+    background: rgba(200, 215, 130, 0.09);
     font-size: 0.88rem;
     opacity: 0.85;
     max-width: 62ch;
@@ -1271,7 +1275,7 @@ nav ul.menu a.nav-cta.ativo { color: var(--verde-900) !important; }
 /* Botoes ao final de uma secao */
 .acoes-secao { margin-top: 2.5rem; }
 .sec-clara .btn-secondary,
-.sec-branca .btn-secondary { color: var(--verde-700); border-color: rgba(43, 74, 48, 0.35); }
+.sec-branca .btn-secondary { color: var(--verde-700); border-color: rgba(63, 75, 65, 0.35); }
 .sec-clara .btn-secondary:hover,
 .sec-branca .btn-secondary:hover { color: var(--verde-900); border-color: var(--verde-700); }
 
@@ -1393,7 +1397,7 @@ nav ul.menu a.nav-cta.ativo { color: var(--verde-900) !important; }
 /* Botao "Area do Mantenedor" no menu: contorno, ao lado do "Faca Parte" */
 .nav-acesso {
     padding: 0.5rem 1rem !important;
-    border: 1px solid rgba(201, 173, 106, 0.6);
+    border: 1px solid rgba(200, 215, 130, 0.6);
     color: var(--areia-clara) !important;
     font-size: 0.76rem !important;
     font-weight: 700;
@@ -1402,7 +1406,7 @@ nav ul.menu a.nav-cta.ativo { color: var(--verde-900) !important; }
     transition: all 0.25s;
 }
 .nav-acesso:hover,
-.nav-acesso.ativo { background: rgba(201, 173, 106, 0.15); border-color: var(--areia); }
+.nav-acesso.ativo { background: rgba(200, 215, 130, 0.15); border-color: var(--areia); }
 
 /* Itens do portal que ainda nao existem */
 .em-breve {
@@ -1475,7 +1479,7 @@ html .revelar.visivel {
 /* Cabecalho: sombra suave depois que a pagina sai do topo */
 header { transition: box-shadow 0.35s ease, background-color 0.35s ease; }
 header.rolou {
-    background: rgba(22, 40, 26, 0.985);
+    background: rgba(43, 52, 45, 0.985);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
 }
 
@@ -1494,13 +1498,13 @@ header.rolou {
 .btn:active,
 .contato-button:active { transform: translateY(0) scale(0.98); transition-duration: 0.1s; }
 
-.btn-primary:hover { box-shadow: 0 10px 24px rgba(201, 173, 106, 0.28); }
+.btn-primary:hover { box-shadow: 0 10px 24px rgba(200, 215, 130, 0.28); }
 
 .sec-clara .card-acao:hover,
-.sec-branca .card-acao:hover { box-shadow: 0 16px 36px rgba(22, 40, 26, 0.12); }
+.sec-branca .card-acao:hover { box-shadow: 0 16px 36px rgba(43, 52, 45, 0.12); }
 
 .noticia-card { transition: transform 0.35s var(--ease-suave), box-shadow 0.35s var(--ease-suave); }
-.noticia-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(22, 40, 26, 0.12); }
+.noticia-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(43, 52, 45, 0.12); }
 
 .info-item:hover { transform: translateX(4px); }
 
@@ -1598,4 +1602,124 @@ button:focus-visible,
         transition-delay: 0s !important;
     }
     @view-transition { navigation: none; }
+}
+
+/* =========================================================
+   IDENTIDADE VISUAL — estampa "Fronteiras que conectam a Cristo"
+   Verde-escuro, verde-limao e creme; serifa de alto contraste nos
+   titulos; arcos concentricos, rosa dos ventos e bandeiras em duotone.
+   ========================================================= */
+
+/* Fundo branco das secoes vira creme mais claro, para casar com a paleta */
+.sec-branca { background: #fffaee; }
+
+/* Titulos em serifa, como "FRONTEIRAS" */
+.hero h1,
+section h2,
+.destaque,
+.sub-titulo,
+.numero-valor,
+.valor-numero,
+.etapa-num,
+.base-envio strong,
+.card-header h3,
+.barreira h3,
+.footer-marca strong,
+nav .logo {
+    font-family: var(--fonte-titulo);
+    font-weight: 400;
+}
+
+.hero h1 { color: var(--creme); letter-spacing: -0.02em; line-height: 0.95; }
+section h2 { letter-spacing: -0.015em; line-height: 1.05; }
+.destaque { letter-spacing: -0.005em; }
+.numero-valor, .etapa-num { letter-spacing: -0.01em; }
+nav .logo, .footer-marca strong { letter-spacing: 0.01em; }
+
+/* Rotulos condensados, como "CONE SUL" e "QUE CONECTAM A CRISTO" */
+.hero-kicker,
+.sec-kicker,
+.territorio-etapa,
+.barreira-pais,
+.footer-assinatura {
+    font-family: var(--fonte-rotulo);
+    font-weight: 400;
+}
+.sec-kicker { font-size: 1.35rem; letter-spacing: 0.08em; }
+.hero-kicker { font-size: 1.15rem; letter-spacing: 0.12em; }
+.footer-assinatura { font-size: 1.05rem; }
+
+/* "CONE SUL ———" : o rotulo do topo ganha o fio que segue ate a borda */
+.hero-kicker {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 46rem;
+}
+.hero-kicker::after {
+    content: '';
+    flex: 1;
+    min-width: 2rem;
+    height: 3px;
+    background: var(--areia);
+}
+
+/* Arcos concentricos em limao, saindo do canto, como na estampa */
+.hero::before {
+    background:
+        repeating-radial-gradient(circle at 88% 115%,
+            transparent 0 22px,
+            rgba(200, 215, 130, 0.30) 22px 25px);
+    -webkit-mask-image: radial-gradient(circle at 88% 115%, #000 0, #000 35%, transparent 70%);
+            mask-image: radial-gradient(circle at 88% 115%, #000 0, #000 35%, transparent 70%);
+}
+
+/* Rosa dos ventos */
+.hero::after {
+    content: '';
+    position: absolute;
+    right: 6%;
+    top: 14%;
+    width: clamp(90px, 14vw, 170px);
+    aspect-ratio: 1;
+    opacity: 0.55;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -50 100 100'%3E%3Cg fill='none' stroke='%23c8d782' stroke-width='1.2'%3E%3Ccircle r='20'/%3E%3Ccircle r='24'/%3E%3C/g%3E%3Cg fill='%23c8d782'%3E%3Cpath d='M0-46 5-5 0 0-5-5Z M46 0 5 5 0 0 5-5Z M0 46-5 5 0 0 5 5Z M-46 0-5-5 0 0-5 5Z'/%3E%3Cpath opacity='.7' d='M24-24 4 0 0 0 0-4Z M24 24 0 4 0 0 4 0Z M-24 24-4 0 0 0 0 4Z M-24-24 0-4 0 0-4 0Z'/%3E%3C/g%3E%3Cg fill='%23c8d782' font-family='Georgia,serif' font-size='7' text-anchor='middle'%3E%3Ctext y='-38' x='8'%3EN%3C/text%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Fio duplo, como as duas barras no rodape da estampa */
+footer { position: relative; }
+footer::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 9px;
+    border-top: 3px solid var(--areia);
+    border-bottom: 3px solid var(--areia);
+    opacity: 0.85;
+}
+
+/* Bandeiras em duotone (filtro definido no app.js) */
+.bandeira { filter: url(#duotone-estampa); box-shadow: 0 0 0 1.5px var(--creme); border-radius: 0; }
+
+/* Faixa de numeros: valores em limao */
+.numero-valor { color: var(--areia); }
+
+/* Botoes: limao com texto escuro, cantos retos */
+.btn-primary,
+.nav-cta { background: var(--areia); color: var(--verde-900); }
+.btn-primary:hover,
+.nav-cta:hover { background: var(--creme); }
+
+/* Fundo do mapa em tons apagados, para conversar com a paleta */
+.leaflet-tile-pane { filter: grayscale(0.75) sepia(0.2) brightness(1.03); }
+
+/* Rodape: a linha final ocupa a largura toda, nao so a primeira coluna */
+.footer-base { grid-column: 1 / -1; }
+
+/* No celular a rosa dos ventos ficaria sobre o titulo */
+@media (max-width: 700px) {
+    .hero::after { display: none; }
 }
