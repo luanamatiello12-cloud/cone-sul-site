@@ -1881,6 +1881,8 @@ footer::before {
 }
 .campanha-btn span { display: inline-block; margin-left: 0.4rem; transition: transform 0.3s var(--ease-suave); }
 .campanha-btn:hover { background: var(--verde-900); color: var(--areia); transform: translateY(-2px); }
+/* Sem link de pagamento ainda: aparece, mas nao reage */
+.campanha-btn[aria-disabled="true"] { cursor: default; pointer-events: none; }
 .campanha-btn:hover span { transform: translateX(4px); }
 
 .pilares {
@@ -1930,4 +1932,19 @@ footer::before {
     .campanha-topo { grid-template-columns: 1fr; }
     .pilar { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
     .pilar:last-child { border-bottom: none; }
+}
+
+/* A campanha vem logo apos outra secao escura: fio duplo marca a divisao */
+.sec-escura + .campanha { position: relative; }
+.sec-escura + .campanha::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: min(1132px, calc(100% - 48px));
+    height: 9px;
+    border-top: 3px solid var(--areia);
+    border-bottom: 3px solid var(--areia);
+    opacity: 0.85;
 }
