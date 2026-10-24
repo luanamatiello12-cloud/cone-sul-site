@@ -567,39 +567,3 @@ if (PAGINA === 'portal') {
         mostrar(null, true);
     });
 }
-
-/* =========================================================
-   MODO EDICAO (as alteracoes NAO sao salvas no arquivo)
-   ========================================================= */
-let editMode = false;
-
-const EDITAVEIS = [
-    '.hero h1', '.hero-lead', '.hero-complemento', 'section h2', '.sec-intro', '.sub-titulo', '.sub-intro',
-    '.texto-bloco p', '.destaque', '.mvp-item h4', '.mvp-item p', '.territorio p',
-    '.etapa h3', '.etapa p', '.barreira h3', '.barreira > p',
-    '.card-acao h3', '.card-acao p', '.beneficio h4', '.beneficio p', '.logo'
-].join(', ');
-
-function toggleEditMode() {
-    editMode = !editMode;
-    document.querySelectorAll(EDITAVEIS).forEach(el => {
-        el.contentEditable = editMode;
-        el.style.outline = editMode ? '1px dashed rgba(201, 215, 128, 0.9)' : '';
-        el.style.outlineOffset = editMode ? '6px' : '';
-    });
-    document.getElementById('btn-editar').textContent = editMode ? 'Concluir' : 'Editar';
-}
-
-document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'e') {
-        e.preventDefault();
-        toggleEditMode();
-    }
-});
-
-const editBtn = document.createElement('button');
-editBtn.id = 'btn-editar';
-editBtn.textContent = 'Editar';
-editBtn.title = 'Edição temporária: some ao recarregar a página';
-editBtn.onclick = toggleEditMode;
-document.body.appendChild(editBtn);
