@@ -249,12 +249,12 @@ const dadosPaises = {
 
 // Tres estados do sul do Brasil (base) e tres paises (campo).
 const paises = [
-    { nome: 'Paraná',            lat: -24.6, lng: -51.6, cor: '#c8d782', base: true },
-    { nome: 'Santa Catarina',    lat: -27.3, lng: -50.5, cor: '#c8d782', base: true },
-    { nome: 'Rio Grande do Sul', lat: -29.8, lng: -53.3, cor: '#c8d782', base: true },
-    { nome: 'Paraguai',          lat: -23.4, lng: -58.4, cor: '#343e36' },
-    { nome: 'Argentina',         lat: -35.5, lng: -65.0, cor: '#343e36' },
-    { nome: 'Chile',             lat: -35.0, lng: -71.0, cor: '#343e36' }
+    { nome: 'Paraná',            lat: -24.6, lng: -51.6, cor: '#c9d780', base: true },
+    { nome: 'Santa Catarina',    lat: -27.3, lng: -50.5, cor: '#c9d780', base: true },
+    { nome: 'Rio Grande do Sul', lat: -29.8, lng: -53.3, cor: '#c9d780', base: true },
+    { nome: 'Paraguai',          lat: -23.4, lng: -58.4, cor: '#122d1e' },
+    { nome: 'Argentina',         lat: -35.5, lng: -65.0, cor: '#122d1e' },
+    { nome: 'Chile',             lat: -35.0, lng: -71.0, cor: '#122d1e' }
 ];
 
 let map = null;
@@ -342,7 +342,7 @@ if (document.getElementById('mapa-leaflet')) {
                 stroke: false, fillColor: fundo, fillOpacity: 0.6, interactive: false
             }).addTo(map);
             L.polygon(REGIAO_CONTORNO, {
-                color: '#c8d782', weight: 2, opacity: 1, fill: false, interactive: false
+                color: '#c9d780', weight: 2, opacity: 1, fill: false, interactive: false
             }).addTo(map);
         }
 
@@ -364,7 +364,7 @@ if (document.getElementById('mapa-leaflet')) {
         paises.forEach(pais => {
             const circle = L.circleMarker([pais.lat, pais.lng], {
                 fillColor: pais.cor,
-                color: pais.base ? '#687a2c' : '#fbf4e2',
+                color: pais.base ? '#5f7424' : '#fef5e2',
                 opacity: 0.85,
                 dashArray: pais.base ? null : '3 3',
                 ...estiloBase(pais)
@@ -584,7 +584,7 @@ function toggleEditMode() {
     editMode = !editMode;
     document.querySelectorAll(EDITAVEIS).forEach(el => {
         el.contentEditable = editMode;
-        el.style.outline = editMode ? '1px dashed rgba(200, 215, 130, 0.9)' : '';
+        el.style.outline = editMode ? '1px dashed rgba(201, 215, 128, 0.9)' : '';
         el.style.outlineOffset = editMode ? '6px' : '';
     });
     document.getElementById('btn-editar').textContent = editMode ? 'Concluir' : 'Editar';
