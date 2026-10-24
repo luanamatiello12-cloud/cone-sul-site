@@ -120,8 +120,8 @@ function montarRodape() {
             <ul>
                 <li><a href="portal.html">Área do Mantenedor</a></li>
                 <li><a href="${CONTATO.igreja}">Igreja Renovar em Cristo</a></li>
-                <li><a href="#">Política de Privacidade</a></li>
-                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
+                <li><a href="termos-de-uso.html">Termos de Uso</a></li>
             </ul>
         </div>
     </div>
