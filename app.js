@@ -67,7 +67,7 @@ function montarCabecalho() {
         <ul class="menu">
             ${itens}
             <li><a href="portal.html" class="nav-acesso${PAGINA === 'portal' ? ' ativo' : ''}">Área do Mantenedor</a></li>
-            <li><a href="contato.html" class="nav-cta${PAGINA === 'contato' ? ' ativo' : ''}">Faça Parte</a></li>
+            <li><a href="portal.html#cadastro" class="nav-cta">Faça Parte</a></li>
         </ul>
     </nav>
 </header>`;
@@ -502,6 +502,14 @@ const PORTAL = {
         throw new Error('Sistema de contas ainda não configurado.');
     },
 
+    // Em modo demonstracao o cadastro NAO e enviado a lugar nenhum: so abre
+    // a sessao com nome e e-mail. CPF, nascimento, endereco e respostas sobre
+    // a fe nao sao guardados. Com um servico de contas, enviar `dados` aqui.
+    async cadastrar(dados) {
+        if (this.MODO_DEMO) return { nome: dados.nome, email: dados.email };
+        throw new Error('Sistema de contas ainda não configurado.');
+    },
+
     sessao() {
         try { return JSON.parse(sessionStorage.getItem(this.CHAVE)); } catch { return null; }
     },
@@ -515,6 +523,18 @@ const PORTAL = {
     }
 };
 
+// CPF: 11 digitos, nao todos iguais, e os dois digitos verificadores corretos
+function cpfValido(cpf) {
+    const d = cpf.replace(/\D/g, '');
+    if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+    const verificador = (n) => {
+        let soma = 0;
+        for (let i = 0; i < n; i++) soma += Number(d[i]) * (n + 1 - i);
+        return (soma * 10) % 11 % 10;
+    };
+    return verificador(9) === Number(d[9]) && verificador(10) === Number(d[10]);
+}
+
 if (PAGINA === 'portal') {
     const telaLogin = document.getElementById('tela-login');
     const telasPortal = [document.getElementById('tela-portal-topo'), document.getElementById('tela-portal')];
@@ -522,7 +542,7 @@ if (PAGINA === 'portal') {
     const mostrar = (usuario, animar = false) => {
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
-        if (usuario) document.getElementById('usuario-email').textContent = usuario.email;
+        if (usuario) document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
         window.scrollTo(0, 0);
 
         // Troca de tela com fade, sem salto seco
@@ -562,8 +582,92 @@ if (PAGINA === 'portal') {
         }
     });
 
+    // Abas "Ja sou mantenedor" / "Fazer parte". portal.html#cadastro abre direto
+    // no cadastro (e para onde leva o "Faca Parte" do menu).
+    const abas = { entrar: document.getElementById('aba-entrar'), cadastro: document.getElementById('aba-cadastro') };
+    const paineis = { entrar: formLogin, cadastro: document.getElementById('form-cadastro') };
+    const abrirAba = (qual) => {
+        Object.keys(abas).forEach(k => {
+            abas[k].setAttribute('aria-selected', k === qual);
+            paineis[k].hidden = k !== qual;
+        });
+        document.getElementById('portal-acesso').classList.toggle('largo', qual === 'cadastro');
+    };
+    abas.entrar.addEventListener('click', () => { abrirAba('entrar'); history.replaceState(null, '', '#entrar'); });
+    abas.cadastro.addEventListener('click', () => { abrirAba('cadastro'); history.replaceState(null, '', '#cadastro'); });
+    const abaDoEndereco = () => abrirAba(location.hash === '#cadastro' ? 'cadastro' : 'entrar');
+    abaDoEndereco();
+    // "Faca Parte" clicado de dentro do proprio portal so troca o #
+    window.addEventListener('hashchange', () => {
+        abaDoEndereco();
+        if (location.hash === '#cadastro' && !telaLogin.hidden) document.getElementById('portal-acesso').scrollIntoView({ block: 'start' });
+    });
+
+    const formCadastro = paineis.cadastro;
+    const cpf = document.getElementById('c-cpf');
+    const campoIgreja = document.getElementById('campo-igreja');
+
+    // Mascara 000.000.000-00 enquanto digita
+    cpf.addEventListener('input', () => {
+        const d = cpf.value.replace(/\D/g, '').slice(0, 11);
+        cpf.value = d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        cpf.setCustomValidity('');
+    });
+
+    document.getElementById('c-nascimento').max = new Date().toISOString().slice(0, 10);
+
+    // "Qual igreja?" so aparece para quem congrega
+    formCadastro.querySelectorAll('input[name="congrega"]').forEach(r => r.addEventListener('change', () => {
+        const congrega = formCadastro.querySelector('input[name="congrega"]:checked')?.value === 'sim';
+        campoIgreja.hidden = !congrega;
+        document.getElementById('c-igreja').required = congrega;
+    }));
+
+    formCadastro.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = document.getElementById('cadastro-retorno');
+        formCadastro.classList.add('validar');
+        cpf.setCustomValidity(cpf.value && !cpfValido(cpf.value) ? 'CPF inválido.' : '');
+
+        if (!formCadastro.checkValidity()) {
+            const invalido = formCadastro.querySelector(':invalid');
+            retorno.textContent = invalido === cpf && cpf.value
+                ? 'Confira o CPF: os números não formam um CPF válido.'
+                : 'Preencha todos os campos e marque a autorização.';
+            invalido?.focus();
+            return;
+        }
+
+        const valor = (id) => document.getElementById(id).value.trim();
+        const escolha = (nome) => formCadastro.querySelector(`input[name="${nome}"]:checked`).value;
+        try {
+            const usuario = await PORTAL.cadastrar({
+                nome: valor('c-nome'),
+                cpf: cpf.value.replace(/\D/g, ''),
+                nascimento: valor('c-nascimento'),
+                naturalidade: valor('c-naturalidade'),
+                moradia: valor('c-moradia'),
+                cristao: escolha('cristao') === 'sim',
+                congrega: escolha('congrega') === 'sim',
+                igreja: valor('c-igreja'),
+                email: valor('c-email'),
+                senha: document.getElementById('c-senha').value
+            });
+            PORTAL.salvar(usuario);
+            formCadastro.reset();
+            formCadastro.classList.remove('validar');
+            campoIgreja.hidden = true;
+            retorno.textContent = '';
+            history.replaceState(null, '', location.pathname);
+            mostrar(usuario, true);
+        } catch (erro) {
+            retorno.textContent = erro.message;
+        }
+    });
+
     document.getElementById('btn-sair').addEventListener('click', () => {
         PORTAL.sair();
+        abrirAba('entrar');
         mostrar(null, true);
     });
 }

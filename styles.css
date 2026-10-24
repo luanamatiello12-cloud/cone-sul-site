@@ -1694,3 +1694,63 @@ footer::before {
 
 /* Abertura no verde exato da estampa */
 .hero { background: var(--verde-800); }
+
+/* Portal: abas "Ja sou mantenedor" / "Fazer parte" e o cadastro */
+.portal-acesso { transition: max-width 0.4s var(--ease-suave); }
+.portal-acesso.largo { max-width: 760px; }
+.portal-acesso.largo .formulario { grid-template-columns: 1fr 1fr; }
+@media (max-width: 700px) {
+    .portal-acesso.largo .formulario { grid-template-columns: 1fr; }
+}
+
+.abas-acesso {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+.abas-acesso button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    padding: 0.7rem 1rem;
+    color: rgba(255, 255, 255, 0.65);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.25s, border-color 0.35s var(--ease-suave);
+}
+.abas-acesso button:hover { color: var(--creme); }
+.abas-acesso button[aria-selected="true"] { color: var(--areia); border-bottom-color: var(--areia); }
+
+.cadastro-intro { font-size: 0.95rem; opacity: 0.8; }
+
+/* Perguntas de sim/nao */
+.campo.escolha { display: block; border: none; min-width: 0; }
+.campo.escolha .opcoes { display: flex; gap: 1.6rem; }
+.campo.escolha legend {
+    width: 100%;
+    font-size: 0.76rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--areia);
+    margin-bottom: 0.6rem;
+}
+.campo.escolha label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0;
+    cursor: pointer;
+}
+.campo.escolha input { width: 1.05rem; height: 1.05rem; accent-color: var(--areia); }
+.campo input[type="date"] { color-scheme: dark; }
+.formulario.validar .escolha:has(input:invalid) legend { color: #e7a08f; }
