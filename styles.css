@@ -1976,3 +1976,15 @@ footer::before {
 .beneficios-destaque .beneficio h4 { color: var(--verde-800); font-size: 1.1rem; }
 .beneficios-destaque .beneficio p { color: #4a4f4a; opacity: 1; }
 .beneficios-destaque + #tela-portal { padding-top: 0; }
+
+/* Paginas juridicas (politica de privacidade e termos de uso) */
+.texto-bloco.juridico { max-width: 70ch; }
+.texto-bloco.juridico h3 {
+    font-family: var(--fonte-titulo);
+    font-weight: 400;
+    font-size: 1.45rem;
+    color: var(--verde-700);
+    margin: 2.4rem 0 0.7rem;
+}
+.texto-bloco.juridico a { color: var(--verde-600); font-weight: 600; }
+.texto-bloco.juridico .lista-destaques { margin: 1rem 0 1.2rem; }
