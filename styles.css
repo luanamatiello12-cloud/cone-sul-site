@@ -1948,3 +1948,6 @@ footer::before {
     border-bottom: 3px solid var(--areia);
     opacity: 0.85;
 }
+
+/* Beneficios com mais de um paragrafo */
+.beneficio p + p { margin-top: 0.6rem; }
