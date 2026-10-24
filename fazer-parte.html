@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faça Parte | CONE SUL</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Instrument+Serif&display=swap">
+    <link rel="stylesheet" href="styles.css?v=18">
+</head>
+<body data-pagina="fazer-parte">
+
+    <!-- CADASTRO: quem conclui entra direto na Area do Mantenedor (portal.html) -->
+    <section class="hero hero-pagina">
+        <div class="wrap">
+            <span class="hero-kicker">Faça parte — Cadastro de mantenedor</span>
+            <h1>Faça parte da missão.</h1>
+            <p class="hero-lead">Preencha seu cadastro para acessar a Área do Mantenedor.</p>
+
+            <div class="portal-acesso largo">
+                <!-- CADASTRO DE MANTENEDOR -->
+                <form class="formulario" id="form-cadastro" novalidate>
+                    <div class="campo campo-largo">
+                        <label for="c-nome">Nome completo</label>
+                        <input type="text" id="c-nome" autocomplete="name" required>
+                    </div>
+                    <div class="campo">
+                        <label for="c-cpf">CPF</label>
+                        <input type="text" id="c-cpf" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" required>
+                    </div>
+                    <div class="campo">
+                        <label for="c-nascimento">Data de nascimento</label>
+                        <input type="date" id="c-nascimento" autocomplete="bday" required>
+                    </div>
+                    <div class="campo">
+                        <label for="c-naturalidade">Local de nascimento</label>
+                        <input type="text" id="c-naturalidade" placeholder="Cidade e estado" required>
+                    </div>
+                    <div class="campo">
+                        <label for="c-moradia">Onde você mora</label>
+                        <input type="text" id="c-moradia" placeholder="Cidade e estado" autocomplete="address-level2" required>
+                    </div>
+
+                    <fieldset class="campo escolha">
+                        <legend>Você é cristão?</legend>
+                        <div class="opcoes">
+                            <label><input type="radio" name="cristao" value="sim" required> Sim</label>
+                            <label><input type="radio" name="cristao" value="nao"> Não</label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="campo escolha">
+                        <legend>Congrega em alguma igreja?</legend>
+                        <div class="opcoes">
+                            <label><input type="radio" name="congrega" value="sim" required> Sim</label>
+                            <label><input type="radio" name="congrega" value="nao"> Não</label>
+                        </div>
+                    </fieldset>
+                    <div class="campo campo-largo" id="campo-igreja" hidden>
+                        <label for="c-igreja">Qual igreja?</label>
+                        <input type="text" id="c-igreja">
+                    </div>
+
+                    <div class="campo">
+                        <label for="c-email">E-mail</label>
+                        <input type="email" id="c-email" autocomplete="email" required>
+                    </div>
+                    <div class="campo">
+                        <label for="c-senha">Crie uma senha</label>
+                        <input type="password" id="c-senha" autocomplete="new-password" minlength="6" required>
+                    </div>
+
+                    <div class="campo campo-largo consentimento">
+                        <label>
+                            <input type="checkbox" required>
+                            <span>Autorizo o CONE SUL a tratar os meus dados para o cadastro de mantenedor.</span>
+                        </label>
+                    </div>
+                    <div class="campo campo-largo">
+                        <button type="submit" class="btn btn-primary">Concluir cadastro</button>
+                        <p class="form-retorno" id="cadastro-retorno" role="status"></p>
+                    </div>
+                </form>
+                <p class="acesso-alternativo">Já é mantenedor? <a href="portal.html">Entrar na Área do Mantenedor</a></p>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js?v=21"></script>
+</body>
+</html>
