@@ -12,6 +12,15 @@ const CONTATO = {
     igreja: '#'
 };
 
+// ---------- Links de pagamento da campanha (seja-mantenedor.html) ----------
+// Cole aqui o link do portal de pagamento de cada faixa. Enquanto estiver
+// vazio, o botao aparece mas nao leva a lugar nenhum.
+const LINKS_PAGAMENTO = {
+    semeadores: '',
+    construtores: '',
+    expansores: ''
+};
+
 // ---------- Menu principal (ordem da copy oficial) ----------
 const MENU = [
     { id: 'inicio',      rotulo: 'Início',                    href: 'index.html' },
@@ -458,6 +467,18 @@ document.getElementById('btn-compartilhar')?.addEventListener('click', async (e)
         }
     } catch {
         // usuario cancelou o compartilhamento: nada a fazer
+    }
+});
+
+// Botoes da campanha: so ganham destino quando o link de pagamento existir
+document.querySelectorAll('[data-pagamento]').forEach(botao => {
+    const link = LINKS_PAGAMENTO[botao.dataset.pagamento];
+    if (link) {
+        botao.href = link;
+        botao.target = '_blank';
+        botao.rel = 'noopener';
+    } else {
+        botao.setAttribute('aria-disabled', 'true');
     }
 });
 

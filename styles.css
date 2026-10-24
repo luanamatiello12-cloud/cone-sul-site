@@ -1881,6 +1881,8 @@ footer::before {
 }
 .campanha-btn span { display: inline-block; margin-left: 0.4rem; transition: transform 0.3s var(--ease-suave); }
 .campanha-btn:hover { background: var(--verde-900); color: var(--areia); transform: translateY(-2px); }
+/* Sem link de pagamento ainda: aparece, mas nao reage */
+.campanha-btn[aria-disabled="true"] { cursor: default; pointer-events: none; }
 .campanha-btn:hover span { transform: translateX(4px); }
 
 .pilares {
