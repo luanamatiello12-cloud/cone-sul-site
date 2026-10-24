@@ -563,7 +563,7 @@ if (PAGINA === 'portal') {
     window.addEventListener('hashchange', irParaCadastro);
 
     const telaLogin = document.getElementById('tela-login');
-    const telasPortal = [document.getElementById('tela-portal-topo'), document.getElementById('tela-portal')];
+    const telasPortal = ['tela-portal-topo', 'tela-portal', 'tela-portal-expansores'].map(id => document.getElementById(id));
 
     const mostrar = (usuario, animar = false) => {
         telaLogin.hidden = !!usuario;
