@@ -572,7 +572,7 @@ if (PAGINA === 'portal') {
     window.addEventListener('hashchange', irParaCadastro);
 
     const telaLogin = document.getElementById('tela-login');
-    const telasPortal = ['tela-portal-topo', 'tela-portal', 'tela-portal-expansores'].map(id => document.getElementById(id));
+    const telasPortal = ['tela-portal-topo', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal'].map(id => document.getElementById(id));
 
     // Poe ou tira "Noticias" do menu conforme o login, sem recarregar
     const atualizarMenu = (logado) => {
