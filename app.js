@@ -600,7 +600,6 @@ if (PAGINA === 'portal') {
 if (PAGINA === 'fazer-parte') {
     const formCadastro = document.getElementById('form-cadastro');
     const cpf = document.getElementById('c-cpf');
-    const campoIgreja = document.getElementById('campo-igreja');
 
     // Mascara 000.000.000-00 enquanto digita
     cpf.addEventListener('input', () => {
@@ -611,11 +610,10 @@ if (PAGINA === 'fazer-parte') {
 
     document.getElementById('c-nascimento').max = new Date().toISOString().slice(0, 10);
 
-    // "Qual igreja?" so aparece para quem congrega
+    // Nome da igreja fica sempre visivel; passa a ser obrigatorio para quem congrega
     formCadastro.querySelectorAll('input[name="congrega"]').forEach(r => r.addEventListener('change', () => {
-        const congrega = formCadastro.querySelector('input[name="congrega"]:checked')?.value === 'sim';
-        campoIgreja.hidden = !congrega;
-        document.getElementById('c-igreja').required = congrega;
+        document.getElementById('c-igreja').required =
+            formCadastro.querySelector('input[name="congrega"]:checked')?.value === 'sim';
     }));
 
     formCadastro.addEventListener('submit', async (e) => {
