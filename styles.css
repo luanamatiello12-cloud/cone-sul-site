@@ -1931,3 +1931,18 @@ footer::before {
     .pilar { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
     .pilar:last-child { border-bottom: none; }
 }
+
+/* A campanha vem logo apos outra secao escura: fio duplo marca a divisao */
+.sec-escura + .campanha { position: relative; }
+.sec-escura + .campanha::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: min(1132px, calc(100% - 48px));
+    height: 9px;
+    border-top: 3px solid var(--areia);
+    border-bottom: 3px solid var(--areia);
+    opacity: 0.85;
+}
