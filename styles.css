@@ -2045,3 +2045,81 @@ footer::before {
 .portal-acesso .btn-primary { box-shadow: 0 6px 18px rgba(95, 116, 36, 0.25); }
 
 .formulario.validar .portal-acesso input:invalid { border-color: #c97a6a; }
+
+/* =========================================================
+   CALENDARIO 2027 (area do mantenedor)
+   ========================================================= */
+.agenda-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 1rem;
+}
+.agenda-item {
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--areia);
+    padding: 1.1rem 1.2rem;
+}
+.agenda-data {
+    flex-shrink: 0;
+    width: 4.2rem;
+    text-align: center;
+    padding-right: 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+.agenda-data strong {
+    display: block;
+    font-family: var(--fonte-titulo);
+    font-weight: 400;
+    font-size: 1.9rem;
+    line-height: 1;
+    color: var(--areia);
+}
+.agenda-data span {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: #fff;
+}
+.agenda-data small {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+.agenda-info h4 { font-size: 0.98rem; color: #fff; margin-bottom: 0.25rem; }
+.agenda-info p { font-size: 0.86rem; opacity: 0.78; margin: 0; }
+
+.devocionais-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 4rem;
+    align-items: start;
+}
+.meses-lista { list-style: none; }
+.meses-lista li {
+    display: grid;
+    grid-template-columns: 3.4rem 1fr;
+    gap: 0.8rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.92rem;
+}
+.meses-lista .mes {
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: var(--areia);
+    padding-top: 0.15rem;
+}
+.meses-lista small { display: block; font-size: 0.78rem; opacity: 0.6; }
+
+@media (max-width: 800px) {
+    .devocionais-grid { grid-template-columns: 1fr; }
+}
