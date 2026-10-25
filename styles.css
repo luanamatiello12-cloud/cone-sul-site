@@ -1988,3 +1988,60 @@ footer::before {
 }
 .texto-bloco.juridico a { color: var(--verde-600); font-weight: 600; }
 .texto-bloco.juridico .lista-destaques { margin: 1rem 0 1.2rem; }
+
+/* =========================================================
+   CAIXA DE ACESSO EM BRANCO (login e cadastro)
+   O quadro era translucido sobre o fundo verde; passa a ser um
+   cartao branco, e os campos dentro dele seguem a versao clara.
+   ========================================================= */
+.portal-acesso {
+    background: #fff;
+    color: #2a2e2a;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+    padding: 2.4rem 2.2rem;
+}
+
+.portal-acesso .campo label,
+.portal-acesso .campo.escolha legend { color: var(--limao-escuro); }
+
+.portal-acesso .campo input,
+.portal-acesso .campo select,
+.portal-acesso .campo textarea {
+    background: #fff;
+    border-color: #cfcbbd;
+    color: #2a2e2a;
+}
+
+.portal-acesso .campo input:focus,
+.portal-acesso .campo select:focus,
+.portal-acesso .campo textarea:focus {
+    border-color: var(--limao-escuro);
+    background: #fff;
+}
+
+.portal-acesso .campo input::placeholder,
+.portal-acesso .campo textarea::placeholder { color: #9a9a92; }
+
+.portal-acesso .campo input[type="date"] { color-scheme: light; }
+
+.portal-acesso .campo.escolha label { color: #3d423d; }
+.portal-acesso .campo.escolha input { accent-color: var(--limao-escuro); }
+
+.portal-acesso .consentimento label { color: #55594f; }
+
+.portal-acesso .form-retorno { color: var(--verde-700); }
+
+.portal-acesso .cadastro-intro { color: #55594f; opacity: 1; }
+
+.portal-acesso .link-discreto { color: var(--limao-escuro); font-weight: 600; }
+
+.portal-acesso .acesso-alternativo {
+    border-top-color: #e3dccb;
+    color: #55594f;
+    opacity: 1;
+}
+.portal-acesso .acesso-alternativo a { color: var(--limao-escuro); }
+
+.portal-acesso .btn-primary { box-shadow: 0 6px 18px rgba(95, 116, 36, 0.25); }
+
+.formulario.validar .portal-acesso input:invalid { border-color: #c97a6a; }
