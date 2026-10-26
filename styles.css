@@ -2124,25 +2124,35 @@ footer::before {
     .devocionais-grid { grid-template-columns: 1fr; }
 }
 
-/* ===== BOTAO EDITAR (ferramenta temporaria, visivel a todos) ===== */
-#btn-editar {
+/* ===== MODO EDICAO (ferramenta temporaria, visivel a todos) ===== */
+#barra-edicao {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    padding: 0.9rem 1.4rem;
-    background: var(--areia);
-    color: var(--verde-900);
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+#barra-edicao button {
     border: none;
     border-radius: 2px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    z-index: 1500;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     transition: all 0.25s ease;
+}
+
+#btn-editar {
+    padding: 0.9rem 1.4rem;
+    background: var(--areia);
+    color: var(--verde-900);
+    font-size: 0.8rem;
 }
 
 #btn-editar:hover {
@@ -2150,11 +2160,17 @@ footer::before {
     transform: translateY(-2px);
 }
 
+#barra-edicao-extra { display: flex; gap: 0.5rem; }
+#barra-edicao-extra button {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.68rem;
+    background: var(--verde-800);
+    color: var(--areia-clara);
+    border: 1px solid rgba(201, 215, 128, 0.5);
+}
+#barra-edicao-extra button:hover { background: var(--verde-900); border-color: var(--areia); }
+
 @media (max-width: 560px) {
-    #btn-editar {
-        bottom: 16px;
-        right: 16px;
-        padding: 0.75rem 1.1rem;
-        font-size: 0.72rem;
-    }
+    #barra-edicao { bottom: 16px; right: 16px; }
+    #btn-editar { padding: 0.75rem 1.1rem; font-size: 0.72rem; }
 }
