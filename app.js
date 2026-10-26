@@ -592,9 +592,6 @@ if (PAGINA === 'portal') {
             document.querySelector('footer .footer-col ul').appendChild(li);
         }
         if (!logado && noRodape) noRodape.parentElement.remove();
-        // botao Editar acompanha o login
-        const be = document.getElementById('btn-editar');
-        if (be) be.hidden = !logado;
     };
 
     const mostrar = (usuario, animar = false) => {
@@ -710,8 +707,9 @@ if (PAGINA === 'fazer-parte') {
 
 /* =========================================================
    MODO EDICAO (as alteracoes NAO sao salvas no arquivo)
-   O botao so aparece para quem entrou na Area do Mantenedor,
-   para nao ficar visivel a qualquer visitante. Ctrl+E tambem liga.
+   Ferramenta temporaria desta fase de ajustes: o botao aparece em
+   todas as paginas, para qualquer visitante. Ctrl+E tambem liga.
+   Retirar quando os textos estiverem fechados.
    ========================================================= */
 let editMode = false;
 
@@ -745,6 +743,5 @@ const editBtn = document.createElement('button');
 editBtn.id = 'btn-editar';
 editBtn.textContent = 'Editar';
 editBtn.title = 'Edição temporária: some ao recarregar a página';
-editBtn.hidden = !sessaoAtiva();
 editBtn.onclick = toggleEditMode;
 document.body.appendChild(editBtn);

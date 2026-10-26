@@ -2124,7 +2124,7 @@ footer::before {
     .devocionais-grid { grid-template-columns: 1fr; }
 }
 
-/* ===== BOTAO EDITAR (so para quem esta logado) ===== */
+/* ===== BOTAO EDITAR (ferramenta temporaria, visivel a todos) ===== */
 #btn-editar {
     position: fixed;
     bottom: 24px;
