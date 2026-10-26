@@ -706,10 +706,14 @@ if (PAGINA === 'fazer-parte') {
 }
 
 /* =========================================================
-   MODO EDICAO (as alteracoes NAO sao salvas no arquivo)
+   MODO EDICAO
    Ferramenta temporaria desta fase de ajustes: o botao aparece em
    todas as paginas, para qualquer visitante. Ctrl+E tambem liga.
-   Retirar quando os textos estiverem fechados.
+   Ao Concluir, as mudancas sao SALVAS NO NAVEGADOR de quem editou
+   (localStorage) e reaplicadas nas proximas visitas daquele mesmo
+   navegador. O site publicado nao muda: para isso, "Baixar edicoes"
+   gera um arquivo com as alteracoes, a ser enviado para publicacao.
+   Retirar tudo quando os textos estiverem fechados.
    ========================================================= */
 let editMode = false;
 
@@ -722,14 +726,71 @@ const EDITAVEIS = [
     '.agenda-info h4', '.agenda-info p', '.meses-lista li', '.lista-destaques li', '.logo'
 ].join(', ');
 
+const CHAVE_EDICOES = 'conesul-edicoes::' + (location.pathname.split('/').pop() || 'index.html');
+const elementosEditaveis = () => [...document.querySelectorAll(EDITAVEIS)];
+// Texto original de cada elemento, para salvar so o que mudou
+const textosOriginais = elementosEditaveis().map(el => el.innerText);
+
+function lerEdicoes() {
+    try { return JSON.parse(localStorage.getItem(CHAVE_EDICOES)); } catch { return null; }
+}
+
+// Reaplica edicoes salvas. "total" protege: se a pagina mudou de
+// estrutura (outra quantidade de textos), as edicoes antigas sao ignoradas.
+const salvo = lerEdicoes();
+if (salvo && salvo.total === textosOriginais.length) {
+    elementosEditaveis().forEach((el, i) => {
+        if (salvo.textos[i] !== undefined) el.innerText = salvo.textos[i];
+    });
+}
+
+function salvarEdicoes() {
+    const textos = {};
+    let houve = false;
+    elementosEditaveis().forEach((el, i) => {
+        if (el.innerText !== textosOriginais[i]) { textos[i] = el.innerText; houve = true; }
+    });
+    try {
+        if (houve) localStorage.setItem(CHAVE_EDICOES, JSON.stringify({ total: textosOriginais.length, textos, quando: new Date().toISOString() }));
+        else localStorage.removeItem(CHAVE_EDICOES);
+    } catch { alert('Não foi possível salvar neste navegador.'); return; }
+    const btn = document.getElementById('btn-editar');
+    btn.textContent = houve ? 'Salvo ✓' : 'Editar';
+    if (houve) setTimeout(() => { if (!editMode) btn.textContent = 'Editar'; }, 2000);
+}
+
 function toggleEditMode() {
     editMode = !editMode;
-    document.querySelectorAll(EDITAVEIS).forEach(el => {
+    elementosEditaveis().forEach(el => {
         el.contentEditable = editMode;
         el.style.outline = editMode ? '1px dashed rgba(201, 215, 128, 0.9)' : '';
         el.style.outlineOffset = editMode ? '6px' : '';
     });
     document.getElementById('btn-editar').textContent = editMode ? 'Concluir' : 'Editar';
+    document.getElementById('barra-edicao-extra').hidden = !editMode;
+    if (!editMode) salvarEdicoes();
+}
+
+// Baixa TODAS as edicoes salvas neste navegador (todas as paginas),
+// num arquivo para enviar a quem publica o site.
+function baixarEdicoes() {
+    const tudo = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k.startsWith('conesul-edicoes::')) tudo[k.replace('conesul-edicoes::', '')] = JSON.parse(localStorage.getItem(k));
+    }
+    if (!Object.keys(tudo).length) { alert('Nenhuma edição salva ainda. Edite um texto e clique em Concluir.'); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(tudo, null, 2)], { type: 'application/json' }));
+    a.download = 'edicoes-cone-sul.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function desfazerEdicoes() {
+    if (!confirm('Descartar as edições salvas desta página e voltar ao texto publicado?')) return;
+    try { localStorage.removeItem(CHAVE_EDICOES); } catch { /* nada */ }
+    location.reload();
 }
 
 document.addEventListener('keydown', (e) => {
@@ -739,9 +800,15 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-const editBtn = document.createElement('button');
-editBtn.id = 'btn-editar';
-editBtn.textContent = 'Editar';
-editBtn.title = 'Edição temporária: some ao recarregar a página';
-editBtn.onclick = toggleEditMode;
-document.body.appendChild(editBtn);
+const barraEdicao = document.createElement('div');
+barraEdicao.id = 'barra-edicao';
+barraEdicao.innerHTML = `
+    <div id="barra-edicao-extra" hidden>
+        <button type="button" id="btn-baixar-edicoes" title="Gera um arquivo com tudo que você editou, para enviar a quem publica o site">Baixar edições</button>
+        <button type="button" id="btn-desfazer-edicoes" title="Descarta as edições salvas desta página">Desfazer</button>
+    </div>
+    <button type="button" id="btn-editar" title="Editar os textos. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>`;
+document.body.appendChild(barraEdicao);
+document.getElementById('btn-editar').onclick = toggleEditMode;
+document.getElementById('btn-baixar-edicoes').onclick = baixarEdicoes;
+document.getElementById('btn-desfazer-edicoes').onclick = desfazerEdicoes;
