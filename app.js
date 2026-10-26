@@ -592,6 +592,9 @@ if (PAGINA === 'portal') {
             document.querySelector('footer .footer-col ul').appendChild(li);
         }
         if (!logado && noRodape) noRodape.parentElement.remove();
+        // botao Editar acompanha o login
+        const be = document.getElementById('btn-editar');
+        if (be) be.hidden = !logado;
     };
 
     const mostrar = (usuario, animar = false) => {
@@ -704,3 +707,44 @@ if (PAGINA === 'fazer-parte') {
         }
     });
 }
+
+/* =========================================================
+   MODO EDICAO (as alteracoes NAO sao salvas no arquivo)
+   O botao so aparece para quem entrou na Area do Mantenedor,
+   para nao ficar visivel a qualquer visitante. Ctrl+E tambem liga.
+   ========================================================= */
+let editMode = false;
+
+const EDITAVEIS = [
+    '.hero h1', '.hero-lead', '.hero-complemento', 'section h2', '.sec-intro', '.sub-titulo', '.sub-intro',
+    '.texto-bloco p', '.destaque', '.mvp-item h4', '.mvp-item p', '.territorio p',
+    '.etapa h3', '.etapa p', '.barreira h3', '.barreira > p',
+    '.card-acao h3', '.card-acao p', '.beneficio h4', '.beneficio p',
+    '.campanha-card h3', '.campanha-lema', '.campanha-desc', '.campanha-lista li',
+    '.agenda-info h4', '.agenda-info p', '.meses-lista li', '.lista-destaques li', '.logo'
+].join(', ');
+
+function toggleEditMode() {
+    editMode = !editMode;
+    document.querySelectorAll(EDITAVEIS).forEach(el => {
+        el.contentEditable = editMode;
+        el.style.outline = editMode ? '1px dashed rgba(201, 215, 128, 0.9)' : '';
+        el.style.outlineOffset = editMode ? '6px' : '';
+    });
+    document.getElementById('btn-editar').textContent = editMode ? 'Concluir' : 'Editar';
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        toggleEditMode();
+    }
+});
+
+const editBtn = document.createElement('button');
+editBtn.id = 'btn-editar';
+editBtn.textContent = 'Editar';
+editBtn.title = 'Edição temporária: some ao recarregar a página';
+editBtn.hidden = !sessaoAtiva();
+editBtn.onclick = toggleEditMode;
+document.body.appendChild(editBtn);
