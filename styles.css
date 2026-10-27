@@ -1950,9 +1950,9 @@ footer::before {
     .pilar:last-child { border-bottom: none; }
 }
 
-/* A campanha vem logo apos outra secao escura: fio duplo marca a divisao */
-.sec-escura + .campanha { position: relative; }
-.sec-escura + .campanha::before {
+/* Duas secoes escuras seguidas: fio duplo marca a divisao */
+.sec-escura + .sec-escura { position: relative; }
+.sec-escura + .sec-escura::before {
     content: '';
     position: absolute;
     left: 50%;
