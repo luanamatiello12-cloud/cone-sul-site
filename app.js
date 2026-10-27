@@ -349,15 +349,14 @@ if (document.getElementById('mapa-leaflet')) {
             maxZoom: 19
         }).addTo(map);
 
-        // Recorte suave: o que nao e a regiao do projeto fica sob um veu da
-        // cor da secao, apagado mas ainda legivel (nada sai cortado), e a
-        // regiao ganha um contorno em areia. Vem antes dos marcadores para
-        // ficar por baixo deles.
+        // Recorte: tudo que nao e a regiao do projeto (PR, SC, RS, Paraguai,
+        // Argentina e Chile) fica coberto pela cor da secao, e a regiao ganha
+        // um contorno em limao. Vem antes dos marcadores para ficar por baixo.
         if (temContorno) {
             const fundo = getComputedStyle(document.getElementById('mapa-leaflet').closest('section')).backgroundColor;
             const mundo = [[-85, -180], [-85, 180], [85, 180], [85, -180]];
             L.polygon([mundo, ...REGIAO_CONTORNO], {
-                stroke: false, fillColor: fundo, fillOpacity: 0.6, interactive: false
+                stroke: false, fillColor: fundo, fillOpacity: 1, interactive: false
             }).addTo(map);
             L.polygon(REGIAO_CONTORNO, {
                 color: '#c9d780', weight: 2, opacity: 1, fill: false, interactive: false
