@@ -1,3 +1,19 @@
+/* Fonte oficial da marca (hospedada no proprio site, pasta fonts/) */
+@font-face {
+    font-family: 'Advercase';
+    src: url('fonts/advercase-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Advercase';
+    src: url('fonts/advercase-bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     /* Identidade visual "Fronteiras que conectam a Cristo" (estampa) */
     --verde-900: #0b2215;
@@ -9,8 +25,8 @@
     --creme: #fef5e2;
     --limao-escuro: #5f7424; /* limao legivel sobre o creme */
     --texto: #22262220;
-    --fonte-titulo: 'DM Serif Display', Georgia, 'Times New Roman', serif;
-    --fonte-rotulo: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --fonte-titulo: 'Advercase', Georgia, 'Times New Roman', serif;
+    --fonte-rotulo: 'Advercase', Georgia, 'Times New Roman', serif;
 }
 
 * {
@@ -1595,7 +1611,7 @@ section h2,
 .footer-marca strong,
 nav .logo {
     font-family: var(--fonte-titulo);
-    font-weight: 400;
+    font-weight: 700;
 }
 
 .hero h1 { color: var(--creme); letter-spacing: -0.02em; line-height: 0.95; }
@@ -1788,7 +1804,7 @@ footer::before {
 .campanha-num::after { content: ''; width: 1.8rem; height: 2px; background: var(--areia); }
 .campanha-card h3 {
     font-family: var(--fonte-titulo);
-    font-weight: 400;
+    font-weight: 700;
     font-size: clamp(1.9rem, 3vw, 2.4rem);
     line-height: 1;
     text-transform: uppercase;
