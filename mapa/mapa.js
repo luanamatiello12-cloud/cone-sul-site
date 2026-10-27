@@ -9,6 +9,11 @@
    - referencia.geojson: demais paises da America do Sul e demais
      estados do Brasil (Natural Earth 1:10m), em tom neutro
 
+   Pins (opcional): se a pagina carregar mapa/locais.js, cada cidade
+   vira um pin; pins proximos se agrupam (Leaflet.markercluster, em
+   mapa/vendor/) e se abrem com o zoom. Com um #locais-lista na pagina,
+   a lista de cidades e montada ali.
+
    Selecao unica: selecionarTerritorio(id) atualiza mapa, lista e
    painel, venha o clique do mapa ou da lista.
    ========================================================= */
@@ -132,8 +137,84 @@
     // Reajusta o tamanho quando o container muda (responsivo)
     if ('ResizeObserver' in window) new ResizeObserver(() => map.invalidateSize()).observe(elMapa);
 
+    // ---------- Pins das cidades (mapa/locais.js) ----------
+    const pins = [];
+    const ICONE_PIN = L.divIcon({
+        className: 'pin-local',
+        html: '<svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 31s10-11.2 10-19A10 10 0 0 0 2 12c0 7.8 10 19 10 19Z"/><circle cx="12" cy="12" r="4"/></svg>',
+        iconSize: [24, 32],
+        iconAnchor: [12, 31],
+        tooltipAnchor: [0, -28],
+        popupAnchor: [0, -28]
+    });
+
+    function adicionarLocais() {
+        if (typeof LOCAIS === 'undefined' || !LOCAIS.length) return;
+        const grupo = L.markerClusterGroup
+            ? L.markerClusterGroup({
+                showCoverageOnHover: false,
+                spiderfyOnMaxZoom: true,
+                maxClusterRadius: 38,
+                iconCreateFunction: c => L.divIcon({
+                    className: 'pin-grupo',
+                    html: `<span>${c.getChildCount()}</span>`,
+                    iconSize: [34, 34]
+                })
+            })
+            : L.layerGroup();   // sem o plugin, os pins aparecem soltos
+
+        LOCAIS.forEach((local, i) => {
+            const onde = local.uf || local.pais;
+            const marcador = L.marker([local.lat, local.lng], { icon: ICONE_PIN, title: `${local.nome} — ${onde}`, keyboard: true });
+            marcador.bindTooltip(`<strong>${escapar(local.nome)}</strong> · ${escapar(onde)}`, { direction: 'top', className: 'mapa-dica' });
+            marcador.on('click', () => {
+                if (POR_ID[local.territorio]) selecionarTerritorio(local.territorio);
+                marcarLocal(i);
+            });
+            grupo.addLayer(marcador);
+            pins.push({ local, marcador });
+        });
+        grupo.addTo(map);
+
+        const lista = document.getElementById('locais-lista');
+        if (lista) montarLista(lista, grupo);
+    }
+
+    function marcarLocal(i) {
+        document.querySelectorAll('.local-btn').forEach(b => b.classList.toggle('ativo', +b.dataset.i === i));
+    }
+
+    // Lista de cidades agrupada por estado/pais; clicar leva ate o pin
+    function montarLista(lista, grupo) {
+        const grupos = [];
+        LOCAIS.forEach((local, i) => {
+            const chave = local.uf || local.pais;
+            let g = grupos.find(x => x.chave === chave);
+            if (!g) grupos.push(g = { chave, nome: POR_ID[local.territorio]?.nome || chave, itens: [] });
+            g.itens.push({ local, i });
+        });
+        lista.innerHTML = grupos.map(g => `
+            <div class="locais-grupo">
+                <h4>${escapar(g.nome)} <small>${g.itens.length} ${g.itens.length === 1 ? 'cidade' : 'cidades'}</small></h4>
+                <ul>${g.itens.map(({ local, i }) => `<li><button type="button" class="local-btn" data-i="${i}">${escapar(local.nome)}</button></li>`).join('')}</ul>
+            </div>`).join('');
+
+        lista.addEventListener('click', (e) => {
+            const btn = e.target.closest('.local-btn');
+            if (!btn) return;
+            const { local, marcador } = pins[+btn.dataset.i];
+            if (POR_ID[local.territorio]) selecionarTerritorio(local.territorio);
+            marcarLocal(+btn.dataset.i);
+            elMapa.scrollIntoView({ behavior: MOVIMENTO_REDUZIDO_MAPA ? 'auto' : 'smooth', block: 'center' });
+            const abrir = () => marcador.openTooltip();
+            if (grupo.zoomToShowLayer) grupo.zoomToShowLayer(marcador, abrir);
+            else { map.setView([local.lat, local.lng], 9); abrir(); }
+        });
+    }
+    const MOVIMENTO_REDUZIDO_MAPA = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     // Ponto de acesso para integracoes futuras (e testes)
-    window.mapaConeSul = { map, camadas, selecionarTerritorio, territorios: POR_ID };
+    window.mapaConeSul = { map, camadas, pins, selecionarTerritorio, territorios: POR_ID };
 
     const carregar = (arquivo) => fetch(arquivo).then(r => {
         if (!r.ok) throw new Error(arquivo + ': HTTP ' + r.status);
@@ -165,6 +246,7 @@
             }).addTo(map);
 
             if (selecionado) aplicarEstilo(selecionado);
+            adicionarLocais();
         })
         .catch(erro => {
             console.error('Mapa: falha ao carregar os limites geográficos.', erro);

@@ -2334,3 +2334,58 @@ footer::before {
 @media (max-width: 900px) {
     .campanha-beneficios { margin: 0 0 1.2rem; }
 }
+
+/* Pins das cidades no mapa (mapa/locais.js) */
+.pin-local svg {
+    width: 24px;
+    height: 32px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+    transition: transform 0.2s var(--ease-suave);
+    transform-origin: 50% 100%;
+}
+.pin-local svg path { fill: var(--verde-800); stroke: var(--creme); stroke-width: 1.6; }
+.pin-local svg circle { fill: var(--areia); }
+.pin-local:hover svg { transform: scale(1.15); }
+
+.pin-grupo {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--verde-800);
+    border: 3px solid var(--areia);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    color: var(--creme);
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+/* Lista de cidades abaixo do mapa */
+.locais { margin-top: 3rem; }
+.locais .sub-titulo { margin-top: 0; }
+.locais-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.6rem;
+}
+.locais-grupo h4 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--areia);
+}
+.locais-grupo h4 small { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; margin-left: 0.4rem; }
+.locais-grupo ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.local-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(201, 215, 128, 0.35);
+    color: var(--creme);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-suave);
+}
+.local-btn:hover,
+.local-btn.ativo { background: var(--areia); color: var(--verde-900); border-color: var(--areia); }
