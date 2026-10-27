@@ -527,7 +527,7 @@ const EDITAVEIS = [
     '.texto-bloco p', '.destaque', '.mvp-item h4', '.mvp-item p', '.territorio p',
     '.etapa h3', '.etapa p', '.barreira h3', '.barreira > p',
     '.card-acao h3', '.card-acao p', '.beneficio h4', '.beneficio p',
-    '.campanha-card h3', '.campanha-lema', '.campanha-desc', '.campanha-lista li',
+    '.campanha-card h3', '.campanha-lema', '.campanha-desc', '.campanha-lista li', '.campanha-beneficios li',
     '.agenda-info h4', '.agenda-info p', '.meses-lista li', '.lista-destaques li', '.logo'
 ].join(', ');
 

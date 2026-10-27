@@ -2263,7 +2263,8 @@ footer::before {
         "titulo  desc"
         "lema    lista"
         "valor   lista"
-        "valor   botao";
+        "benef   lista"
+        "benef   botao";
     column-gap: 2.2rem;
     align-content: start;
     padding: 1.8rem 2rem;
@@ -2280,7 +2281,7 @@ footer::before {
 @media (max-width: 900px) {
     .campanha-corpo {
         grid-template-columns: 1fr;
-        grid-template-areas: "num" "titulo" "lema" "valor" "desc" "lista" "botao";
+        grid-template-areas: "num" "titulo" "lema" "valor" "benef" "desc" "lista" "botao";
         padding: 1.5rem 1.4rem 1.7rem;
     }
     .campanha-valor { margin-bottom: 1.2rem; }
@@ -2289,4 +2290,47 @@ footer::before {
 @media (max-width: 680px) {
     .campanha-card { flex-direction: column; border-left: none; border-top: 4px solid var(--areia); }
     .campanha-card img { width: 100%; max-width: none; aspect-ratio: 3 / 1; min-height: 0; }
+}
+
+/* Beneficios de cada nivel, dentro da faixa da campanha */
+.campanha-beneficios {
+    grid-area: benef;
+    align-self: start;
+    margin-top: 1.1rem;
+    padding: 0.9rem 1rem 1rem;
+    border: 1px solid #e3dccb;
+    background: #fff;
+}
+.campanha-beneficios-titulo {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--limao-escuro);
+    margin-bottom: 0.55rem;
+}
+.campanha-beneficios ul { list-style: none; }
+.campanha-beneficios li {
+    position: relative;
+    padding-left: 1.3rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--verde-800);
+    line-height: 1.4;
+    margin-bottom: 0.35rem;
+}
+.campanha-beneficios li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.42rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    background: var(--areia);
+    transform: rotate(45deg);
+}
+.campanha-beneficios li:last-child { margin-bottom: 0; }
+@media (max-width: 900px) {
+    .campanha-beneficios { margin: 0 0 1.2rem; }
 }
