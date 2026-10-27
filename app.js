@@ -25,7 +25,7 @@ const LINKS_PAGAMENTO = {
 const MENU = [
     { id: 'inicio',      rotulo: 'Início',                    href: 'index.html' },
     { id: 'missao',      rotulo: 'Nossa Missão',              href: 'nossa-missao.html' },
-    { id: 'onde',        rotulo: 'Onde Atuamos',              href: 'onde-atuamos.html' },
+    { id: 'onde',        rotulo: 'Onde Estamos',              href: 'onde-atuamos.html' },
     { id: 'como',        rotulo: 'Como Funciona',             href: 'como-funciona.html' },
     { id: 'mantenedor',  rotulo: 'Seja Mantenedor',           href: 'seja-mantenedor.html' },
     { id: 'empresarios', rotulo: 'Expansores com Propósito', href: 'empresarios.html' },
