@@ -2389,3 +2389,99 @@ footer::before {
 }
 .local-btn:hover,
 .local-btn.ativo { background: var(--areia); color: var(--verde-900); border-color: var(--areia); }
+
+/* Coluna ao lado do mapa (Onde Estamos): abas Cidades / Territorios */
+.abas-mapa {
+    display: flex;
+    gap: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+.abas-mapa button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    padding: 0.7rem 1rem;
+    color: rgba(255, 255, 255, 0.65);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.25s, border-color 0.35s var(--ease-suave);
+}
+.abas-mapa button:hover { color: var(--creme); }
+.abas-mapa button[aria-selected="true"] { color: var(--areia); border-bottom-color: var(--areia); }
+
+/* Lista de cidades dentro da coluna */
+.info-paises .locais-lista { grid-template-columns: 1fr; gap: 1.2rem; }
+.info-paises .locais-grupo h4 { font-size: 0.92rem; }
+
+/* Fotos da cidade no quadro */
+.galeria-local {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.5rem;
+    white-space: normal;
+}
+.galeria-foto {
+    padding: 0;
+    border: none;
+    cursor: zoom-in;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #e7e4da;
+}
+.galeria-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s var(--ease-suave);
+}
+.galeria-foto:hover img { transform: scale(1.06); }
+.galeria-vazia {
+    display: grid;
+    place-items: center;
+    min-height: 140px;
+    border: 1px dashed #cfcbbd;
+    color: #8c8f88;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: normal;
+    background: repeating-linear-gradient(135deg, #f6f3ea 0 12px, #efebdf 12px 24px);
+}
+
+/* Foto ampliada */
+.visor-foto {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(8, 20, 13, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+}
+.visor-foto[hidden] { display: none; }
+.visor-foto figure { max-width: min(1100px, 100%); max-height: 100%; text-align: center; }
+.visor-foto img { max-width: 100%; max-height: 78vh; object-fit: contain; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.visor-foto figcaption { color: var(--creme); margin-top: 0.8rem; font-size: 0.95rem; }
+.visor-foto button {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(201, 215, 128, 0.5);
+    color: var(--creme);
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.visor-foto button:hover { background: var(--areia); color: var(--verde-900); }
+.visor-fechar { top: 1.2rem; right: 1.2rem; }
+.visor-ant { left: 1rem; top: 50%; transform: translateY(-50%); }
+.visor-prox { right: 1rem; top: 50%; transform: translateY(-50%); }

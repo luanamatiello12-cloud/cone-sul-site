@@ -29,26 +29,47 @@
     // ---------- Painel de informacoes ----------
     const escapar = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-    function preencherPainel(t) {
+    function mostrarPainel(titulo, bandeira, html) {
         const corpo = document.querySelector('.card-body');
         corpo.style.transition = 'opacity 0.15s ease';
         corpo.style.opacity = '0';
         setTimeout(() => {
-            document.getElementById('pasta-titulo').textContent = t.nome;
-            const bandeira = document.getElementById('card-bandeira');
-            bandeira.querySelector('use').setAttribute('href', t.bandeira);
-            bandeira.style.visibility = 'visible';
-
-            const tipo = t.pais ? `${t.tipo} (${t.pais})` : t.tipo;
-            document.getElementById('pasta-info').innerHTML = `
-                <dl class="ficha-territorio">
-                    <div><dt>Nome oficial</dt><dd>${escapar(t.nomeOficial)}</dd></div>
-                    <div><dt>Tipo</dt><dd>${escapar(tipo)}</dd></div>
-                    ${t.sigla ? `<div><dt>Sigla</dt><dd>${escapar(t.sigla)}</dd></div>` : ''}
-                </dl>
-                <div class="ficha-descricao">${t.descricao ? escapar(t.descricao) : '<em>Descrição em preparação.</em>'}</div>`;
+            document.getElementById('pasta-titulo').textContent = titulo;
+            const elBandeira = document.getElementById('card-bandeira');
+            elBandeira.querySelector('use').setAttribute('href', bandeira);
+            elBandeira.style.visibility = 'visible';
+            document.getElementById('pasta-info').innerHTML = html;
             corpo.style.opacity = '1';
         }, 150);
+    }
+
+    function preencherPainel(t) {
+        const tipo = t.pais ? `${t.tipo} (${t.pais})` : t.tipo;
+        mostrarPainel(t.nome, t.bandeira, `
+            <dl class="ficha-territorio">
+                <div><dt>Nome oficial</dt><dd>${escapar(t.nomeOficial)}</dd></div>
+                <div><dt>Tipo</dt><dd>${escapar(tipo)}</dd></div>
+                ${t.sigla ? `<div><dt>Sigla</dt><dd>${escapar(t.sigla)}</dd></div>` : ''}
+            </dl>
+            <div class="ficha-descricao">${t.descricao ? escapar(t.descricao) : '<em>Descrição em preparação.</em>'}</div>`);
+    }
+
+    // Ficha da cidade: onde fica e as fotos (mapa/locais.js -> fotos)
+    function preencherLocal(local, i) {
+        const t = POR_ID[local.territorio];
+        const onde = local.uf ? `${t ? t.nome : local.uf} (${local.uf})` : local.pais;
+        const fotos = local.fotos || [];
+        const galeria = fotos.length
+            ? `<div class="galeria-local">${fotos.map((f, n) => `
+                <button type="button" class="galeria-foto" data-local="${i}" data-foto="${n}" aria-label="Ampliar foto ${n + 1}${f.legenda ? ': ' + escapar(f.legenda) : ''}">
+                    <img src="${escapar(f.src)}" alt="${escapar(f.legenda || local.nome)}" loading="lazy">
+                </button>`).join('')}</div>`
+            : '<div class="galeria-vazia">Fotos em breve.</div>';
+        mostrarPainel(local.nome, t ? t.bandeira : '#flag-br', `
+            <dl class="ficha-territorio">
+                <div><dt>${local.uf ? 'Estado' : 'País'}</dt><dd>${escapar(onde)}</dd></div>
+            </dl>
+            ${galeria}`);
     }
 
     // ---------- Estilos das camadas ----------
@@ -68,7 +89,7 @@
     }
 
     // ---------- Selecao (mapa e lista) ----------
-    function selecionarTerritorio(id, { enquadrar = false } = {}) {
+    function selecionarTerritorio(id, { enquadrar = false, painel = true } = {}) {
         const t = POR_ID[id];
         if (!t) return;
         const anterior = selecionado;
@@ -85,7 +106,7 @@
         camadas[id]?.bringToFront();
         if (enquadrar && camadas[id]) map.flyToBounds(camadas[id].getBounds(), { padding: [30, 30], maxZoom: 6, duration: 0.6 });
 
-        preencherPainel(t);
+        if (painel) { marcarLocal(-1); preencherPainel(t); }
     }
 
     // Lista ao lado: funciona mesmo se o mapa falhar; acessivel por teclado
@@ -167,14 +188,12 @@
             const onde = local.uf || local.pais;
             const marcador = L.marker([local.lat, local.lng], { icon: ICONE_PIN, title: `${local.nome} — ${onde}`, keyboard: true });
             marcador.bindTooltip(`<strong>${escapar(local.nome)}</strong> · ${escapar(onde)}`, { direction: 'top', className: 'mapa-dica' });
-            marcador.on('click', () => {
-                if (POR_ID[local.territorio]) selecionarTerritorio(local.territorio);
-                marcarLocal(i);
-            });
+            marcador.on('click', () => selecionarLocal(i));
             grupo.addLayer(marcador);
             pins.push({ local, marcador });
         });
         grupo.addTo(map);
+        grupoPins = grupo;
 
         const lista = document.getElementById('locais-lista');
         if (lista) montarLista(lista, grupo);
@@ -201,20 +220,80 @@
 
         lista.addEventListener('click', (e) => {
             const btn = e.target.closest('.local-btn');
-            if (!btn) return;
-            const { local, marcador } = pins[+btn.dataset.i];
-            if (POR_ID[local.territorio]) selecionarTerritorio(local.territorio);
-            marcarLocal(+btn.dataset.i);
-            elMapa.scrollIntoView({ behavior: MOVIMENTO_REDUZIDO_MAPA ? 'auto' : 'smooth', block: 'center' });
-            const abrir = () => marcador.openTooltip();
-            if (grupo.zoomToShowLayer) grupo.zoomToShowLayer(marcador, abrir);
-            else { map.setView([local.lat, local.lng], 9); abrir(); }
+            if (btn) selecionarLocal(+btn.dataset.i, { irAoPin: true });
         });
     }
+
+    let grupoPins = null;
+    function selecionarLocal(i, { irAoPin = false } = {}) {
+        const { local, marcador } = pins[i];
+        if (POR_ID[local.territorio]) selecionarTerritorio(local.territorio, { painel: false });
+        marcarLocal(i);
+        preencherLocal(local, i);
+        if (!irAoPin) return;
+        // No celular a lista fica abaixo do quadro: sobe ate as fotos
+        if (window.matchMedia('(max-width: 900px)').matches) {
+            document.querySelector('.card-info').scrollIntoView({ behavior: MOVIMENTO_REDUZIDO_MAPA ? 'auto' : 'smooth', block: 'start' });
+        }
+        const abrir = () => marcador.openTooltip();
+        if (grupoPins && grupoPins.zoomToShowLayer) grupoPins.zoomToShowLayer(marcador, abrir);
+        else { map.setView([local.lat, local.lng], 9); abrir(); }
+    }
+
+    // Abas Cidades / Territorios (pagina Onde Estamos)
+    const abas = [...document.querySelectorAll('.abas-mapa [role="tab"]')];
+    abas.forEach(aba => aba.addEventListener('click', () => {
+        abas.forEach(a => {
+            const ativa = a === aba;
+            a.setAttribute('aria-selected', ativa);
+            document.getElementById(a.getAttribute('aria-controls')).hidden = !ativa;
+        });
+    }));
+
+    // Foto ampliada: clique na miniatura; setas trocam, Esc fecha
+    const visor = document.createElement('div');
+    visor.className = 'visor-foto';
+    visor.hidden = true;
+    visor.setAttribute('role', 'dialog');
+    visor.setAttribute('aria-modal', 'true');
+    visor.innerHTML = `
+        <button type="button" class="visor-fechar" aria-label="Fechar">×</button>
+        <button type="button" class="visor-ant" aria-label="Foto anterior">‹</button>
+        <figure><img alt=""><figcaption></figcaption></figure>
+        <button type="button" class="visor-prox" aria-label="Próxima foto">›</button>`;
+    document.body.appendChild(visor);
+    let visorLocal = null, visorN = 0;
+    function abrirFoto(iLocal, n) {
+        const fotos = LOCAIS[iLocal].fotos;
+        visorLocal = iLocal; visorN = (n + fotos.length) % fotos.length;
+        const f = fotos[visorN];
+        visor.querySelector('img').src = f.src;
+        visor.querySelector('img').alt = f.legenda || LOCAIS[iLocal].nome;
+        visor.querySelector('figcaption').textContent = f.legenda || '';
+        visor.querySelector('.visor-ant').hidden = visor.querySelector('.visor-prox').hidden = fotos.length < 2;
+        visor.hidden = false;
+        visor.querySelector('.visor-fechar').focus();
+    }
+    const fecharFoto = () => { visor.hidden = true; };
+    document.addEventListener('click', (e) => {
+        const mini = e.target.closest('.galeria-foto');
+        if (mini) abrirFoto(+mini.dataset.local, +mini.dataset.foto);
+    });
+    visor.addEventListener('click', (e) => {
+        if (e.target === visor || e.target.closest('.visor-fechar')) fecharFoto();
+        else if (e.target.closest('.visor-ant')) abrirFoto(visorLocal, visorN - 1);
+        else if (e.target.closest('.visor-prox')) abrirFoto(visorLocal, visorN + 1);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (visor.hidden) return;
+        if (e.key === 'Escape') fecharFoto();
+        if (e.key === 'ArrowLeft') abrirFoto(visorLocal, visorN - 1);
+        if (e.key === 'ArrowRight') abrirFoto(visorLocal, visorN + 1);
+    });
     const MOVIMENTO_REDUZIDO_MAPA = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Ponto de acesso para integracoes futuras (e testes)
-    window.mapaConeSul = { map, camadas, pins, selecionarTerritorio, territorios: POR_ID };
+    window.mapaConeSul = { map, camadas, pins, selecionarTerritorio, selecionarLocal, territorios: POR_ID };
 
     const carregar = (arquivo) => fetch(arquivo).then(r => {
         if (!r.ok) throw new Error(arquivo + ': HTTP ' + r.status);

@@ -7,7 +7,7 @@
     <meta name="description" content="Do Brasil para o Cone Sul: o CONE SUL parte de Foz do Iguaçu, com visão de expansão missionária para Paraguai, Argentina e Chile.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
     <link rel="stylesheet" href="mapa/vendor/markercluster/MarkerCluster.css">
-    <link rel="stylesheet" href="styles.css?v=34">
+    <link rel="stylesheet" href="styles.css?v=35">
 </head>
 <body data-pagina="onde">
 
@@ -39,7 +39,7 @@
         <div class="wrap">
             <span class="sec-kicker">Territórios</span>
             <h2>De uma fronteira para as nações.</h2>
-            <p class="sec-intro">Clique em um território no mapa ou na lista.</p>
+            <p class="sec-intro">Clique em uma cidade ou em um território, no mapa ou na lista.</p>
 
             <div class="mapa-container">
                 <div id="mapa-leaflet" class="mapa-leaflet"></div>
@@ -48,14 +48,22 @@
                     <div class="card-info">
                         <div class="card-header">
                             <svg class="bandeira" id="card-bandeira" viewBox="0 0 30 20" style="visibility:hidden"><use href="#flag-ar"/></svg>
-                            <h3 id="pasta-titulo">Selecione um território</h3>
+                            <h3 id="pasta-titulo">Onde estamos</h3>
                         </div>
                         <div class="card-body">
-                            <div id="pasta-info" style="white-space: pre-line;">Clique em um território no mapa ou na lista ao lado.</div>
+                            <div id="pasta-info" style="white-space: pre-line;">Clique em uma cidade ou em um território no mapa ou na lista.</div>
                         </div>
                     </div>
 
-                    <div class="info-items-list">
+                    <div class="abas-mapa" role="tablist">
+                        <button type="button" role="tab" id="aba-cidades" aria-controls="locais-lista" aria-selected="true">Cidades</button>
+                        <button type="button" role="tab" id="aba-territorios" aria-controls="lista-territorios" aria-selected="false">Territórios</button>
+                    </div>
+
+                    <!-- Cidades com pin: montada pelo mapa/mapa.js a partir de mapa/locais.js -->
+                    <div class="locais-lista" id="locais-lista" role="tabpanel" aria-labelledby="aba-cidades"></div>
+
+                    <div class="info-items-list" id="lista-territorios" role="tabpanel" aria-labelledby="aba-territorios" hidden>
                         <div class="info-item base" data-territorio="PR">
                             <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
                             <div class="info-text"><h4>Paraná</h4><p>Foz do Iguaçu — ponto de partida</p></div>
@@ -82,13 +90,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Cidades com pin no mapa: montada pelo mapa/mapa.js a partir de mapa/locais.js -->
-            <div class="locais">
-                <h3 class="sub-titulo">Onde estamos presentes</h3>
-                <p class="sub-intro">Clique em uma cidade para vê-la no mapa.</p>
-                <div class="locais-lista" id="locais-lista"></div>
             </div>
 
             <div class="territorios">
@@ -216,8 +217,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="mapa/territorios.js?v=1"></script>
     <script src="mapa/vendor/markercluster/leaflet.markercluster.js"></script>
-    <script src="mapa/locais.js?v=1"></script>
+    <script src="mapa/locais.js?v=2"></script>
     <script src="app.js?v=37"></script>
-    <script src="mapa/mapa.js?v=2"></script>
+    <script src="mapa/mapa.js?v=3"></script>
 </body>
 </html>
