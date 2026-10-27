@@ -527,7 +527,7 @@ const EDITAVEIS = [
     '.texto-bloco p', '.destaque', '.mvp-item h4', '.mvp-item p', '.territorio p',
     '.etapa h3', '.etapa p', '.barreira h3', '.barreira > p',
     '.card-acao h3', '.card-acao p', '.beneficio h4', '.beneficio p',
-    '.campanha-card h3', '.campanha-lema', '.campanha-desc', '.campanha-lista li',
+    '.campanha-card h3', '.campanha-lema', '.campanha-desc', '.campanha-lista li', '.campanha-beneficios li',
     '.agenda-info h4', '.agenda-info p', '.meses-lista li', '.lista-destaques li', '.logo'
 ].join(', ');
 
@@ -540,12 +540,18 @@ function lerEdicoes() {
     try { return JSON.parse(localStorage.getItem(CHAVE_EDICOES)); } catch { return null; }
 }
 
-// Reaplica edicoes salvas. "total" protege: se a pagina mudou de
-// estrutura (outra quantidade de textos), as edicoes antigas sao ignoradas.
+// Reaplica edicoes salvas. Cada edicao guarda o texto original ("de"):
+// so e aplicada se aquele lugar ainda tiver o mesmo texto, entao
+// reordenar ou acrescentar blocos na pagina nao joga uma edicao no
+// lugar errado. (Formato antigo, sem "de": vale se a pagina tiver a
+// mesma quantidade de textos.)
 const salvo = lerEdicoes();
-if (salvo && salvo.total === textosOriginais.length) {
+if (salvo && salvo.textos) {
     elementosEditaveis().forEach((el, i) => {
-        if (salvo.textos[i] !== undefined) el.innerText = salvo.textos[i];
+        const ed = salvo.textos[i];
+        if (ed === undefined) return;
+        if (typeof ed === 'object' && ed.de === textosOriginais[i]) el.innerText = ed.para;
+        else if (typeof ed === 'string' && salvo.total === textosOriginais.length) el.innerText = ed;
     });
 }
 
@@ -553,7 +559,7 @@ function salvarEdicoes() {
     const textos = {};
     let houve = false;
     elementosEditaveis().forEach((el, i) => {
-        if (el.innerText !== textosOriginais[i]) { textos[i] = el.innerText; houve = true; }
+        if (el.innerText !== textosOriginais[i]) { textos[i] = { de: textosOriginais[i], para: el.innerText }; houve = true; }
     });
     try {
         if (houve) localStorage.setItem(CHAVE_EDICOES, JSON.stringify({ total: textosOriginais.length, textos, quando: new Date().toISOString() }));
