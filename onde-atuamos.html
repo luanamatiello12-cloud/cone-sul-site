@@ -6,7 +6,8 @@
     <title>Onde Estamos | CONE SUL</title>
     <meta name="description" content="Do Brasil para o Cone Sul: o CONE SUL parte de Foz do Iguaçu, com visão de expansão missionária para Paraguai, Argentina e Chile.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-    <link rel="stylesheet" href="styles.css?v=33">
+    <link rel="stylesheet" href="mapa/vendor/markercluster/MarkerCluster.css">
+    <link rel="stylesheet" href="styles.css?v=34">
 </head>
 <body data-pagina="onde">
 
@@ -81,6 +82,13 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Cidades com pin no mapa: montada pelo mapa/mapa.js a partir de mapa/locais.js -->
+            <div class="locais">
+                <h3 class="sub-titulo">Onde estamos presentes</h3>
+                <p class="sub-intro">Clique em uma cidade para vê-la no mapa.</p>
+                <div class="locais-lista" id="locais-lista"></div>
             </div>
 
             <div class="territorios">
@@ -207,7 +215,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="mapa/territorios.js?v=1"></script>
+    <script src="mapa/vendor/markercluster/leaflet.markercluster.js"></script>
+    <script src="mapa/locais.js?v=1"></script>
     <script src="app.js?v=37"></script>
-    <script src="mapa/mapa.js?v=1"></script>
+    <script src="mapa/mapa.js?v=2"></script>
 </body>
 </html>
