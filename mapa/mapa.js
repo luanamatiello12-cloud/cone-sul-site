@@ -1,0 +1,173 @@
+/* =========================================================
+   MAPA INTERATIVO — roda nas paginas que tem #mapa-leaflet
+   Depende de: Leaflet (CDN), mapa/territorios.js (dados) e dos
+   GeoJSON em mapa/ (carregados por fetch).
+
+   - territorios.geojson: os seis territorios em destaque
+       PR, SC, RS: uniao dos municipios da malha do IBGE
+       PY, AR, CL: Natural Earth 1:10m
+   - referencia.geojson: demais paises da America do Sul e demais
+     estados do Brasil (Natural Earth 1:10m), em tom neutro
+
+   Selecao unica: selecionarTerritorio(id) atualiza mapa, lista e
+   painel, venha o clique do mapa ou da lista.
+   ========================================================= */
+(function () {
+    const elMapa = document.getElementById('mapa-leaflet');
+    if (!elMapa || typeof TERRITORIOS === 'undefined') return;
+
+    const POR_ID = Object.fromEntries(TERRITORIOS.map(t => [t.id, t]));
+    const camadas = {};          // id -> camada Leaflet do territorio
+    let map = null;
+    let selecionado = null;
+
+    // ---------- Painel de informacoes ----------
+    const escapar = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+    function preencherPainel(t) {
+        const corpo = document.querySelector('.card-body');
+        corpo.style.transition = 'opacity 0.15s ease';
+        corpo.style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('pasta-titulo').textContent = t.nome;
+            const bandeira = document.getElementById('card-bandeira');
+            bandeira.querySelector('use').setAttribute('href', t.bandeira);
+            bandeira.style.visibility = 'visible';
+
+            const tipo = t.pais ? `${t.tipo} (${t.pais})` : t.tipo;
+            document.getElementById('pasta-info').innerHTML = `
+                <dl class="ficha-territorio">
+                    <div><dt>Nome oficial</dt><dd>${escapar(t.nomeOficial)}</dd></div>
+                    <div><dt>Tipo</dt><dd>${escapar(tipo)}</dd></div>
+                    ${t.sigla ? `<div><dt>Sigla</dt><dd>${escapar(t.sigla)}</dd></div>` : ''}
+                </dl>
+                <div class="ficha-descricao">${t.descricao ? escapar(t.descricao) : '<em>Descrição em preparação.</em>'}</div>`;
+            corpo.style.opacity = '1';
+        }, 150);
+    }
+
+    // ---------- Estilos das camadas ----------
+    const estilo = (t, modo) => ({
+        color: t.pais ? '#3d5a24' : '#1b3a28',
+        weight: modo === 'selecionado' ? 3.5 : modo === 'hover' ? 2.5 : 1.4,
+        opacity: 1,
+        fillColor: t.cor,
+        fillOpacity: modo === 'selecionado' ? 0.85 : modo === 'hover' ? 0.72 : 0.5
+    });
+
+    function aplicarEstilo(id) {
+        const t = POR_ID[id];
+        const camada = camadas[id];
+        if (!camada) return;
+        camada.setStyle(estilo(t, id === selecionado ? 'selecionado' : 'normal'));
+    }
+
+    // ---------- Selecao (mapa e lista) ----------
+    function selecionarTerritorio(id, { enquadrar = false } = {}) {
+        const t = POR_ID[id];
+        if (!t) return;
+        const anterior = selecionado;
+        selecionado = id;
+
+        document.querySelectorAll('.info-item').forEach(el => {
+            const ativo = el.dataset.territorio === id;
+            el.classList.toggle('active', ativo);
+            el.setAttribute('aria-pressed', ativo);
+        });
+
+        if (anterior) aplicarEstilo(anterior);
+        aplicarEstilo(id);
+        camadas[id]?.bringToFront();
+        if (enquadrar && camadas[id]) map.flyToBounds(camadas[id].getBounds(), { padding: [30, 30], maxZoom: 6, duration: 0.6 });
+
+        preencherPainel(t);
+    }
+
+    // Lista ao lado: funciona mesmo se o mapa falhar; acessivel por teclado
+    document.querySelectorAll('.info-item[data-territorio]').forEach(item => {
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-pressed', 'false');
+        const ir = () => selecionarTerritorio(item.dataset.territorio, { enquadrar: !!map });
+        item.addEventListener('click', ir);
+        item.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ir(); }
+        });
+    });
+
+    function avisoMapa(texto) {
+        elMapa.innerHTML = `<div class="mapa-offline">${texto}<br>Use a lista ao lado para ver os dados.</div>`;
+    }
+
+    if (typeof L === 'undefined') {
+        avisoMapa('Mapa indisponível (sem conexão).');
+        return;
+    }
+
+    // ---------- Mapa ----------
+    // Zoom e arraste liberados. A roda do mouse so da zoom depois de um
+    // clique no mapa, para nao "prender" a rolagem da pagina.
+    map = L.map(elMapa, {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        zoomSnap: 0.25,
+        minZoom: 2.5,
+        maxZoom: 12,
+        maxBounds: [[-62, -100], [5, -20]],
+        maxBoundsViscosity: 0.8,
+        attributionControl: true
+    });
+    map.on('click', () => map.scrollWheelZoom.enable());
+    elMapa.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
+
+    // Enquadramento inicial: Sul do Brasil, Paraguai, Argentina e Chile
+    const REGIAO = L.latLngBounds([[-55.9, -75.8], [-19.2, -47.9]]);
+    map.fitBounds(REGIAO, { padding: [16, 16], animate: false });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · limites: IBGE, Natural Earth',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Reajusta o tamanho quando o container muda (responsivo)
+    if ('ResizeObserver' in window) new ResizeObserver(() => map.invalidateSize()).observe(elMapa);
+
+    // Ponto de acesso para integracoes futuras (e testes)
+    window.mapaConeSul = { map, camadas, selecionarTerritorio, territorios: POR_ID };
+
+    const carregar = (arquivo) => fetch(arquivo).then(r => {
+        if (!r.ok) throw new Error(arquivo + ': HTTP ' + r.status);
+        return r.json();
+    });
+
+    Promise.all([carregar('mapa/referencia.geojson'), carregar('mapa/territorios.geojson')])
+        .then(([referencia, territorios]) => {
+            // Referencia neutra, por baixo e sem interacao
+            L.geoJSON(referencia, {
+                interactive: false,
+                style: { color: '#8f9488', weight: 0.7, opacity: 0.9, fillColor: '#e9e6dc', fillOpacity: 0.35 }
+            }).addTo(map);
+
+            // Os seis territorios
+            L.geoJSON(territorios, {
+                filter: f => !!POR_ID[f.properties.id],
+                style: f => estilo(POR_ID[f.properties.id], 'normal'),
+                onEachFeature: (f, camada) => {
+                    const t = POR_ID[f.properties.id];
+                    camadas[t.id] = camada;
+                    camada.bindTooltip(`<strong>${escapar(t.nome)}</strong><br>${escapar(t.rotulo)}`, { sticky: true, direction: 'top', className: 'mapa-dica' });
+                    camada.on({
+                        click: () => selecionarTerritorio(t.id),
+                        mouseover: () => { if (t.id !== selecionado) camada.setStyle(estilo(t, 'hover')); },
+                        mouseout: () => aplicarEstilo(t.id)
+                    });
+                }
+            }).addTo(map);
+
+            if (selecionado) aplicarEstilo(selecionado);
+        })
+        .catch(erro => {
+            console.error('Mapa: falha ao carregar os limites geográficos.', erro);
+            avisoMapa('Não foi possível carregar os limites do mapa.');
+        });
+})();
