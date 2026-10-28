@@ -29,6 +29,7 @@ const MENU = [
     { id: 'como',        rotulo: 'Como Funciona',             href: 'como-funciona.html' },
     { id: 'mantenedor',  rotulo: 'Seja Mantenedor',           href: 'seja-mantenedor.html' },
     { id: 'empresarios', rotulo: 'Expansores com Propósito', href: 'empresarios.html' },
+    { id: 'camisetas',   rotulo: 'Camisetas',                 href: 'camisetas.html' },
     { id: 'noticias',    rotulo: 'Notícias',                  href: 'noticias.html', soLogado: true }
 ];
 
