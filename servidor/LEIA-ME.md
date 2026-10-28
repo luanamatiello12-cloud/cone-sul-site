@@ -7,12 +7,15 @@ abrir o portal com o valor no endereço: `portal.html?demo=1500` (Expansor),
 
 ## Como funciona, quando ligado
 
-1. A pessoa clica em um plano (Semeador, Construtor, Expansor) e paga a contribuição
-   mensal na plataforma de pagamento.
-2. A plataforma avisa o **webhook** (`supabase/functions/webhook-pagamento`).
-3. Se a pessoa ainda não tem conta, o webhook cria a conta com os dados do pagamento
-   (nome, e-mail, CPF, telefone) e o Supabase envia o e-mail de convite. O link do e-mail
-   abre o portal já logado.
+1. A pessoa escolhe um plano (Semeador, Construtor, Expansor). O botão leva primeiro
+   ao **cadastro** (`fazer-parte.html?plano=...`): nome, CPF, nascimento, igreja, e-mail
+   e senha. A conta é criada nesse momento, ainda sem nível.
+2. Concluído o cadastro, o site leva ao **link de pagamento** do plano
+   (`LINKS_PAGAMENTO` no `app.js`). Quem já tem cadastro vai direto ao pagamento.
+3. A plataforma avisa o **webhook** (`supabase/functions/webhook-pagamento`), que
+   encontra o cadastro **pelo e-mail** do pagamento. Por isso o site pede para usar o
+   mesmo e-mail nos dois. (Se o e-mail não tiver cadastro, o webhook cria a conta e
+   manda um convite por e-mail, para ninguém que pagou ficar sem acesso.)
 4. O banco calcula o **nível pelo valor** (regra em `supabase/schema.sql` e em `NIVEIS`
    no `app.js`; ao mudar, mude nos dois lugares):
 
@@ -23,12 +26,11 @@ abrir o portal com o valor no endereço: `portal.html?demo=1500` (Expansor),
    | abaixo de R$ 500                  | Semeador   |
    | sem contribuição ativa            | sem nível  |
 
-5. No portal, a pessoa vê o nível e os benefícios dele, confere o cadastro em
-   **Meu cadastro**, altera o que quiser e pode definir uma senha.
+5. No portal, a pessoa vê o nível e os benefícios dele.
 6. Se o valor mudar, o nível muda junto. Se cancelar ou atrasar, perde o nível.
 
-Quem se cadastra pelo **Faça parte** (sem pagar) tem conta, mas fica sem nível até a
-primeira contribuição aprovada com o mesmo e-mail.
+Quem se cadastra e ainda não pagou tem conta, mas fica sem nível até a primeira
+contribuição aprovada com o mesmo e-mail.
 
 ## Ligar (uma vez)
 

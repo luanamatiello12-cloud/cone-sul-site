@@ -298,16 +298,12 @@ document.getElementById('btn-compartilhar')?.addEventListener('click', async (e)
 });
 
 // Botoes da campanha: so ganham destino quando o link de pagamento existir
+// Escolher um plano leva primeiro ao cadastro (fazer-parte.html); depois
+// de cadastrada, a pessoa segue para o link de pagamento do plano.
 document.querySelectorAll('[data-pagamento]').forEach(botao => {
-    const link = LINKS_PAGAMENTO[botao.dataset.pagamento];
-    if (link) {
-        botao.href = link;
-        botao.target = '_blank';
-        botao.rel = 'noopener';
-    } else {
-        botao.setAttribute('aria-disabled', 'true');
-    }
+    botao.href = 'fazer-parte.html?plano=' + encodeURIComponent(botao.dataset.pagamento);
 });
+const PLANOS = { expansores: 'expansor', construtores: 'construtor', semeadores: 'semeador' };
 
 // Filtro de categorias da pagina de noticias
 document.querySelectorAll('.filtro-categorias button').forEach(botao => {
@@ -390,9 +386,7 @@ const PORTAL = {
             nascimento: r.nascimento || '', naturalidade: r.naturalidade || '', moradia: r.moradia || '', igreja: r.igreja || '',
             ...(r.cristao === null || r.cristao === undefined ? {} : { cristao: r.cristao }),
             ...(r.congrega === null || r.congrega === undefined ? {} : { congrega: r.congrega }),
-            valor: r.status_contribuicao === 'ativa' ? Number(r.valor_mensal) : 0,
-            cadastroAutomatico: !!r.cadastro_automatico,
-            conferido: !!r.conferido
+            valor: r.status_contribuicao === 'ativa' ? Number(r.valor_mensal) : 0
         };
     },
 
@@ -408,43 +402,18 @@ const PORTAL = {
         return usuario;
     },
 
-    // Com contas reais, o login devolve o cadastro guardado no servidor,
-    // criado automaticamente quando a contribuicao foi aprovada (ver
-    // servidor/LEIA-ME.md). Na demonstracao, entra sem contribuicao; para ver
+    // Com contas reais, o login devolve o cadastro guardado no servidor; o
+    // nivel vem da contribuicao aprovada (ver servidor/LEIA-ME.md). Na demonstracao, entra sem contribuicao; para ver
     // um nivel, abrir portal.html?demo=<valor> (ex.: ?demo=1500 = Expansor).
     async entrar(email, senha, valorDemo) {
         if (this.MODO_DEMO) {
             const valor = Number(valorDemo) || 0;
-            return { email, nome: '', valor, cadastroAutomatico: valor > 0, conferido: false };
+            return { email, nome: '', valor };
         }
         const sb = await this.cliente();
         const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
         if (error) throw new Error('E-mail ou senha incorretos.');
         return this.perfil(sb, data.user);
-    },
-
-    // Salva o que a pessoa alterou em "Meu cadastro". Nivel e valor nao
-    // passam por aqui: so a plataforma de pagamento muda isso (o banco
-    // tambem nao deixa: ver as permissoes em schema.sql).
-    async atualizar(dados) {
-        const atual = this.sessao() || {};
-        const { valor, cadastroAutomatico, email, senha, ...editaveis } = dados;
-        const novo = { ...atual, ...editaveis, conferido: true };
-        if (!this.MODO_DEMO) {
-            const sb = await this.cliente();
-            const { error } = await sb.from('mantenedores').update({
-                nome: novo.nome, telefone: novo.telefone || null, nascimento: novo.nascimento || null,
-                naturalidade: novo.naturalidade || null, moradia: novo.moradia || null, igreja: novo.igreja || null,
-                cristao: novo.cristao ?? null, congrega: novo.congrega ?? null, conferido: true
-            }).eq('id', atual.id);
-            if (error) throw new Error('Não foi possível salvar. Tente de novo.');
-            if (senha) {
-                const { error: e2 } = await sb.auth.updateUser({ password: senha });
-                if (e2) throw new Error('Dados salvos, mas a senha não foi alterada: ' + e2.message);
-            }
-        }
-        this.salvar(novo);
-        return novo;
     },
 
     // Cadastro pelo "Faca parte". Em demonstracao NAO e enviado a lugar
@@ -497,7 +466,7 @@ if (PAGINA === 'portal') {
     window.addEventListener('hashchange', irParaCadastro);
 
     const telaLogin = document.getElementById('tela-login');
-    const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal', 'tela-portal-cadastro'].map(id => document.getElementById(id));
+    const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal'].map(id => document.getElementById(id));
     // Telas que dependem do nivel: so aparecem para quem tem esse nivel
     const SO_NIVEL = { 'tela-portal-expansores': ['expansor'] };
 
@@ -520,48 +489,11 @@ if (PAGINA === 'portal') {
         document.getElementById('contribuicao-resumo').textContent = nivel
             ? `${reais(usuario.valor)} por mês · nível ${nivel.nome}.`
             : 'Nenhuma contribuição ativa ainda.';
-        document.getElementById('aviso-cadastro').hidden = !(usuario.cadastroAutomatico && !usuario.conferido);
         telasPortal.forEach(t => {
             const exige = SO_NIVEL[t.id];
             if (exige) t.hidden = !nivel || !exige.includes(nivel.id);
         });
     }
-
-    // Meu cadastro: preenche com o que ja existe
-    const formMeu = document.getElementById('form-meu-cadastro');
-    function preencherCadastro(u) {
-        const por = (id, v) => { document.getElementById(id).value = v || ''; };
-        por('m-nome', u.nome); por('m-email', u.email); por('m-telefone', u.telefone);
-        por('m-cpf', u.cpf ? u.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '');
-        por('m-nascimento', u.nascimento); por('m-naturalidade', u.naturalidade); por('m-moradia', u.moradia); por('m-igreja', u.igreja);
-        formMeu.querySelectorAll('input[type="radio"]').forEach(r => { r.checked = false; });
-        if (u.cristao !== undefined) formMeu.querySelector(`input[name="m-cristao"][value="${u.cristao ? 'sim' : 'nao'}"]`).checked = true;
-        if (u.congrega !== undefined) formMeu.querySelector(`input[name="m-congrega"][value="${u.congrega ? 'sim' : 'nao'}"]`).checked = true;
-        document.getElementById('meu-cadastro-retorno').textContent = '';
-    }
-    formMeu.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const retorno = document.getElementById('meu-cadastro-retorno');
-        formMeu.classList.add('validar');
-        if (!formMeu.checkValidity()) { retorno.textContent = 'Informe seu nome.'; formMeu.querySelector(':invalid')?.focus(); return; }
-        const valor = (id) => document.getElementById(id).value.trim();
-        const escolha = (nome) => formMeu.querySelector(`input[name="${nome}"]:checked`)?.value;
-        try {
-            const usuario = await PORTAL.atualizar({
-                nome: valor('m-nome'), telefone: valor('m-telefone'), nascimento: valor('m-nascimento'),
-                naturalidade: valor('m-naturalidade'), moradia: valor('m-moradia'), igreja: valor('m-igreja'),
-                ...(escolha('m-cristao') ? { cristao: escolha('m-cristao') === 'sim' } : {}),
-                ...(escolha('m-congrega') ? { congrega: escolha('m-congrega') === 'sim' } : {}),
-                senha: document.getElementById('m-senha').value
-            });
-            document.getElementById('m-senha').value = '';
-            document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
-            document.getElementById('aviso-cadastro').hidden = true;
-            retorno.textContent = 'Alterações salvas.';
-        } catch (erro) {
-            retorno.textContent = erro.message;
-        }
-    });
 
     // Poe ou tira "Noticias" do menu conforme o login, sem recarregar
     const atualizarMenu = (logado) => {
@@ -590,7 +522,6 @@ if (PAGINA === 'portal') {
         if (usuario) {
             document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
             mostrarNivel(usuario);
-            preencherCadastro(usuario);
         }
         window.scrollTo(0, 0);
 
@@ -647,6 +578,27 @@ if (PAGINA === 'portal') {
    ========================================================= */
 if (PAGINA === 'fazer-parte') {
     const formCadastro = document.getElementById('form-cadastro');
+
+    // Veio de um plano? Mostra qual e, ao concluir, segue para o pagamento
+    const chavePlano = new URLSearchParams(location.search).get('plano');
+    const nivelPlano = NIVEIS.find(n => n.id === PLANOS[chavePlano]);
+    const linkPlano = nivelPlano ? LINKS_PAGAMENTO[chavePlano] : '';
+    if (nivelPlano) {
+        document.getElementById('plano-escolhido').hidden = false;
+        document.getElementById('plano-nome').textContent = `Plano ${nivelPlano.nome}`;
+        document.getElementById('plano-faixa').textContent = `· ${nivelPlano.faixa}`;
+        document.getElementById('cadastro-lead').textContent = 'Primeiro, seu cadastro. Em seguida você vai para a página de pagamento da contribuição.';
+        const ja = PORTAL.sessao();
+        if (ja) {
+            formCadastro.hidden = true;
+            document.querySelector('.acesso-alternativo').hidden = true;
+            document.getElementById('plano-ja-cadastrado').hidden = false;
+            document.getElementById('plano-ja-email').textContent = ja.email;
+            const ir = document.getElementById('plano-ir-pagamento');
+            if (linkPlano) ir.href = linkPlano;
+            else { ir.setAttribute('aria-disabled', 'true'); document.getElementById('plano-sem-link').hidden = false; }
+        }
+    }
     const cpf = document.getElementById('c-cpf');
 
     // Mascara 000.000.000-00 enquanto digita
@@ -695,6 +647,12 @@ if (PAGINA === 'fazer-parte') {
                 senha: document.getElementById('c-senha').value
             });
             PORTAL.salvar(usuario);
+            if (nivelPlano && linkPlano) { location.href = linkPlano; return; }
+            if (nivelPlano) {
+                retorno.textContent = 'Cadastro concluído! O link de pagamento deste plano ainda não está disponível. Avisaremos em breve.';
+                setTimeout(() => { location.href = 'portal.html'; }, 3500);
+                return;
+            }
             location.href = 'portal.html';
         } catch (erro) {
             retorno.textContent = erro.message;

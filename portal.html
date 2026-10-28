@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Mantenedor | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=56">
+    <link rel="stylesheet" href="styles.css?v=57">
 </head>
 <body data-pagina="portal">
 
@@ -53,7 +53,6 @@
     <!-- MEU NIVEL: vem do valor da contribuicao (NIVEIS em app.js) -->
     <section class="sec-escura nivel-portal" id="tela-portal-nivel" hidden>
         <div class="wrap">
-            <p class="aviso-cadastro" id="aviso-cadastro" hidden>Seu cadastro foi criado a partir da sua contribuição. <a href="#tela-portal-cadastro">Confira seus dados</a> e altere o que quiser.</p>
             <span class="sec-kicker">Seu nível</span>
             <h2 id="nivel-titulo"></h2>
             <p class="sec-intro" id="nivel-resumo"></p>
@@ -269,74 +268,7 @@
         </div>
     </section>
 
-    <!-- MEU CADASTRO: chega preenchido com os dados da contribuicao;
-         a pessoa altera o que quiser. E-mail e CPF vem do pagamento. -->
-    <section class="sec-branca" id="tela-portal-cadastro" hidden>
-        <div class="wrap">
-            <span class="sec-kicker">Meu cadastro</span>
-            <h2>Seus dados.</h2>
-            <p class="sec-intro">Preenchidos a partir da sua contribuição. Confira, altere o que quiser e salve.</p>
-            <div class="meu-cadastro">
-                <form class="formulario" id="form-meu-cadastro" novalidate>
-                    <div class="campo campo-largo">
-                        <label for="m-nome">Nome completo</label>
-                        <input type="text" id="m-nome" autocomplete="name" required>
-                    </div>
-                    <div class="campo">
-                        <label for="m-email">E-mail (login)</label>
-                        <input type="email" id="m-email" readonly>
-                    </div>
-                    <div class="campo">
-                        <label for="m-telefone">Telefone / WhatsApp</label>
-                        <input type="tel" id="m-telefone" autocomplete="tel" placeholder="(00) 00000-0000">
-                    </div>
-                    <div class="campo">
-                        <label for="m-cpf">CPF</label>
-                        <input type="text" id="m-cpf" readonly>
-                    </div>
-                    <div class="campo">
-                        <label for="m-nascimento">Data de nascimento</label>
-                        <input type="date" id="m-nascimento" autocomplete="bday">
-                    </div>
-                    <div class="campo">
-                        <label for="m-naturalidade">Local de nascimento</label>
-                        <input type="text" id="m-naturalidade" placeholder="Cidade e estado">
-                    </div>
-                    <div class="campo">
-                        <label for="m-moradia">Onde você mora</label>
-                        <input type="text" id="m-moradia" placeholder="Cidade e estado" autocomplete="address-level2">
-                    </div>
-                    <fieldset class="campo escolha">
-                        <legend>Você é cristão?</legend>
-                        <div class="opcoes">
-                            <label><input type="radio" name="m-cristao" value="sim"> Sim</label>
-                            <label><input type="radio" name="m-cristao" value="nao"> Não</label>
-                        </div>
-                    </fieldset>
-                    <fieldset class="campo escolha">
-                        <legend>Congrega em alguma igreja?</legend>
-                        <div class="opcoes">
-                            <label><input type="radio" name="m-congrega" value="sim"> Sim</label>
-                            <label><input type="radio" name="m-congrega" value="nao"> Não</label>
-                        </div>
-                    </fieldset>
-                    <div class="campo campo-largo">
-                        <label for="m-igreja">Nome da igreja</label>
-                        <input type="text" id="m-igreja" placeholder="Se você congrega, qual igreja?">
-                    </div>
-                    <div class="campo campo-largo">
-                        <label for="m-senha">Nova senha (opcional)</label>
-                        <input type="password" id="m-senha" autocomplete="new-password" minlength="6" placeholder="Deixe em branco para manter a atual">
-                    </div>
-                    <div class="campo campo-largo">
-                        <button type="submit" class="btn btn-primary">Salvar alterações</button>
-                        <p class="form-retorno" id="meu-cadastro-retorno" role="status"></p>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
 
-    <script src="app.js?v=43"></script>
+    <script src="app.js?v=44"></script>
 </body>
 </html>

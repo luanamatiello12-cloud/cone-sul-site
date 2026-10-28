@@ -5,16 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faça Parte | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=56">
+    <link rel="stylesheet" href="styles.css?v=57">
 </head>
 <body data-pagina="fazer-parte">
 
-    <!-- CADASTRO: quem conclui entra direto na Area do Mantenedor (portal.html) -->
+    <!-- CADASTRO: vem antes do pagamento. Com ?plano=<semeadores|construtores|expansores>
+         (botoes dos planos), ao concluir segue para o link de pagamento do plano;
+         sem plano, entra na Area do Mantenedor (portal.html) -->
     <section class="hero hero-pagina">
         <div class="wrap">
             <span class="hero-kicker">Faça parte — Cadastro de mantenedor</span>
             <h1>Faça parte da missão.</h1>
-            <p class="hero-lead">Preencha seu cadastro para acessar a Área do Mantenedor.</p>
+            <p class="hero-lead" id="cadastro-lead">Preencha seu cadastro para acessar a Área do Mantenedor.</p>
+
+            <!-- Plano escolhido (preenchido por app.js quando vem ?plano=) -->
+            <div class="plano-escolhido" id="plano-escolhido" hidden>
+                <div class="plano-passos"><span class="ativo">1. Cadastro</span><span>2. Pagamento</span></div>
+                <p><strong id="plano-nome"></strong> <span id="plano-faixa"></span></p>
+                <small>Na página de pagamento, use o mesmo e-mail deste cadastro: é por ele que sua contribuição chega ao seu nível.</small>
+            </div>
+
+            <!-- Quem ja tem cadastro e escolhe um plano vai direto ao pagamento -->
+            <div class="plano-ja-cadastrado" id="plano-ja-cadastrado" hidden>
+                <p>Você já tem cadastro como <strong id="plano-ja-email"></strong>.</p>
+                <a class="btn btn-primary" id="plano-ir-pagamento">Continuar para o pagamento</a>
+                <p class="form-retorno" id="plano-sem-link" hidden>O link de pagamento deste plano ainda não está disponível. Avisaremos em breve.</p>
+            </div>
 
             <div class="portal-acesso largo">
                 <!-- CADASTRO DE MANTENEDOR -->
@@ -84,6 +100,6 @@
         </div>
     </section>
 
-    <script src="app.js?v=43"></script>
+    <script src="app.js?v=44"></script>
 </body>
 </html>
