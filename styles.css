@@ -2486,39 +2486,13 @@ footer::before {
 .visor-ant { left: 1rem; top: 50%; transform: translateY(-50%); }
 .visor-prox { right: 1rem; top: 50%; transform: translateY(-50%); }
 
-/* Inicio, "O que e o Cone Sul?": titulo mais largo e numeros de nao crentes */
+/* Inicio, "O que e o Cone Sul?": titulo mais largo */
 section h2.titulo-largo { max-width: 24ch; }
-.nao-crentes {
-    margin: 1.4rem 0 2.6rem;
-    padding: 1.4rem 1.6rem;
-    background: #fff;
-    border-left: 4px solid var(--areia);
-    box-shadow: 0 4px 18px rgba(11, 34, 21, 0.07);
-    max-width: 760px;
-}
-.nao-crentes-rotulo {
-    display: block;
-    font-size: 0.74rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--limao-escuro);
-    margin-bottom: 0.9rem;
-}
-.nao-crentes ul {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem 2rem;
-}
-.nao-crentes li { display: grid; grid-template-columns: auto 1fr; column-gap: 0.7rem; align-items: center; }
-.nao-crentes .bandeira { width: 2rem; grid-row: span 2; }
-.nao-crentes strong {
-    font-family: var(--fonte-titulo);
-    font-weight: 700;
-    font-size: clamp(1.45rem, 2.4vw, 1.85rem);
-    line-height: 1;
-    color: var(--verde-800);
-    white-space: nowrap;
-}
-.nao-crentes li span { font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6b6f66; }
+
+/* Faixa verde "Pessoas nao crentes", logo abaixo */
+.nao-crentes-faixa { padding-top: 2.6rem; }
+.nao-crentes-faixa .sec-kicker { color: var(--areia); margin-bottom: 0.4rem; }
+.nao-crentes-faixa .numero-item { padding-top: 1.6rem; padding-bottom: 3rem; }
+.nao-crentes-faixa .numero-valor { font-size: clamp(3rem, 7vw, 5.2rem); }
+.nao-crentes-faixa .numero-label { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; opacity: 0.9; }
+.nao-crentes-faixa .bandeira { width: 1.8rem; }
