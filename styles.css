@@ -2551,3 +2551,20 @@ body.modo-edicao .bloco-alvo { box-shadow: inset 0 0 0 2px rgba(201, 215, 128, 0
     font-size: 0.65rem;
     border-radius: 2px;
 }
+
+/* Card de campanha sem descricao: a lista sobe para o topo da coluna direita */
+.campanha-corpo:not(:has(.campanha-desc)) {
+    grid-template-areas:
+        "num     lista"
+        "titulo  lista"
+        "lema    lista"
+        "valor   lista"
+        "benef   lista"
+        "benef   botao";
+}
+.campanha-corpo:not(:has(.campanha-desc)) .campanha-lista { border-top: none; padding-top: 0.4rem; }
+@media (max-width: 900px) {
+    .campanha-corpo:not(:has(.campanha-desc)) {
+        grid-template-areas: "num" "titulo" "lema" "valor" "benef" "lista" "botao";
+    }
+}
