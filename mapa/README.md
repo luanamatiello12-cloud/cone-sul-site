@@ -22,7 +22,7 @@ Usado nas páginas **Início** e **Onde Estamos** (`<div id="mapa-leaflet">`).
   1:10m (`ne_10m_admin_0_countries`), domínio público.
 - **Referência neutra:** Natural Earth 1:10m — países (`admin_0`) e estados do
   Brasil (`admin_1`).
-- **Mapa de base:** © OpenStreetMap, com atribuição no canto do mapa.
+- **Mapa de base:** nenhum. O mar é o fundo verde do mapa (CSS) e as terras vêm dos GeoJSON; a atribuição (IBGE, Natural Earth) fica no canto.
 
 Simplificação: estados a ~100 m, países a ~200 m, referência a ~1 km.
 Ilhas do Pacífico (Páscoa, Juan Fernández) e ilhotas minúsculas ficam de fora.

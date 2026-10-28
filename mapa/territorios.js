@@ -27,7 +27,7 @@ const TERRITORIOS = [
         pais: 'Brasil',
         sigla: 'PR',
         bandeira: '#flag-br',
-        cor: '#c9d780',
+        cor: '#e6c766',
         rotulo: 'Foz do Iguaçu — o ponto de partida',
         descricao: 'FOZ DO IGUAÇU\nO ponto de partida\n\nFoz do Iguaçu representa o início da estruturação da nossa jornada missionária. Uma região estratégica de conexão entre países, culturas e pessoas.\n\n11,4 milhões de habitantes\n26,1% evangélicos · 62,9% católicos · 6% sem religião'
     },
@@ -39,7 +39,7 @@ const TERRITORIOS = [
         pais: 'Brasil',
         sigla: 'SC',
         bandeira: '#flag-br',
-        cor: '#9fbf5a',
+        cor: '#f0d98e',
         rotulo: 'Sul do Brasil',
         descricao: 'SUL DO BRASIL\n\n[A preencher: papel de Santa Catarina no projeto.]\n\n7,6 milhões de habitantes\n23,4% evangélicos · 64,3% católicos · 6,3% sem religião'
     },
@@ -51,7 +51,7 @@ const TERRITORIOS = [
         pais: 'Brasil',
         sigla: 'RS',
         bandeira: '#flag-br',
-        cor: '#e2cf7d',
+        cor: '#f6e7b5',
         rotulo: 'Sul do Brasil',
         descricao: 'SUL DO BRASIL\n\n[A preencher: papel do Rio Grande do Sul no projeto.]\n\n10,9 milhões de habitantes\n21,4% evangélicos · 60,6% católicos · 8,8% sem religião'
     },
@@ -62,7 +62,7 @@ const TERRITORIOS = [
         tipo: 'País',
         sigla: 'PY',
         bandeira: '#flag-py',
-        cor: '#6fae8f',
+        cor: '#9fbe6a',
         rotulo: 'Santa Rita — o próximo passo',
         descricao: 'O PRÓXIMO PASSO\nSanta Rita está entre as localidades contempladas para a próxima etapa do desenvolvimento missionário.\n\n6,1 milhões de habitantes\n93,3% com acesso à internet\n6% a 9,6% evangélicos · 88% católicos'
     },
@@ -73,7 +73,7 @@ const TERRITORIOS = [
         tipo: 'País',
         sigla: 'AR',
         bandeira: '#flag-ar',
-        cor: '#8db8d6',
+        cor: '#c3d68f',
         rotulo: 'Uma visão de expansão',
         descricao: 'UMA VISÃO DE EXPANSÃO\nO avanço para a Argentina integra a visão de longo prazo do CONE SUL.\n\n45,9 milhões de habitantes\n91% com acesso à internet\n17,4% evangélicos · 57,7% católicos · 22,4% sem religião'
     },
@@ -84,7 +84,7 @@ const TERRITORIOS = [
         tipo: 'País',
         sigla: 'CL',
         bandeira: '#flag-cl',
-        cor: '#d9967a',
+        cor: '#7d9f52',
         rotulo: 'Fronteiras que ainda queremos atravessar',
         descricao: 'FRONTEIRAS QUE AINDA QUEREMOS ATRAVESSAR\nO Chile também faz parte da visão de expansão missionária.\n\n18,5 milhões de habitantes\n88% com acesso à internet\n16,3% evangélicos · 54% católicos · 25,8% sem religião (15 anos ou mais)'
     }
