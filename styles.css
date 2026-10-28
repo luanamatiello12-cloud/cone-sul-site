@@ -3063,3 +3063,53 @@ a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); tra
 .plano-passos .ativo { color: var(--areia); }
 .plano-ja-cadastrado .btn { margin-top: 0.8rem; }
 .plano-ja-cadastrado .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+
+/* =========================================================
+   IMPORTAR RELATORIO (importar.html) — bastidor da equipe
+   ========================================================= */
+.importar-aviso {
+    margin: 0 0 2rem;
+    padding: 0.9rem 1.1rem;
+    background: #fff7d6;
+    border-left: 3px solid #d9b64a;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #5a4a12;
+}
+.importar-passo { margin-bottom: 2.6rem; }
+.importar-arquivo {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0.8rem;
+    padding: 0.9rem 1.4rem;
+    background: var(--verde-800);
+    color: var(--creme);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.importar-arquivo input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.importar-arquivo:hover { background: var(--verde-900); color: var(--areia); }
+.importar-nome { margin-top: 0.6rem; font-size: 0.88rem; color: #5a5f58; }
+.importar-mapa { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.importar-campo { display: grid; gap: 0.35rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--limao-escuro); }
+.importar-campo select,
+.importar-opcoes select { padding: 0.6rem 0.7rem; border: 1px solid #d7d4c8; border-radius: 4px; background: #fff; font: inherit; font-size: 0.9rem; letter-spacing: 0; text-transform: none; color: #2a2e2a; }
+.importar-opcoes { display: flex; flex-wrap: wrap; gap: 1.2rem 2rem; align-items: center; margin-top: 1.4rem; font-size: 0.9rem; color: #2a2e2a; }
+.importar-opcoes label { display: flex; align-items: center; gap: 0.5rem; }
+.importar-resumo { font-size: 1rem; color: #2a2e2a; }
+.importar-ignoradas { color: #9a5a2a; }
+.importar-tabela { max-height: 420px; overflow: auto; margin-top: 1rem; background: #fff; border-radius: 4px; box-shadow: 0 10px 26px rgba(18, 45, 30, 0.08); }
+.importar-tabela table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.importar-tabela th { position: sticky; top: 0; background: var(--verde-800); color: var(--creme); text-align: left; padding: 0.7rem 0.9rem; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.importar-tabela td { padding: 0.6rem 0.9rem; border-bottom: 1px solid #efece3; color: #2a2e2a; }
+.nivel-tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 800; background: #efece3; color: #6b6f68; }
+.nivel-tag.expansor { background: var(--verde-800); color: var(--areia); }
+.nivel-tag.construtor { background: #c3d68f; color: var(--verde-900); }
+.nivel-tag.semeador { background: #f0e6c0; color: #5a4a12; }
+#btn-importar:disabled { opacity: 0.5; cursor: not-allowed; }
+.importar .btn-primary { background: var(--verde-800); color: var(--creme); box-shadow: none; }
+.importar .btn-primary:hover:not(:disabled) { background: var(--verde-900); color: var(--areia); }
