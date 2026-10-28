@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONE SUL | Fronteiras que conectam a Cristo</title>
     <meta name="description" content="Conheça o CONE SUL, uma iniciativa missionária da Igreja Renovar em Cristo. Faça parte da missão, seja mantenedor e contribua para levar o Evangelho além das fronteiras.">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-    <link rel="stylesheet" href="styles.css?v=37">
+    <link rel="stylesheet" href="styles.css?v=38">
 </head>
 <body data-pagina="inicio">
 
@@ -36,125 +35,29 @@
             <span class="sec-kicker">O que é o Cone Sul?</span>
             <h2 class="titulo-largo">O Cone Sul é a região Sul do Brasil, Argentina, Chile e Paraguai.</h2>
 
-            <!-- Numeros informados pela equipe do projeto (out/2026) -->
-            <div class="nao-crentes">
-                <span class="nao-crentes-rotulo">Pessoas não crentes</span>
-                <ul>
-                    <li><svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg><strong>42,2 milhões</strong><span>Argentina</span></li>
-                    <li><svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg><strong>5,7 milhões</strong><span>Paraguai</span></li>
-                    <li><svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg><strong>17,8 milhões</strong><span>Chile</span></li>
-                </ul>
-            </div>
-
-            <div class="texto-bloco">
-                <p>O CONE SUL é uma iniciativa missionária da Igreja Renovar em Cristo, que nasce com um propósito: anunciar Jesus Cristo, fazer discípulos e contribuir para o desenvolvimento de comunidades de fé em diferentes territórios.</p>
-                <p>Nossa visão vai além de ações pontuais. Queremos construir um trabalho missionário contínuo, com presença local, discipulado, formação de lideranças e multiplicação de igrejas.</p>
-                <p>Porque a missão não termina quando chegamos a um novo lugar. É ali que uma nova história começa.</p>
-            </div>
-
-            <p class="destaque">Não queremos apenas chegar a novos lugares. Queremos que o Evangelho crie raízes.</p>
-
             <div class="cta-buttons acoes-secao">
                 <a href="nossa-missao.html" class="btn btn-secondary">Conheça nossa missão</a>
             </div>
         </div>
     </section>
 
-    <!-- SECAO 03 - ONDE TUDO COMECA -->
-    <section class="sec-escura" id="onde">
+    <!-- PESSOAS NAO CRENTES — numeros informados pela equipe do projeto (out/2026) -->
+    <section class="numeros nao-crentes-faixa" aria-label="Pessoas não crentes">
         <div class="wrap">
-            <span class="sec-kicker">Onde tudo começa</span>
-            <h2>De uma fronteira para as nações.</h2>
-            <p class="sec-intro">Uma visão missionária que começa no Brasil e se estende por diferentes países da América do Sul.</p>
-
-            <div class="texto-bloco" style="margin-bottom: 3rem;">
-                <p>Nossa jornada tem como ponto de partida Foz do Iguaçu, uma região estratégica de conexão entre países, culturas e pessoas.</p>
-                <p>A partir dessa base, nossa visão contempla o avanço missionário pelo Paraguai, Argentina e Chile, desenvolvendo relacionamentos, formando discípulos e preparando lideranças locais.</p>
-                <p>Cada território representa uma nova oportunidade de anunciar o Evangelho e construir comunidades que permaneçam.</p>
+            <span class="sec-kicker">Pessoas não crentes</span>
+        </div>
+        <div class="numeros-grid">
+            <div class="numero-item">
+                <span class="numero-valor">42,2 mi</span>
+                <span class="numero-label"><svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg> Argentina</span>
             </div>
-
-            <div class="mapa-container">
-                <div id="mapa-leaflet" class="mapa-leaflet"></div>
-
-                <div class="info-paises">
-                    <div class="card-info">
-                        <div class="card-header">
-                            <svg class="bandeira" id="card-bandeira" viewBox="0 0 30 20" style="visibility:hidden"><use href="#flag-ar"/></svg>
-                            <h3 id="pasta-titulo">Selecione um território</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="pasta-info" style="white-space: pre-line;">Clique em um território no mapa ou na lista ao lado.</div>
-                        </div>
-                    </div>
-
-                    <div class="info-items-list">
-                        <div class="info-item base" data-territorio="PR">
-                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
-                            <div class="info-text"><h4>Paraná</h4><p>Foz do Iguaçu — ponto de partida</p></div>
-                        </div>
-                        <div class="info-item base" data-territorio="SC">
-                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
-                            <div class="info-text"><h4>Santa Catarina</h4><p>Sul do Brasil</p></div>
-                        </div>
-                        <div class="info-item base" data-territorio="RS">
-                            <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
-                            <div class="info-text"><h4>Rio Grande do Sul</h4><p>Sul do Brasil</p></div>
-                        </div>
-                        <div class="info-item" data-territorio="PY">
-                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg>
-                            <div class="info-text"><h4>Paraguai</h4><p>Santa Rita — próxima etapa</p></div>
-                        </div>
-                        <div class="info-item" data-territorio="AR">
-                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg>
-                            <div class="info-text"><h4>Argentina</h4><p>Visão de expansão</p></div>
-                        </div>
-                        <div class="info-item" data-territorio="CL">
-                            <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg>
-                            <div class="info-text"><h4>Chile</h4><p>Visão de expansão</p></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="numero-item">
+                <span class="numero-valor">5,7 mi</span>
+                <span class="numero-label"><svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg> Paraguai</span>
             </div>
-
-            <div class="territorios">
-                <div class="territorio ativo">
-                    <div class="territorio-topo">
-                        <svg class="bandeira" viewBox="0 0 30 21"><use href="#flag-br"/></svg>
-                        <h4>Brasil</h4>
-                    </div>
-                    <span class="territorio-etapa">Foz do Iguaçu</span>
-                    <p>Ponto de partida da missão.</p>
-                </div>
-                <div class="territorio ativo">
-                    <div class="territorio-topo">
-                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-py"/></svg>
-                        <h4>Paraguai</h4>
-                    </div>
-                    <span class="territorio-etapa">Santa Rita</span>
-                    <p>Próxima etapa da expansão missionária.</p>
-                </div>
-                <div class="territorio">
-                    <div class="territorio-topo">
-                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-ar"/></svg>
-                        <h4>Argentina</h4>
-                    </div>
-                    <span class="territorio-etapa">Visão de expansão</span>
-                    <p>Parte da visão de expansão do CONE SUL.</p>
-                </div>
-                <div class="territorio">
-                    <div class="territorio-topo">
-                        <svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg>
-                        <h4>Chile</h4>
-                    </div>
-                    <span class="territorio-etapa">Visão de expansão</span>
-                    <p>Parte da visão de expansão do CONE SUL.</p>
-                </div>
-            </div>
-
-            <p class="destaque">Uma missão. Diferentes territórios. O mesmo Evangelho.</p>
-
-            <div class="cta-buttons acoes-secao">
-                <a href="onde-atuamos.html" class="btn btn-primary">Conheça onde estamos</a>
+            <div class="numero-item">
+                <span class="numero-valor">17,8 mi</span>
+                <span class="numero-label"><svg class="bandeira" viewBox="0 0 30 20"><use href="#flag-cl"/></svg> Chile</span>
             </div>
         </div>
     </section>
@@ -293,9 +196,6 @@
         </div>
     </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script src="mapa/territorios.js?v=1"></script>
     <script src="app.js?v=37"></script>
-    <script src="mapa/mapa.js?v=3"></script>
 </body>
 </html>
