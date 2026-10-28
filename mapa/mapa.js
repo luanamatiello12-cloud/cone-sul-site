@@ -109,11 +109,9 @@
         }
         localAberto = i;
         const fotos = local.fotos || [];
+        // As fotos aparecem so no pop-up sobre o pin; aqui fica o resumo
         const galeria = fotos.length
-            ? `<div class="galeria-local">${fotos.map((f, n) => `
-                <button type="button" class="galeria-foto" data-local="${i}" data-foto="${n}" aria-label="Ampliar foto ${n + 1}${f.legenda ? ': ' + escapar(f.legenda) : ''}">
-                    <img src="${escapar(f.src)}" alt="${escapar(f.legenda || local.nome)}" loading="lazy">
-                </button>`).join('')}</div>`
+            ? `<p class="fotos-no-mapa">${fotos.length} ${fotos.length > 1 ? 'fotos' : 'foto'} no mapa — use as setas no cartão sobre o pin.</p>`
             : '<div class="galeria-vazia">Fotos em breve.</div>';
         mostrarPainel(local.nome, t ? t.bandeira : '#flag-br', `
             <dl class="ficha-territorio">
