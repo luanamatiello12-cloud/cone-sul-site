@@ -2895,3 +2895,4 @@ body.modo-edicao .bloco-alvo { box-shadow: inset 0 0 0 2px rgba(201, 215, 128, 0
    de 1340px, nas regras do cabecalho acima) */
 header nav { max-width: 1400px; }
 nav ul.menu { gap: 0.85rem; }
+.fotos-no-mapa { margin: 0; font-size: 0.88rem; color: #5a5f58; white-space: normal; }
