@@ -2992,7 +2992,7 @@ a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); tra
 .produto-comprar[aria-disabled="true"] { cursor: default; }
 
 /* =========================================================
-   PORTAL: nivel do mantenedor e "Meu cadastro"
+   PORTAL: nivel do mantenedor
    ========================================================= */
 .nivel-selo {
     display: inline-block;
@@ -3006,16 +3006,6 @@ a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); tra
     text-transform: uppercase;
     color: var(--areia);
 }
-.aviso-cadastro {
-    margin: 0 0 2rem;
-    padding: 0.9rem 1.1rem;
-    background: rgba(201, 215, 128, 0.12);
-    border-left: 3px solid var(--areia);
-    border-radius: 4px;
-    color: var(--creme);
-    font-size: 0.92rem;
-}
-.aviso-cadastro a { color: var(--areia); font-weight: 700; }
 .nivel-beneficios {
     list-style: none;
     display: grid;
@@ -3043,28 +3033,6 @@ a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); tra
     border-radius: 50%;
     background: var(--areia) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23122d1e' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 70% no-repeat;
 }
-.meu-cadastro {
-    max-width: 760px;
-    margin-top: 2rem;
-    padding: 2rem;
-    background: #fff;
-    border-top: 3px solid var(--areia);
-    border-radius: 4px;
-    box-shadow: 0 12px 30px rgba(18, 45, 30, 0.08);
-}
-.meu-cadastro .formulario { grid-template-columns: 1fr 1fr; max-width: none; }
-.meu-cadastro fieldset { border: none; display: contents; }
-.meu-cadastro input[readonly] { background: #f3f1ea; color: #6b6f68; cursor: default; }
-@media (max-width: 640px) {
-    .meu-cadastro { padding: 1.4rem; }
-    .meu-cadastro .formulario { grid-template-columns: 1fr; }
-}
-.meu-cadastro .campo label,
-.meu-cadastro .opcoes label { color: #2a2e2a; }
-.meu-cadastro legend { color: var(--limao-escuro); }
-.meu-cadastro .btn-primary { background: var(--verde-800); color: var(--creme); box-shadow: none; }
-.meu-cadastro .btn-primary:hover { background: var(--verde-900); color: var(--areia); }
-.meu-cadastro .campo.escolha legend { color: var(--limao-escuro); }
 /* Cartao do pin para cidade ainda sem fotos */
 .popup-sem-fotos .pf-rodape { padding: 0.9rem 2.6rem 0.2rem 1rem; }
 .pf-onde { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; color: var(--areia); }
@@ -3077,3 +3045,21 @@ a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); tra
     color: rgba(254, 245, 226, 0.6);
 }
 .popup-fotos-wrap .leaflet-popup-content:has(.popup-sem-fotos) { width: 230px !important; }
+
+/* Cadastro vindo de um plano (fazer-parte.html?plano=...) */
+.plano-escolhido, .plano-ja-cadastrado {
+    max-width: 760px;
+    margin-top: 1.6rem;
+    padding: 1.1rem 1.3rem;
+    background: rgba(201, 215, 128, 0.1);
+    border-left: 3px solid var(--areia);
+    border-radius: 4px;
+    color: var(--creme);
+}
+.plano-escolhido p, .plano-ja-cadastrado p { margin: 0.5rem 0 0.3rem; }
+.plano-escolhido strong { color: var(--areia); font-size: 1.05rem; }
+.plano-escolhido small { display: block; font-size: 0.8rem; color: rgba(254, 245, 226, 0.7); }
+.plano-passos { display: flex; gap: 1.2rem; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(254, 245, 226, 0.45); }
+.plano-passos .ativo { color: var(--areia); }
+.plano-ja-cadastrado .btn { margin-top: 0.8rem; }
+.plano-ja-cadastrado .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
