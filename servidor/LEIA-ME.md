@@ -1,8 +1,9 @@
 # Contas de mantenedor e nível por contribuição
 
 O site já está pronto para isto. Enquanto nada for configurado, o portal funciona em
-**modo demonstração**: qualquer e-mail entra, e um seletor na tela de login simula o
-valor da contribuição para mostrar cada nível.
+**modo demonstração**: qualquer e-mail entra, sem contribuição. Para ver um nível,
+abrir o portal com o valor no endereço: `portal.html?demo=1500` (Expansor),
+`?demo=700` (Construtor), `?demo=150` (Semeador).
 
 ## Como funciona, quando ligado
 
