@@ -37,7 +37,7 @@
             document.getElementById('pasta-titulo').textContent = titulo;
             const elBandeira = document.getElementById('card-bandeira');
             elBandeira.querySelector('use').setAttribute('href', bandeira);
-            elBandeira.style.visibility = 'visible';
+            elBandeira.style.display = '';
             document.getElementById('pasta-info').innerHTML = html;
             corpo.style.opacity = '1';
         }, 150);
@@ -123,11 +123,11 @@
 
     // ---------- Estilos das camadas ----------
     const estilo = (t, modo) => ({
-        color: t.pais ? '#3d5a24' : '#1b3a28',
-        weight: modo === 'selecionado' ? 3.5 : modo === 'hover' ? 2.5 : 1.4,
+        color: modo === 'selecionado' ? '#fef5e2' : '#0e2218',
+        weight: modo === 'selecionado' ? 3 : modo === 'hover' ? 2 : 1,
         opacity: 1,
         fillColor: t.cor,
-        fillOpacity: modo === 'selecionado' ? 0.85 : modo === 'hover' ? 0.72 : 0.5
+        fillOpacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.95 : 0.82
     });
 
     function aplicarEstilo(id) {
@@ -199,10 +199,26 @@
     const REGIAO = L.latLngBounds([[-55.9, -75.8], [-19.2, -47.9]]);
     map.fitBounds(REGIAO, { padding: [16, 16], animate: false });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · limites: IBGE, Natural Earth',
-        maxZoom: 19
-    }).addTo(map);
+    // Sem mapa de ruas por baixo: o mar e o fundo verde do proprio mapa
+    // (CSS) e as terras vem dos GeoJSON, nas cores da identidade.
+    map.attributionControl.addAttribution('Limites: IBGE, Natural Earth');
+
+    // Rotulos fixos (paises vizinhos, oceanos e os territorios)
+    const ROTULOS = [
+        { txt: 'Argentina', em: [-37.6, -65.6], cls: 'pais' },
+        { txt: 'Paraguai', em: [-22.9, -59.4], cls: 'pais' },
+        { txt: 'Chile', em: [-31.5, -76.6], cls: 'pais lado' },
+        { txt: 'Uruguai', em: [-32.9, -56.1], cls: 'vizinho' },
+        { txt: 'Brasil', em: [-20.8, -52.5], cls: 'vizinho' },
+        { txt: 'Bolívia', em: [-20.4, -63.6], cls: 'vizinho' },
+        { txt: 'Oceano Pacífico', em: [-44, -79.6], cls: 'oceano' },
+        { txt: 'Oceano Atlântico', em: [-41, -51], cls: 'oceano' }
+    ];
+    ROTULOS.forEach(r => L.marker(r.em, {
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({ className: 'rotulo-mapa ' + r.cls, html: `<span>${r.txt}</span>`, iconSize: null })
+    }).addTo(map));
 
     // Reajusta o tamanho quando o container muda (responsivo)
     if ('ResizeObserver' in window) new ResizeObserver(() => map.invalidateSize()).observe(elMapa);
@@ -354,7 +370,7 @@
             // Referencia neutra, por baixo e sem interacao
             L.geoJSON(referencia, {
                 interactive: false,
-                style: { color: '#8f9488', weight: 0.7, opacity: 0.9, fillColor: '#e9e6dc', fillOpacity: 0.35 }
+                style: { color: '#2c4f39', weight: 0.8, opacity: 1, fillColor: '#1a3626', fillOpacity: 1 }
             }).addTo(map);
 
             // Os seis territorios
