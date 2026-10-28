@@ -107,15 +107,14 @@
         return achadas;
     }
 
-    // Ficha da cidade: onde fica e as fotos
+    // Cidade escolhida: procura as fotos (uma vez) e recolhe o quadro
     function preencherLocal(local, i) {
-        const t = POR_ID[local.territorio];
-        const onde = local.uf ? `${t ? t.nome : local.uf} (${local.uf})` : local.pais;
         if (!(local.fotos && local.fotos.length) && !local._procurado) {
             local._procurado = true;
             recolherPainel();
             procurarFotos(local).then(achadas => {
                 local.fotos = achadas;
+                local._pronto = true;
                 // So redesenha se a pessoa ainda estiver nesta cidade
                 if (localAberto === i) { preencherLocal(local, i); abrirPopupFotos(i); }
             });
@@ -123,16 +122,11 @@
             return;
         }
         localAberto = i;
-        const fotos = local.fotos || [];
-        // Com fotos, o quadro sai de cena: as fotos ficam no cartao do pin
-        if (fotos.length) { recolherPainel(); return; }
-        const galeria = '<div class="galeria-vazia">Fotos em breve.</div>';
-        mostrarPainel(local.nome, t ? t.bandeira : '#flag-br', `
-            <dl class="ficha-territorio">
-                <div><dt>${local.uf ? 'Estado' : 'País'}</dt><dd>${escapar(onde)}</dd></div>
-            </dl>
-            ${galeria}`);
+        // Cidade: o quadro branco sai de cena (ele e so dos territorios);
+        // fotos ou "Fotos em breve" ficam no cartao sobre o pin
+        recolherPainel();
     }
+    const fotosProntas = local => (local.fotos && local.fotos.length) || local._pronto;
 
     // ---------- Estilos das camadas ----------
     const estilo = (t, modo) => ({
@@ -254,6 +248,9 @@
                 showCoverageOnHover: false,
                 spiderfyOnMaxZoom: true,
                 maxClusterRadius: 38,
+                // A partir do zoom 8 todos os pins aparecem soltos: ao abrir uma
+                // cidade o mapa nao precisa chegar perto demais (fica so cor lisa)
+                disableClusteringAtZoom: 8,
                 iconCreateFunction: c => L.divIcon({
                     className: 'pin-grupo',
                     html: `<span>${c.getChildCount()}</span>`,
@@ -308,15 +305,14 @@
         if (POR_ID[local.territorio]) selecionarTerritorio(local.territorio, { painel: false });
         marcarLocal(i);
         preencherLocal(local, i);
-        const temFotos = local.fotos && local.fotos.length;
-        if (!irAoPin) { if (temFotos) abrirPopupFotos(i); return; }
+        if (!irAoPin) { if (fotosProntas(local)) abrirPopupFotos(i); return; }
         // No celular a lista fica abaixo do mapa: sobe ate ele (pin e fotos)
         if (window.matchMedia('(max-width: 900px)').matches) {
             elMapa.scrollIntoView({ behavior: MOVIMENTO_REDUZIDO_MAPA ? 'auto' : 'smooth', block: 'start' });
         }
-        const abrir = () => (local.fotos && local.fotos.length) ? abrirPopupFotos(i) : marcador.openTooltip();
+        const abrir = () => fotosProntas(local) ? abrirPopupFotos(i) : marcador.openTooltip();
         if (grupoPins && grupoPins.zoomToShowLayer) grupoPins.zoomToShowLayer(marcador, abrir);
-        else { map.setView([local.lat, local.lng], 9); abrir(); }
+        else { map.setView([local.lat, local.lng], 8); abrir(); }
     }
 
     // Abas Cidades / Territorios (pagina Onde Estamos)
@@ -337,7 +333,20 @@
     function abrirPopupFotos(i, n = 0) {
         const { local, marcador } = pins[i];
         const fotos = local.fotos || [];
-        if (!fotos.length) return;
+        if (!fotos.length) {
+            // Sem fotos ainda: cartao pequeno, so com o nome e o aviso
+            marcador.closeTooltip();
+            popupFotos.setLatLng(marcador.getLatLng()).setContent(`
+                <div class="popup-fotos popup-sem-fotos">
+                    <div class="pf-rodape">
+                        <strong>${escapar(local.nome)}</strong>
+                        <span class="pf-onde">${escapar(local.uf || local.pais || '')}</span>
+                    </div>
+                    <p class="pf-aviso">Fotos em breve</p>
+                </div>`);
+            if (!map.hasLayer(popupFotos)) popupFotos.openOn(map);
+            return;
+        }
         n = (n + fotos.length) % fotos.length;
         const f = fotos[n];
         marcador.closeTooltip();
