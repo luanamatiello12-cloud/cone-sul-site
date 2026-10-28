@@ -531,60 +531,208 @@ const EDITAVEIS = [
     '.agenda-info h4', '.agenda-info p', '.meses-lista li', '.lista-destaques li', '.logo'
 ].join(', ');
 
+// Blocos que o modo edicao deixa ocultar, mostrar e duplicar.
+// SECOES: so ocultar/mostrar. ITENS: tambem duplicar (e remover a copia).
+const SECOES = 'section';
+const ITENS = [
+    '.card-acao', '.beneficio', '.mvp-item', '.etapa', '.barreira', '.campanha-card', '.pilar',
+    '.numero-item', '.agenda-item', '.noticia-card', '.territorio', '.texto-bloco p', '.destaque',
+    '.campanha-lista li', '.campanha-beneficios li', '.lista-destaques li', '.meses-lista li', '.cta-buttons .btn'
+].join(', ');
+
 const CHAVE_EDICOES = 'conesul-edicoes::' + (location.pathname.split('/').pop() || 'index.html');
 const elementosEditaveis = () => [...document.querySelectorAll(EDITAVEIS)];
-// Texto original de cada elemento, para salvar so o que mudou
-const textosOriginais = elementosEditaveis().map(el => el.innerText);
+const blocos = () => [...document.querySelectorAll(`${SECOES}, ${ITENS}`)].filter(el => !el.closest('header, footer'));
 
 function lerEdicoes() {
-    try { return JSON.parse(localStorage.getItem(CHAVE_EDICOES)); } catch { return null; }
+    try { return JSON.parse(localStorage.getItem(CHAVE_EDICOES)) || {}; } catch { return {}; }
+}
+const salvo = lerEdicoes();
+
+// Cada bloco publicado ganha uma chave estavel: o comeco do seu texto
+// mais a ordem entre blocos de texto igual. Assim acrescentar ou
+// reordenar blocos na pagina nao faz uma edicao cair no lugar errado.
+const contagem = {};
+blocos().forEach(el => {
+    const tipo = el.matches(ITENS) ? 'i' : 's';
+    const assinatura = tipo + '|' + el.textContent.replace(/\s+/g, ' ').trim().slice(0, 80);
+    contagem[assinatura] = (contagem[assinatura] || 0) + 1;
+    el.dataset.bloco = assinatura + '|' + contagem[assinatura];
+});
+const acharBloco = chave => blocos().find(el => el.dataset.bloco === chave);
+
+// Texto original de cada elemento editavel, para salvar so o que mudou
+const originais = new WeakMap();
+elementosEditaveis().forEach(el => originais.set(el, el.innerText));
+
+let clones = Array.isArray(salvo.clones) ? salvo.clones : [];
+let ocultos = new Set(Array.isArray(salvo.ocultos) ? salvo.ocultos : []);
+
+function duplicarBloco(origem, id) {
+    const copia = origem.cloneNode(true);
+    [copia, ...copia.querySelectorAll('*')].forEach(el => {
+        el.classList.remove('revelar', 'visivel', 'bloco-alvo');
+        el.removeAttribute('id');
+        el.style.removeProperty('--atraso');
+    });
+    copia.dataset.bloco = 'c:' + id;
+    copia.classList.remove('bloco-oculto');
+    origem.after(copia);
+    // A copia herda o texto original de quem copiou (nao o editado)
+    const deOrigem = [...origem.querySelectorAll(EDITAVEIS)];
+    [...copia.querySelectorAll(EDITAVEIS)].forEach((el, i) => {
+        const orig = deOrigem[i];
+        if (orig && originais.has(orig)) originais.set(el, originais.get(orig));
+        else originais.set(el, el.innerText);
+        if (orig) el.innerText = originais.get(orig) ?? el.innerText;
+    });
+    return copia;
 }
 
-// Reaplica edicoes salvas. Cada edicao guarda o texto original ("de"):
-// so e aplicada se aquele lugar ainda tiver o mesmo texto, entao
-// reordenar ou acrescentar blocos na pagina nao joga uma edicao no
-// lugar errado. (Formato antigo, sem "de": vale se a pagina tiver a
-// mesma quantidade de textos.)
-const salvo = lerEdicoes();
-if (salvo && salvo.textos) {
-    elementosEditaveis().forEach((el, i) => {
+// 1) copias; 2) textos (so onde o original ainda confere); 3) ocultos
+clones = clones.filter(c => {
+    const origem = acharBloco(c.de);
+    if (!origem) return false;
+    duplicarBloco(origem, c.id);
+    return true;
+});
+if (salvo.textos) {
+    const lista = elementosEditaveis();
+    const total = lista.length;
+    lista.forEach((el, i) => {
         const ed = salvo.textos[i];
         if (ed === undefined) return;
-        if (typeof ed === 'object' && ed.de === textosOriginais[i]) el.innerText = ed.para;
-        else if (typeof ed === 'string' && salvo.total === textosOriginais.length) el.innerText = ed;
+        if (typeof ed === 'object' && ed.de === originais.get(el)) el.innerText = ed.para;
+        else if (typeof ed === 'string' && salvo.total === total) el.innerText = ed;
     });
 }
+ocultos.forEach(chave => { const el = acharBloco(chave); if (el) el.classList.add('bloco-oculto'); });
 
 function salvarEdicoes() {
     const textos = {};
-    let houve = false;
-    elementosEditaveis().forEach((el, i) => {
-        if (el.innerText !== textosOriginais[i]) { textos[i] = { de: textosOriginais[i], para: el.innerText }; houve = true; }
+    let houveTexto = false;
+    const lista = elementosEditaveis();
+    lista.forEach((el, i) => {
+        const de = originais.get(el);
+        if (de !== undefined && el.innerText !== de) { textos[i] = { de, para: el.innerText }; houveTexto = true; }
     });
+    // Descarta ocultos que ja nao existem (ex.: copia removida)
+    ocultos = new Set([...ocultos].filter(acharBloco));
+    const houve = houveTexto || clones.length || ocultos.size;
     try {
-        if (houve) localStorage.setItem(CHAVE_EDICOES, JSON.stringify({ total: textosOriginais.length, textos, quando: new Date().toISOString() }));
+        if (houve) localStorage.setItem(CHAVE_EDICOES, JSON.stringify({
+            total: lista.length, textos, clones, ocultos: [...ocultos], quando: new Date().toISOString()
+        }));
         else localStorage.removeItem(CHAVE_EDICOES);
-    } catch { alert('Não foi possível salvar neste navegador.'); return; }
-    const btn = document.getElementById('btn-editar');
-    btn.textContent = houve ? 'Salvo ✓' : 'Editar';
-    if (houve) setTimeout(() => { if (!editMode) btn.textContent = 'Editar'; }, 2000);
+    } catch { alert('Não foi possível salvar neste navegador.'); return false; }
+    return houve;
 }
 
-function toggleEditMode() {
-    editMode = !editMode;
+function aplicarEdicaoNosTextos() {
     elementosEditaveis().forEach(el => {
         el.contentEditable = editMode;
         el.style.outline = editMode ? '1px dashed rgba(201, 215, 128, 0.9)' : '';
         el.style.outlineOffset = editMode ? '6px' : '';
     });
-    document.getElementById('btn-editar').textContent = editMode ? 'Concluir' : 'Editar';
-    document.getElementById('barra-edicao-extra').hidden = !editMode;
-    if (!editMode) salvarEdicoes();
 }
+
+function toggleEditMode() {
+    editMode = !editMode;
+    document.body.classList.toggle('modo-edicao', editMode);
+    aplicarEdicaoNosTextos();
+    const btn = document.getElementById('btn-editar');
+    document.getElementById('barra-edicao-extra').hidden = !editMode;
+    if (editMode) { btn.textContent = 'Concluir'; return; }
+    esconderControle();
+    const houve = salvarEdicoes();
+    btn.textContent = houve ? 'Salvo ✓' : 'Editar';
+    if (houve) setTimeout(() => { if (!editMode) btn.textContent = 'Editar'; }, 2000);
+}
+
+/* Controle de bloco: aparece sobre o bloco em que o mouse (ou o dedo)
+   esta, durante a edicao. Ocultar some com o bloco para os visitantes
+   deste navegador; na edicao ele fica apagado, para poder voltar. */
+const controle = document.createElement('div');
+controle.id = 'ctrl-bloco';
+controle.hidden = true;
+controle.innerHTML = `
+    <span class="ctrl-tipo"></span>
+    <button type="button" data-acao="ocultar"></button>
+    <button type="button" data-acao="duplicar" title="Cria uma cópia logo abaixo, para editar">Duplicar</button>
+    <button type="button" data-acao="remover" title="Apaga esta cópia">Remover</button>`;
+document.body.appendChild(controle);
+let alvoBloco = null;
+
+function esconderControle() {
+    controle.hidden = true;
+    if (alvoBloco) alvoBloco.classList.remove('bloco-alvo');
+    alvoBloco = null;
+}
+
+function mostrarControle(el) {
+    if (alvoBloco !== el) {
+        if (alvoBloco) alvoBloco.classList.remove('bloco-alvo');
+        alvoBloco = el;
+        el.classList.add('bloco-alvo');
+    }
+    const item = el.matches(ITENS);
+    const copia = el.dataset.bloco.startsWith('c:');
+    const oculto = el.classList.contains('bloco-oculto');
+    controle.querySelector('.ctrl-tipo').textContent = (item ? 'Item' : 'Seção') + (copia ? ' (cópia)' : '') + (oculto ? ' · oculto' : '');
+    const btnOcultar = controle.querySelector('[data-acao="ocultar"]');
+    btnOcultar.textContent = oculto ? 'Mostrar' : 'Ocultar';
+    btnOcultar.title = oculto ? 'Volta a mostrar este bloco' : 'Esconde este bloco da página';
+    controle.querySelector('[data-acao="duplicar"]').hidden = !item;
+    controle.querySelector('[data-acao="remover"]').hidden = !copia;
+    controle.hidden = false;
+    const r = el.getBoundingClientRect();
+    const largura = controle.offsetWidth;
+    controle.style.top = `${Math.max(r.top, 0) + window.scrollY + 4}px`;
+    controle.style.left = `${Math.max(8, Math.min(r.right - largura - 4, document.documentElement.clientWidth - largura - 8)) + window.scrollX}px`;
+}
+
+document.addEventListener('mouseover', (e) => {
+    if (!editMode || controle.contains(e.target) || e.target.closest('#barra-edicao')) return;
+    const el = e.target.closest(ITENS) || e.target.closest(SECOES);
+    if (el && el.dataset.bloco && !el.closest('header, footer')) mostrarControle(el);
+});
+
+controle.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn || !alvoBloco) return;
+    const el = alvoBloco;
+    const acao = btn.dataset.acao;
+    if (acao === 'ocultar') {
+        const oculto = el.classList.toggle('bloco-oculto');
+        if (oculto) ocultos.add(el.dataset.bloco); else ocultos.delete(el.dataset.bloco);
+        mostrarControle(el);
+    } else if (acao === 'duplicar') {
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        clones.push({ id, de: el.dataset.bloco });
+        const copia = duplicarBloco(el, id);
+        aplicarEdicaoNosTextos();
+        mostrarControle(copia);
+    } else if (acao === 'remover') {
+        if (!confirm('Remover esta cópia?')) return;
+        // Remove tambem as copias feitas a partir desta
+        const removidas = new Set([el.dataset.bloco]);
+        el.querySelectorAll('[data-bloco^="c:"]').forEach(f => removidas.add(f.dataset.bloco));
+        let mudou = true;
+        while (mudou) {
+            mudou = false;
+            clones.forEach(c => { if (removidas.has(c.de) && !removidas.has('c:' + c.id)) { removidas.add('c:' + c.id); mudou = true; } });
+        }
+        removidas.forEach(k => { const b = acharBloco(k); if (b) b.remove(); ocultos.delete(k); });
+        clones = clones.filter(c => !removidas.has('c:' + c.id));
+        esconderControle();
+    }
+    salvarEdicoes();
+});
 
 // Baixa TODAS as edicoes salvas neste navegador (todas as paginas),
 // num arquivo para enviar a quem publica o site.
 function baixarEdicoes() {
+    if (editMode) salvarEdicoes();
     const tudo = {};
     for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
@@ -599,7 +747,7 @@ function baixarEdicoes() {
 }
 
 function desfazerEdicoes() {
-    if (!confirm('Descartar as edições salvas desta página e voltar ao texto publicado?')) return;
+    if (!confirm('Descartar as edições salvas desta página (textos, blocos ocultos e cópias) e voltar ao que está publicado?')) return;
     try { localStorage.removeItem(CHAVE_EDICOES); } catch { /* nada */ }
     location.reload();
 }
@@ -615,10 +763,11 @@ const barraEdicao = document.createElement('div');
 barraEdicao.id = 'barra-edicao';
 barraEdicao.innerHTML = `
     <div id="barra-edicao-extra" hidden>
+        <span class="dica-edicao">Passe o mouse sobre um bloco para ocultar ou duplicar</span>
         <button type="button" id="btn-baixar-edicoes" title="Gera um arquivo com tudo que você editou, para enviar a quem publica o site">Baixar edições</button>
         <button type="button" id="btn-desfazer-edicoes" title="Descarta as edições salvas desta página">Desfazer</button>
     </div>
-    <button type="button" id="btn-editar" title="Editar os textos. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>`;
+    <button type="button" id="btn-editar" title="Editar os textos e os blocos. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>`;
 document.body.appendChild(barraEdicao);
 document.getElementById('btn-editar').onclick = toggleEditMode;
 document.getElementById('btn-baixar-edicoes').onclick = baixarEdicoes;
