@@ -2568,3 +2568,70 @@ body.modo-edicao .bloco-alvo { box-shadow: inset 0 0 0 2px rgba(201, 215, 128, 0
         grid-template-areas: "num" "titulo" "lema" "valor" "benef" "lista" "botao";
     }
 }
+
+/* Campanha: os beneficios ("Receba acesso a:") sao o destaque do card.
+   Ficam na coluna direita, em caixa verde e letra maior; os itens com
+   check passam a ser informacao de apoio, na coluna esquerda. */
+.campanha-corpo,
+.campanha-corpo:not(:has(.campanha-desc)) {
+    grid-template-areas:
+        "num     benef"
+        "titulo  benef"
+        "lema    benef"
+        "valor   benef"
+        "desc    benef"
+        "lista   botao";
+    row-gap: 0;
+}
+.campanha-corpo .campanha-lista { border-top: none; padding-top: 0; margin: 1.3rem 0 0; }
+.campanha-corpo .campanha-desc { margin-top: 1rem; }
+.campanha-beneficios {
+    margin-top: 0;
+    padding: 1.5rem 1.6rem 1.6rem;
+    border: none;
+    border-left: 4px solid var(--areia);
+    background: var(--verde-900);
+    box-shadow: 0 10px 28px rgba(18, 45, 30, 0.18);
+}
+.campanha-beneficios-titulo {
+    font-size: 0.78rem;
+    color: var(--areia);
+    margin-bottom: 1rem;
+}
+.campanha-beneficios li {
+    padding-left: 2rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--creme);
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+}
+.campanha-beneficios li::before {
+    top: 0.12rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    transform: none;
+    background: var(--areia) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23122d1e' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 70% no-repeat;
+}
+.campanha-corpo .campanha-btn { margin-top: 1.3rem; }
+@media (max-width: 900px) {
+    .campanha-corpo,
+    .campanha-corpo:not(:has(.campanha-desc)) {
+        grid-template-areas: "num" "titulo" "lema" "valor" "benef" "desc" "lista" "botao";
+    }
+    .campanha-beneficios { margin: 0.4rem 0 0; padding: 1.2rem 1.2rem 1.3rem; }
+    .campanha-beneficios li { font-size: 1rem; }
+}
+
+/* Arte "Pessoas que ainda nao conhecem a Cristo" (inicio). A imagem tem
+   1600px de largura: nunca passa disso, para nao perder nitidez; nas
+   telas maiores o fundo verde continua dos dois lados. */
+.nao-crentes-arte { background: #0f2419; line-height: 0; padding: 0; }
+.nao-crentes-arte img {
+    display: block;
+    width: 100%;
+    max-width: 1600px;
+    height: auto;
+    margin: 0 auto;
+}
