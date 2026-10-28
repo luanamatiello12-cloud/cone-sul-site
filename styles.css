@@ -2970,3 +2970,23 @@ nav ul.menu { gap: 0.85rem; }
     .religiao { grid-template-columns: 6.5rem 1fr auto; }
     .ficha-destaque strong { font-size: 1.8rem; }
 }
+.produto-item { display: flex; flex-direction: column; }
+.produto-comprar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+    padding: 0.85rem 1.2rem;
+    background: var(--verde-800);
+    color: var(--creme);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s var(--ease-suave);
+}
+a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); transform: translateY(-2px); }
+.produto-comprar[aria-disabled="true"] { cursor: default; }
