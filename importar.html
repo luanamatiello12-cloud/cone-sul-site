@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar relatório | CONE SUL</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="styles.css?v=59">
+</head>
+<body data-pagina="importar">
+
+    <!-- BASTIDOR: so a equipe usa. Nao aparece no menu.
+         Le o relatorio do Eklesia (Excel), mostra a previa e cria/atualiza os
+         cadastros de mantenedor com o nivel pelo valor (ver servidor/LEIA-ME.md) -->
+    <section class="hero hero-pagina">
+        <div class="wrap">
+            <span class="hero-kicker">Equipe — Importar relatório</span>
+            <h1>Cadastros a partir do Eklesia.</h1>
+            <p class="hero-lead">Envie o relatório em Excel. Confira a prévia e confirme: quem é novo recebe o cadastro pronto por e-mail, e quem já existe tem o valor e o nível atualizados.</p>
+        </div>
+    </section>
+
+    <section class="sec-clara importar">
+        <div class="wrap">
+            <p class="importar-aviso" id="importar-aviso" hidden></p>
+
+            <div class="importar-passo">
+                <span class="sec-kicker">1. Relatório</span>
+                <label class="importar-arquivo">
+                    <input type="file" id="arquivo" accept=".xlsx,.xls,.csv">
+                    <span>Escolher arquivo do Eklesia (.xlsx)</span>
+                </label>
+                <p class="importar-nome" id="arquivo-nome"></p>
+            </div>
+
+            <div class="importar-passo" id="passo-colunas" hidden>
+                <span class="sec-kicker">2. Colunas</span>
+                <p class="sec-intro">Confira qual coluna do relatório corresponde a cada dado. E-mail e valor são obrigatórios.</p>
+                <div class="importar-mapa" id="mapeamento"></div>
+                <div class="importar-opcoes">
+                    <label>Mesma pessoa em várias linhas:
+                        <select id="repetidos">
+                            <option value="somar">somar os valores</option>
+                            <option value="maior">usar o maior valor</option>
+                            <option value="ultimo">usar a última linha</option>
+                        </select>
+                    </label>
+                    <label class="importar-check"><input type="checkbox" id="desativar-ausentes"> Quem não estiver neste relatório perde o nível</label>
+                </div>
+            </div>
+
+            <div class="importar-passo" id="passo-previa" hidden>
+                <span class="sec-kicker">3. Prévia</span>
+                <p class="importar-resumo" id="resumo"></p>
+                <div class="importar-tabela"><table id="previa"></table></div>
+                <div class="cta-buttons acoes-secao">
+                    <button type="button" class="btn btn-primary" id="btn-importar">Importar cadastros</button>
+                </div>
+                <p class="form-retorno" id="importar-retorno" role="status"></p>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js?v=45"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="importar.js?v=1"></script>
+</body>
+</html>

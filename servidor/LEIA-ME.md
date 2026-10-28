@@ -32,6 +32,26 @@ abrir o portal com o valor no endereço: `portal.html?demo=1500` (Expansor),
 Quem se cadastra e ainda não pagou tem conta, mas fica sem nível até a primeira
 contribuição aprovada com o mesmo e-mail.
 
+## Relatório do Eklesia (importação)
+
+Enquanto a plataforma de pagamento não avisa sozinha, a equipe importa o relatório do
+Eklesia em **`importar.html`** (página de bastidor, fora do menu):
+
+1. Baixar o relatório de contribuições do Eklesia em Excel.
+2. Abrir `importar.html` (logado com uma conta da **equipe**, ver abaixo) e escolher o
+   arquivo. A página adivinha as colunas pelo título (e-mail, valor, nome, CPF,
+   celular, nascimento, cidade, igreja); dá para trocar qualquer uma.
+3. Se a mesma pessoa aparece em várias linhas (várias contribuições no período):
+   somar, usar o maior valor ou a última linha.
+4. Conferir a prévia (nível de cada pessoa) e clicar em **Importar cadastros**: quem é
+   novo recebe o convite "seu cadastro está pronto"; quem já existe tem valor e nível
+   atualizados. Dados que a pessoa já editou não são sobrescritos.
+5. Opcional: "quem não estiver neste relatório perde o nível" (só afeta quem veio do
+   Eklesia).
+
+A leitura do Excel acontece no navegador; ao servidor (função `importar-planilha`) só vão
+as linhas já organizadas. Só contas da tabela `equipe` conseguem importar.
+
 ## Ligar (uma vez)
 
 ### 1. Supabase
@@ -44,10 +64,11 @@ contribuição aprovada com o mesmo e-mail.
 5. **Project Settings > API**: copiar a *Project URL* e a chave *anon public* para
    `CONTAS` no topo do `app.js`. Isso tira o portal do modo demonstração.
 
-### 2. Webhook
+### 2. Funções (webhook e importação)
 Com a [CLI do Supabase](https://supabase.com/docs/guides/cli):
 
 ```bash
+supabase functions deploy importar-planilha
 supabase functions deploy webhook-pagamento --no-verify-jwt
 supabase secrets set PROVEDOR_PAGAMENTO=asaas \
   WEBHOOK_TOKEN=<uma senha longa inventada> \
@@ -59,7 +80,11 @@ supabase secrets set MERCADOPAGO_ACCESS_TOKEN=... # ou Mercado Pago
 
 As chaves ficam só nos *secrets* do Supabase, **nunca** no código do site.
 
-### 3. Plataforma de pagamento
+### 3. Equipe
+Quem vai importar o relatório cria a conta pelo site (Faça parte) e é incluído na tabela
+`equipe` (comando no fim do `schema.sql`).
+
+### 4. Plataforma de pagamento (quando houver)
 - Criar a contribuição mensal (assinatura) de cada plano e colar os links em
   `LINKS_PAGAMENTO` no `app.js`.
 - Cadastrar o webhook na plataforma apontando para
@@ -70,7 +95,7 @@ Os tradutores do Asaas e do Mercado Pago (`provedores/`) foram escritos pela
 documentação e **ainda não foram testados com uma conta real**: conferir no primeiro
 pagamento de teste. Outra plataforma = um arquivo novo em `provedores/` no mesmo formato.
 
-### 4. Antes de abrir ao público
+### 5. Antes de abrir ao público
 - Atualizar a **Política de Privacidade**: o site passa a guardar CPF, telefone e dados
   da contribuição.
 - Fazer um pagamento de teste de cada nível e conferir o portal.

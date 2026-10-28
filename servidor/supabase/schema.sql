@@ -100,3 +100,14 @@ revoke insert, update, delete on public.mantenedores from anon, authenticated;
 grant select on public.mantenedores to authenticated;
 grant update (nome, telefone, nascimento, naturalidade, moradia, cristao, congrega, igreja, conferido)
     on public.mantenedores to authenticated;
+
+-- ---------- Equipe (pagina importar.html) ----------
+-- Contas que podem importar o relatorio do Eklesia. Para incluir alguem:
+-- a pessoa cria a conta pelo site e, no SQL Editor:
+--   insert into public.equipe (id, nome)
+--   select id, 'Nome da pessoa' from auth.users where email = 'pessoa@exemplo.com';
+create table if not exists public.equipe (
+    id    uuid primary key references auth.users (id) on delete cascade,
+    nome  text
+);
+alter table public.equipe enable row level security;   -- so o servidor le
