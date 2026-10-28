@@ -46,6 +46,7 @@
     let localAberto = null; // cidade aberta no quadro (para as fotos que chegam depois)
     function preencherPainel(t) {
         localAberto = null;
+        if (map) map.closePopup();
         const tipo = t.pais ? `${t.tipo} (${t.pais})` : t.tipo;
         mostrarPainel(t.nome, t.bandeira, `
             <dl class="ficha-territorio">
@@ -101,7 +102,7 @@
             procurarFotos(local).then(achadas => {
                 local.fotos = achadas;
                 // So redesenha se a pessoa ainda estiver nesta cidade
-                if (localAberto === i) preencherLocal(local, i);
+                if (localAberto === i) { preencherLocal(local, i); abrirPopupFotos(i); }
             });
             localAberto = i;
             return;
@@ -295,12 +296,13 @@
         if (POR_ID[local.territorio]) selecionarTerritorio(local.territorio, { painel: false });
         marcarLocal(i);
         preencherLocal(local, i);
-        if (!irAoPin) return;
-        // No celular a lista fica abaixo do quadro: sobe ate as fotos
+        const temFotos = local.fotos && local.fotos.length;
+        if (!irAoPin) { if (temFotos) abrirPopupFotos(i); return; }
+        // No celular a lista fica abaixo do mapa: sobe ate ele (pin e fotos)
         if (window.matchMedia('(max-width: 900px)').matches) {
-            document.querySelector('.card-info').scrollIntoView({ behavior: MOVIMENTO_REDUZIDO_MAPA ? 'auto' : 'smooth', block: 'start' });
+            elMapa.scrollIntoView({ behavior: MOVIMENTO_REDUZIDO_MAPA ? 'auto' : 'smooth', block: 'start' });
         }
-        const abrir = () => marcador.openTooltip();
+        const abrir = () => (local.fotos && local.fotos.length) ? abrirPopupFotos(i) : marcador.openTooltip();
         if (grupoPins && grupoPins.zoomToShowLayer) grupoPins.zoomToShowLayer(marcador, abrir);
         else { map.setView([local.lat, local.lng], 9); abrir(); }
     }
@@ -316,6 +318,47 @@
     }));
 
     // Foto ampliada: clique na miniatura; setas trocam, Esc fecha
+    // ---------- Pop-up de fotos sobre o pin ----------
+    // Ao abrir uma cidade com fotos, um cartao com a foto aparece em cima
+    // do pin, com setas para passar. Clicar na foto amplia (visor).
+    const popupFotos = L.popup({ className: 'popup-fotos-wrap', maxWidth: 320, minWidth: 260, autoPanPadding: [24, 24], closeButton: true });
+    function abrirPopupFotos(i, n = 0) {
+        const { local, marcador } = pins[i];
+        const fotos = local.fotos || [];
+        if (!fotos.length) return;
+        n = (n + fotos.length) % fotos.length;
+        const f = fotos[n];
+        marcador.closeTooltip();
+        popupFotos.setLatLng(marcador.getLatLng()).setContent(`
+            <div class="popup-fotos" data-local="${i}" data-n="${n}">
+                <button type="button" class="pf-foto" aria-label="Ampliar foto">
+                    <img src="${escapar(f.src)}" alt="${escapar(f.legenda || local.nome)}">
+                </button>
+                <div class="pf-rodape">
+                    <strong>${escapar(local.nome)}</strong>
+                    ${fotos.length > 1 ? `<span class="pf-setas">
+                        <button type="button" class="pf-ant" aria-label="Foto anterior">‹</button>
+                        <span>${n + 1} / ${fotos.length}</span>
+                        <button type="button" class="pf-prox" aria-label="Próxima foto">›</button>
+                    </span>` : ''}
+                </div>
+            </div>`);
+        if (!map.hasLayer(popupFotos)) popupFotos.openOn(map);
+        // O Leaflet nao deixa o clique sair do pop-up: escuta nele mesmo
+        const el = popupFotos.getElement();
+        if (el && !el.dataset.ouvindo) { el.dataset.ouvindo = '1'; el.addEventListener('click', cliquePopup); }
+    }
+    function cliquePopup(e) {
+        const caixa = e.target.closest('.popup-fotos');
+        if (!caixa) return;
+        const i = +caixa.dataset.local, n = +caixa.dataset.n;
+        // Troca o conteudo depois que o clique termina: se o botao clicado
+        // sumir antes, o Leaflet acha que o clique foi no mapa e fecha o pop-up
+        if (e.target.closest('.pf-ant')) setTimeout(() => abrirPopupFotos(i, n - 1));
+        else if (e.target.closest('.pf-prox')) setTimeout(() => abrirPopupFotos(i, n + 1));
+        else if (e.target.closest('.pf-foto')) abrirFoto(i, n);
+    }
+
     const visor = document.createElement('div');
     visor.className = 'visor-foto';
     visor.hidden = true;
