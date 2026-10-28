@@ -30,6 +30,7 @@
     const escapar = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
     function mostrarPainel(titulo, bandeira, html) {
+        document.querySelector('.card-info')?.classList.remove('recolhido');
         const corpo = document.querySelector('.card-body');
         corpo.style.transition = 'opacity 0.15s ease';
         corpo.style.opacity = '0';
@@ -47,15 +48,33 @@
     function preencherPainel(t) {
         localAberto = null;
         if (map) map.closePopup();
-        const tipo = t.pais ? `${t.tipo} (${t.pais})` : t.tipo;
+        if (!t.religiao) {
+            mostrarPainel(t.nome, t.bandeira, `<div class="ficha-descricao">${t.descricao ? escapar(t.descricao) : '<em>Descrição em preparação.</em>'}</div>`);
+            return;
+        }
+        const pct = n => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+        const maior = Math.max(...t.religiao.map(r => r[1]));
         mostrarPainel(t.nome, t.bandeira, `
-            <dl class="ficha-territorio">
-                <div><dt>Nome oficial</dt><dd>${escapar(t.nomeOficial)}</dd></div>
-                <div><dt>Tipo</dt><dd>${escapar(tipo)}</dd></div>
-                ${t.sigla ? `<div><dt>Sigla</dt><dd>${escapar(t.sigla)}</dd></div>` : ''}
-            </dl>
-            <div class="ficha-descricao">${t.descricao ? escapar(t.descricao) : '<em>Descrição em preparação.</em>'}</div>`);
+            <p class="ficha-rotulo">${escapar(t.rotulo)}</p>
+            ${t.naoCristaos ? `<div class="ficha-destaque"><strong>${escapar(t.naoCristaos)}</strong><span>de pessoas que ainda não conhecem a Cristo</span></div>` : ''}
+            ${t.texto ? `<p class="ficha-texto">${escapar(t.texto)}</p>` : ''}
+            <div class="ficha-pop"><span>População</span><strong>${escapar(t.populacao)}</strong></div>
+            <div class="religioes">
+                <span class="religioes-titulo">Religião</span>
+                ${t.religiao.map(([nome, n, rotulo]) => `
+                    <div class="religiao">
+                        <span class="religiao-nome">${escapar(nome)}</span>
+                        <span class="religiao-barra"><i style="width:${(n / maior * 100).toFixed(1)}%"></i></span>
+                        <span class="religiao-pct">${escapar(rotulo || pct(n))}</span>
+                    </div>`).join('')}
+                ${t.notaReligiao ? `<small>${escapar(t.notaReligiao)}</small>` : ''}
+            </div>`);
     }
+
+    // Quadro branco: some com suavidade quando a cidade tem fotos (elas
+    // ficam no cartao sobre o pin) e volta ao escolher um territorio
+    const cardInfo = document.querySelector('.card-info');
+    const recolherPainel = () => cardInfo && cardInfo.classList.add('recolhido');
 
     // Fotos de cada cidade: basta colocar os arquivos na pasta da cidade,
     // img/locais/<cidade>/, com os nomes 01.jpg, 02.jpg, 03.jpg... (aceita
@@ -94,11 +113,7 @@
         const onde = local.uf ? `${t ? t.nome : local.uf} (${local.uf})` : local.pais;
         if (!(local.fotos && local.fotos.length) && !local._procurado) {
             local._procurado = true;
-            mostrarPainel(local.nome, t ? t.bandeira : '#flag-br', `
-                <dl class="ficha-territorio">
-                    <div><dt>${local.uf ? 'Estado' : 'País'}</dt><dd>${escapar(onde)}</dd></div>
-                </dl>
-                <div class="galeria-vazia">Carregando fotos…</div>`);
+            recolherPainel();
             procurarFotos(local).then(achadas => {
                 local.fotos = achadas;
                 // So redesenha se a pessoa ainda estiver nesta cidade
@@ -109,10 +124,9 @@
         }
         localAberto = i;
         const fotos = local.fotos || [];
-        // As fotos aparecem so no pop-up sobre o pin; aqui fica o resumo
-        const galeria = fotos.length
-            ? `<p class="fotos-no-mapa">${fotos.length} ${fotos.length > 1 ? 'fotos' : 'foto'} no mapa — use as setas no cartão sobre o pin.</p>`
-            : '<div class="galeria-vazia">Fotos em breve.</div>';
+        // Com fotos, o quadro sai de cena: as fotos ficam no cartao do pin
+        if (fotos.length) { recolherPainel(); return; }
+        const galeria = '<div class="galeria-vazia">Fotos em breve.</div>';
         mostrarPainel(local.nome, t ? t.bandeira : '#flag-br', `
             <dl class="ficha-territorio">
                 <div><dt>${local.uf ? 'Estado' : 'País'}</dt><dd>${escapar(onde)}</dd></div>
@@ -207,7 +221,7 @@
         { txt: 'Argentina', em: [-37.6, -65.6], cls: 'pais' },
         { txt: 'Paraguai', em: [-22.9, -59.4], cls: 'pais' },
         { txt: 'Chile', em: [-31.5, -76.6], cls: 'pais lado' },
-        { txt: 'Uruguai', em: [-32.9, -56.1], cls: 'vizinho' },
+        { txt: 'Uruguai', em: [-33.2, -55.6], cls: 'vizinho' },
         { txt: 'Brasil', em: [-20.8, -52.5], cls: 'vizinho' },
         { txt: 'Bolívia', em: [-20.4, -63.6], cls: 'vizinho' },
         { txt: 'Oceano Pacífico', em: [-44, -79.6], cls: 'oceano' },
