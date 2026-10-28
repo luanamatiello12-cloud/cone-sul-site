@@ -410,8 +410,8 @@ const PORTAL = {
 
     // Com contas reais, o login devolve o cadastro guardado no servidor,
     // criado automaticamente quando a contribuicao foi aprovada (ver
-    // servidor/LEIA-ME.md). Na demonstracao, o valor vem do seletor da tela
-    // de login e o cadastro nasce so com o e-mail.
+    // servidor/LEIA-ME.md). Na demonstracao, entra sem contribuicao; para ver
+    // um nivel, abrir portal.html?demo=<valor> (ex.: ?demo=1500 = Expansor).
     async entrar(email, senha, valorDemo) {
         if (this.MODO_DEMO) {
             const valor = Number(valorDemo) || 0;
@@ -500,8 +500,6 @@ if (PAGINA === 'portal') {
     const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal', 'tela-portal-cadastro'].map(id => document.getElementById(id));
     // Telas que dependem do nivel: so aparecem para quem tem esse nivel
     const SO_NIVEL = { 'tela-portal-expansores': ['expansor'] };
-
-    if (PORTAL.MODO_DEMO) document.getElementById('demo-nivel').hidden = false;
 
     // Seu nivel, beneficios e resumo da contribuicao
     function mostrarNivel(usuario) {
@@ -626,7 +624,8 @@ if (PAGINA === 'portal') {
             const usuario = await PORTAL.entrar(
                 document.getElementById('p-email').value.trim(),
                 document.getElementById('p-senha').value,
-                document.getElementById('p-demo-valor').value
+                // Bastidor: portal.html?demo=1500 simula o valor mensal na demonstracao
+                new URLSearchParams(location.search).get('demo')
             );
             PORTAL.salvar(usuario);
             formLogin.reset();

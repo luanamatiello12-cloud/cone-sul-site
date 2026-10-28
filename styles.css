@@ -3059,7 +3059,6 @@ a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); tra
     .meu-cadastro { padding: 1.4rem; }
     .meu-cadastro .formulario { grid-template-columns: 1fr; }
 }
-.demo-nivel label { color: var(--areia); }
 .meu-cadastro .campo label,
 .meu-cadastro .opcoes label { color: #2a2e2a; }
 .meu-cadastro legend { color: var(--limao-escuro); }
