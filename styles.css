@@ -2623,3 +2623,15 @@ body.modo-edicao .bloco-alvo { box-shadow: inset 0 0 0 2px rgba(201, 215, 128, 0
     .campanha-beneficios { margin: 0.4rem 0 0; padding: 1.2rem 1.2rem 1.3rem; }
     .campanha-beneficios li { font-size: 1rem; }
 }
+
+/* Arte "Pessoas que ainda nao conhecem a Cristo" (inicio). A imagem tem
+   1600px de largura: nunca passa disso, para nao perder nitidez; nas
+   telas maiores o fundo verde continua dos dois lados. */
+.nao-crentes-arte { background: #0f2419; line-height: 0; padding: 0; }
+.nao-crentes-arte img {
+    display: block;
+    width: 100%;
+    max-width: 1600px;
+    height: auto;
+    margin: 0 auto;
+}
