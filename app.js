@@ -12,9 +12,21 @@ const CONTATO = {
     igreja: '#'
 };
 
+// ---------- Contas de mantenedor (Supabase) ----------
+// Vazio = modo demonstracao (qualquer e-mail entra, nada e guardado).
+// Para ligar as contas reais, siga servidor/LEIA-ME.md e cole aqui a URL
+// do projeto e a chave publica ("anon"). A chave publica pode ficar no
+// site: o que protege os dados sao as regras do banco (schema.sql).
+const CONTAS = {
+    url: '',
+    chavePublica: ''
+};
+
 // ---------- Links de pagamento da campanha (seja-mantenedor.html) ----------
 // Cole aqui o link do portal de pagamento de cada faixa. Enquanto estiver
-// vazio, o botao aparece mas nao leva a lugar nenhum.
+// vazio, o botao aparece mas nao leva a lugar nenhum. Com as contas ligadas
+// (servidor/LEIA-ME.md), o pagamento aprovado cria o cadastro e define o
+// nivel pelo valor pago.
 const LINKS_PAGAMENTO = {
     semeadores: '',
     construtores: '',
@@ -329,21 +341,127 @@ document.querySelectorAll('.filtro-categorias button').forEach(botao => {
    e trocar o corpo de PORTAL.entrar() pela chamada desse servico,
    depois desligar MODO_DEMO.
    ========================================================= */
+/* NIVEIS DE MANTENEDOR — o nivel vem do valor mensal da contribuicao,
+   informado pela plataforma de pagamento (nunca escolhido no site).
+   Mesma regra do servidor (servidor/supabase/schema.sql): mudar nos dois.
+   Abaixo de R$ 500 conta como Semeador. */
+const NIVEIS = [
+    {
+        id: 'expansor', nome: 'Expansor', minimo: 1000, faixa: 'A partir de R$ 1.000 por mês',
+        beneficios: ['Devocional on-line e devocional mensal', 'Links dos workshops on-line', 'Workshops presenciais', 'Acompanhamento pastoral', 'Divulgação da sua empresa']
+    },
+    {
+        id: 'construtor', nome: 'Construtor', minimo: 500, faixa: 'De R$ 500 a R$ 1.000 por mês',
+        beneficios: ['Devocional on-line e devocional mensal', 'Links dos workshops on-line (transmissão, sem participação presencial)']
+    },
+    {
+        id: 'semeador', nome: 'Semeador', minimo: 0.01, faixa: 'De R$ 100 a R$ 500 por mês',
+        beneficios: ['Devocional on-line e devocional mensal']
+    }
+];
+// Sem contribuicao ativa (cadastro feito pelo "Faca parte", por exemplo): sem nivel
+function nivelPorValor(valor) {
+    return NIVEIS.find(n => Number(valor) >= n.minimo) || null;
+}
+const reais = (v) => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
 const PORTAL = {
-    MODO_DEMO: true,
+    MODO_DEMO: !(CONTAS.url && CONTAS.chavePublica),
     CHAVE: 'conesul-sessao',
 
-    async entrar(email, senha) {
-        if (this.MODO_DEMO) return { email };
-        throw new Error('Sistema de contas ainda não configurado.');
+    // ----- Contas reais (Supabase), carregado so quando configurado -----
+    async cliente() {
+        if (!this._cliente) {
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm');
+            this._cliente = createClient(CONTAS.url, CONTAS.chavePublica);
+        }
+        return this._cliente;
     },
 
-    // Em modo demonstracao o cadastro NAO e enviado a lugar nenhum: so abre
-    // a sessao com nome e e-mail. CPF, nascimento, endereco e respostas sobre
-    // a fe nao sao guardados. Com um servico de contas, enviar `dados` aqui.
+    // Linha da tabela "mantenedores" -> objeto usado nas telas
+    async perfil(sb, user) {
+        const { data: m, error } = await sb.from('mantenedores').select('*').eq('id', user.id).maybeSingle();
+        if (error) throw new Error('Não foi possível carregar seu cadastro. Tente de novo.');
+        const r = m || {};
+        return {
+            id: user.id,
+            email: r.email || user.email,
+            nome: r.nome || '', cpf: r.cpf || '', telefone: r.telefone || '',
+            nascimento: r.nascimento || '', naturalidade: r.naturalidade || '', moradia: r.moradia || '', igreja: r.igreja || '',
+            ...(r.cristao === null || r.cristao === undefined ? {} : { cristao: r.cristao }),
+            ...(r.congrega === null || r.congrega === undefined ? {} : { congrega: r.congrega }),
+            valor: r.status_contribuicao === 'ativa' ? Number(r.valor_mensal) : 0,
+            cadastroAutomatico: !!r.cadastro_automatico,
+            conferido: !!r.conferido
+        };
+    },
+
+    // Ao abrir o portal: confere se ha sessao (inclusive a que chega pelo
+    // link do e-mail "seu cadastro esta pronto") e atualiza o cadastro
+    async iniciar() {
+        if (this.MODO_DEMO) return this.sessao();
+        const sb = await this.cliente();
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { this.sair(); return null; }
+        const usuario = await this.perfil(sb, session.user);
+        this.salvar(usuario);
+        return usuario;
+    },
+
+    // Com contas reais, o login devolve o cadastro guardado no servidor,
+    // criado automaticamente quando a contribuicao foi aprovada (ver
+    // servidor/LEIA-ME.md). Na demonstracao, o valor vem do seletor da tela
+    // de login e o cadastro nasce so com o e-mail.
+    async entrar(email, senha, valorDemo) {
+        if (this.MODO_DEMO) {
+            const valor = Number(valorDemo) || 0;
+            return { email, nome: '', valor, cadastroAutomatico: valor > 0, conferido: false };
+        }
+        const sb = await this.cliente();
+        const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+        if (error) throw new Error('E-mail ou senha incorretos.');
+        return this.perfil(sb, data.user);
+    },
+
+    // Salva o que a pessoa alterou em "Meu cadastro". Nivel e valor nao
+    // passam por aqui: so a plataforma de pagamento muda isso (o banco
+    // tambem nao deixa: ver as permissoes em schema.sql).
+    async atualizar(dados) {
+        const atual = this.sessao() || {};
+        const { valor, cadastroAutomatico, email, senha, ...editaveis } = dados;
+        const novo = { ...atual, ...editaveis, conferido: true };
+        if (!this.MODO_DEMO) {
+            const sb = await this.cliente();
+            const { error } = await sb.from('mantenedores').update({
+                nome: novo.nome, telefone: novo.telefone || null, nascimento: novo.nascimento || null,
+                naturalidade: novo.naturalidade || null, moradia: novo.moradia || null, igreja: novo.igreja || null,
+                cristao: novo.cristao ?? null, congrega: novo.congrega ?? null, conferido: true
+            }).eq('id', atual.id);
+            if (error) throw new Error('Não foi possível salvar. Tente de novo.');
+            if (senha) {
+                const { error: e2 } = await sb.auth.updateUser({ password: senha });
+                if (e2) throw new Error('Dados salvos, mas a senha não foi alterada: ' + e2.message);
+            }
+        }
+        this.salvar(novo);
+        return novo;
+    },
+
+    // Cadastro pelo "Faca parte". Em demonstracao NAO e enviado a lugar
+    // nenhum: so abre a sessao com nome e e-mail. Com contas reais, os dados
+    // vao junto da conta e o banco cria a linha em "mantenedores" (gatilho
+    // em schema.sql); o nivel so aparece quando a contribuicao for aprovada.
     async cadastrar(dados) {
         if (this.MODO_DEMO) return { nome: dados.nome, email: dados.email };
-        throw new Error('Sistema de contas ainda não configurado.');
+        const sb = await this.cliente();
+        const { senha, ...perfil } = dados;
+        const { data, error } = await sb.auth.signUp({
+            email: dados.email, password: senha,
+            options: { data: perfil, emailRedirectTo: new URL('portal.html', location.href).href }
+        });
+        if (error) throw new Error(error.message.includes('registered') ? 'Este e-mail já tem cadastro. Entre na Área do Mantenedor.' : 'Não foi possível concluir o cadastro.');
+        if (!data.session) throw new Error('Quase lá: enviamos um e-mail para confirmar seu cadastro. Abra o link para entrar.');
+        return this.perfil(sb, data.user);
     },
 
     sessao() {
@@ -356,6 +474,7 @@ const PORTAL = {
 
     sair() {
         try { sessionStorage.removeItem(this.CHAVE); } catch { /* nada a limpar */ }
+        if (!this.MODO_DEMO && this._cliente) this._cliente.auth.signOut();
     }
 };
 
@@ -378,7 +497,73 @@ if (PAGINA === 'portal') {
     window.addEventListener('hashchange', irParaCadastro);
 
     const telaLogin = document.getElementById('tela-login');
-    const telasPortal = ['tela-portal-topo', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal'].map(id => document.getElementById(id));
+    const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal', 'tela-portal-cadastro'].map(id => document.getElementById(id));
+    // Telas que dependem do nivel: so aparecem para quem tem esse nivel
+    const SO_NIVEL = { 'tela-portal-expansores': ['expansor'] };
+
+    if (PORTAL.MODO_DEMO) document.getElementById('demo-nivel').hidden = false;
+
+    // Seu nivel, beneficios e resumo da contribuicao
+    function mostrarNivel(usuario) {
+        const nivel = nivelPorValor(usuario.valor);
+        const selo = document.getElementById('usuario-nivel');
+        selo.hidden = !nivel;
+        if (nivel) selo.textContent = `Mantenedor ${nivel.nome}`;
+        document.getElementById('nivel-titulo').textContent = nivel ? `Você é ${nivel.nome}.` : 'Escolha como contribuir.';
+        document.getElementById('nivel-resumo').textContent = nivel
+            ? `Sua contribuição de ${reais(usuario.valor)} por mês garante os benefícios abaixo. Se o valor mudar, seu nível acompanha.`
+            : 'Seu cadastro está feito. Os benefícios chegam com a contribuição mensal: o nível depende do valor.';
+        document.getElementById('nivel-beneficios').innerHTML = nivel
+            ? nivel.beneficios.map(b => `<li>${b.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])}</li>`).join('')
+            : '';
+        document.getElementById('nivel-acoes').innerHTML = nivel && nivel.id === 'expansor'
+            ? ''
+            : `<a href="seja-mantenedor.html#campanha" class="btn btn-primary">${nivel ? 'Conhecer os outros níveis' : 'Ver os níveis de contribuição'}</a>`;
+        document.getElementById('contribuicao-resumo').textContent = nivel
+            ? `${reais(usuario.valor)} por mês · nível ${nivel.nome}.`
+            : 'Nenhuma contribuição ativa ainda.';
+        document.getElementById('aviso-cadastro').hidden = !(usuario.cadastroAutomatico && !usuario.conferido);
+        telasPortal.forEach(t => {
+            const exige = SO_NIVEL[t.id];
+            if (exige) t.hidden = !nivel || !exige.includes(nivel.id);
+        });
+    }
+
+    // Meu cadastro: preenche com o que ja existe
+    const formMeu = document.getElementById('form-meu-cadastro');
+    function preencherCadastro(u) {
+        const por = (id, v) => { document.getElementById(id).value = v || ''; };
+        por('m-nome', u.nome); por('m-email', u.email); por('m-telefone', u.telefone);
+        por('m-cpf', u.cpf ? u.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '');
+        por('m-nascimento', u.nascimento); por('m-naturalidade', u.naturalidade); por('m-moradia', u.moradia); por('m-igreja', u.igreja);
+        formMeu.querySelectorAll('input[type="radio"]').forEach(r => { r.checked = false; });
+        if (u.cristao !== undefined) formMeu.querySelector(`input[name="m-cristao"][value="${u.cristao ? 'sim' : 'nao'}"]`).checked = true;
+        if (u.congrega !== undefined) formMeu.querySelector(`input[name="m-congrega"][value="${u.congrega ? 'sim' : 'nao'}"]`).checked = true;
+        document.getElementById('meu-cadastro-retorno').textContent = '';
+    }
+    formMeu.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = document.getElementById('meu-cadastro-retorno');
+        formMeu.classList.add('validar');
+        if (!formMeu.checkValidity()) { retorno.textContent = 'Informe seu nome.'; formMeu.querySelector(':invalid')?.focus(); return; }
+        const valor = (id) => document.getElementById(id).value.trim();
+        const escolha = (nome) => formMeu.querySelector(`input[name="${nome}"]:checked`)?.value;
+        try {
+            const usuario = await PORTAL.atualizar({
+                nome: valor('m-nome'), telefone: valor('m-telefone'), nascimento: valor('m-nascimento'),
+                naturalidade: valor('m-naturalidade'), moradia: valor('m-moradia'), igreja: valor('m-igreja'),
+                ...(escolha('m-cristao') ? { cristao: escolha('m-cristao') === 'sim' } : {}),
+                ...(escolha('m-congrega') ? { congrega: escolha('m-congrega') === 'sim' } : {}),
+                senha: document.getElementById('m-senha').value
+            });
+            document.getElementById('m-senha').value = '';
+            document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
+            document.getElementById('aviso-cadastro').hidden = true;
+            retorno.textContent = 'Alterações salvas.';
+        } catch (erro) {
+            retorno.textContent = erro.message;
+        }
+    });
 
     // Poe ou tira "Noticias" do menu conforme o login, sem recarregar
     const atualizarMenu = (logado) => {
@@ -404,7 +589,11 @@ if (PAGINA === 'portal') {
         atualizarMenu(!!usuario);
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
-        if (usuario) document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
+        if (usuario) {
+            document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
+            mostrarNivel(usuario);
+            preencherCadastro(usuario);
+        }
         window.scrollTo(0, 0);
 
         // Troca de tela com fade, sem salto seco
@@ -418,6 +607,8 @@ if (PAGINA === 'portal') {
     };
 
     mostrar(PORTAL.sessao());
+    // Contas reais: confere a sessao no servidor (e a do link do e-mail)
+    if (!PORTAL.MODO_DEMO) PORTAL.iniciar().then(u => mostrar(u)).catch(() => {});
 
     const formLogin = document.getElementById('form-login');
     formLogin.addEventListener('submit', async (e) => {
@@ -434,7 +625,8 @@ if (PAGINA === 'portal') {
         try {
             const usuario = await PORTAL.entrar(
                 document.getElementById('p-email').value.trim(),
-                document.getElementById('p-senha').value
+                document.getElementById('p-senha').value,
+                document.getElementById('p-demo-valor').value
             );
             PORTAL.salvar(usuario);
             formLogin.reset();
