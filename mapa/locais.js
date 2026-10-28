@@ -11,14 +11,15 @@
    Para incluir uma cidade: acrescente um item com nome, uf (ou pais),
    territorio, lat e lng. A ordem aqui e a ordem da lista ao lado do mapa.
 
-   FOTOS: cada cidade tem "fotos", uma lista que aparece no quadro ao lado
-   do mapa quando a cidade e clicada. Coloque os arquivos em
-   img/locais/<cidade>/ e liste assim:
+   FOTOS: cada cidade tem uma pasta em img/locais/<cidade>/ (nome sem
+   acento, com hifen: chapeco, foz-do-iguacu, ciudad-del-este...). Basta
+   colocar os arquivos la com os nomes 01.jpg, 02.jpg, 03.jpg... (ou .jpeg,
+   .png, .webp): o mapa/mapa.js encontra sozinho e mostra nessa ordem,
+   sem precisar mexer aqui. Sem fotos na pasta, o quadro mostra "Fotos
+   em breve". Para pôr legenda, liste as fotos aqui no campo "fotos":
        fotos: [
-           { src: 'img/locais/chapeco/01.jpg', legenda: 'Culto em Chapecó' },
-           { src: 'img/locais/chapeco/02.jpg', legenda: '' }
+           { src: 'img/locais/chapeco/01.jpg', legenda: 'Culto em Chapecó' }
        ]
-   Com a lista vazia, o quadro mostra "Fotos em breve".
    ========================================================= */
 const LOCAIS = [
     { nome: 'Itajaí',           uf: 'SC', territorio: 'SC', lat: -26.9101, lng: -48.6705, fotos: [] },   // 4208203

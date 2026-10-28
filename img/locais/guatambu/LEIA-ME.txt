@@ -1,0 +1,6 @@
+Fotos de Guatambú
+
+Coloque aqui as fotos desta cidade com os nomes 01.jpg, 02.jpg, 03.jpg...
+(tambem vale .jpeg, .png ou .webp). Elas aparecem nessa ordem na pagina
+Onde Estamos, ao clicar em Guatambú. Nao pule numeros: o site para de
+procurar no primeiro que faltar. Prefira fotos com ate 2000 px de largura.

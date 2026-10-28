@@ -43,7 +43,9 @@
         }, 150);
     }
 
+    let localAberto = null; // cidade aberta no quadro (para as fotos que chegam depois)
     function preencherPainel(t) {
+        localAberto = null;
         const tipo = t.pais ? `${t.tipo} (${t.pais})` : t.tipo;
         mostrarPainel(t.nome, t.bandeira, `
             <dl class="ficha-territorio">
@@ -54,10 +56,57 @@
             <div class="ficha-descricao">${t.descricao ? escapar(t.descricao) : '<em>Descrição em preparação.</em>'}</div>`);
     }
 
-    // Ficha da cidade: onde fica e as fotos (mapa/locais.js -> fotos)
+    // Fotos de cada cidade: basta colocar os arquivos na pasta da cidade,
+    // img/locais/<cidade>/, com os nomes 01.jpg, 02.jpg, 03.jpg... (aceita
+    // .jpg, .jpeg, .png e .webp). O site procura em ordem e para no primeiro
+    // numero que nao existir. Fotos listadas a mao em mapa/locais.js (campo
+    // "fotos") tem prioridade.
+    const pastaDoLocal = local => 'img/locais/' + local.nome.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '/';
+    const EXTENSOES = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'JPEG', 'PNG'];
+    const MAX_FOTOS = 30;
+    const existe = src => new Promise(ok => {
+        const img = new Image();
+        img.onload = () => ok(true);
+        img.onerror = () => ok(false);
+        img.src = src;
+    });
+    async function procurarFotos(local) {
+        const achadas = [];
+        for (let n = 1; n <= MAX_FOTOS; n++) {
+            const nome = String(n).padStart(2, '0');
+            let src = null;
+            for (const ext of EXTENSOES) {
+                const tentativa = `${pastaDoLocal(local)}${nome}.${ext}`;
+                if (await existe(tentativa)) { src = tentativa; break; }
+            }
+            if (!src) break;
+            achadas.push({ src, legenda: '' });
+        }
+        return achadas;
+    }
+
+    // Ficha da cidade: onde fica e as fotos
     function preencherLocal(local, i) {
         const t = POR_ID[local.territorio];
         const onde = local.uf ? `${t ? t.nome : local.uf} (${local.uf})` : local.pais;
+        if (!(local.fotos && local.fotos.length) && !local._procurado) {
+            local._procurado = true;
+            mostrarPainel(local.nome, t ? t.bandeira : '#flag-br', `
+                <dl class="ficha-territorio">
+                    <div><dt>${local.uf ? 'Estado' : 'País'}</dt><dd>${escapar(onde)}</dd></div>
+                </dl>
+                <div class="galeria-vazia">Carregando fotos…</div>`);
+            procurarFotos(local).then(achadas => {
+                local.fotos = achadas;
+                // So redesenha se a pessoa ainda estiver nesta cidade
+                if (localAberto === i) preencherLocal(local, i);
+            });
+            localAberto = i;
+            return;
+        }
+        localAberto = i;
         const fotos = local.fotos || [];
         const galeria = fotos.length
             ? `<div class="galeria-local">${fotos.map((f, n) => `
