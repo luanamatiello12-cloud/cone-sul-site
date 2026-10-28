@@ -2896,3 +2896,78 @@ body.modo-edicao .bloco-alvo { box-shadow: inset 0 0 0 2px rgba(201, 215, 128, 0
 header nav { max-width: 1400px; }
 nav ul.menu { gap: 0.85rem; }
 .fotos-no-mapa { margin: 0; font-size: 0.88rem; color: #5a5f58; white-space: normal; }
+
+/* Quadro do mapa: sai de cena com suavidade quando a cidade tem fotos */
+.mapa-container .card-info {
+    max-height: 1200px;
+    transition:
+        max-height 0.55s var(--ease-suave),
+        opacity 0.35s ease,
+        transform 0.45s var(--ease-suave),
+        margin 0.45s var(--ease-suave),
+        border-width 0.45s var(--ease-suave);
+}
+.mapa-container .card-info.recolhido {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+    margin-bottom: -1.5rem;
+    border-top-width: 0;
+    pointer-events: none;
+}
+
+/* Ficha do territorio: nao crentes em destaque e barras de religiao */
+.ficha-rotulo {
+    margin: 0 0 1rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--limao-escuro);
+    white-space: normal;
+}
+.ficha-destaque {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    background: var(--verde-900);
+    border-left: 4px solid var(--areia);
+    border-radius: 4px;
+    white-space: normal;
+}
+.ficha-destaque strong { font-family: 'Advercase', Georgia, serif; font-size: 2.2rem; line-height: 1; color: var(--areia); }
+.ficha-destaque span { font-size: 0.85rem; line-height: 1.35; color: rgba(254, 245, 226, 0.85); max-width: 14rem; }
+.ficha-texto { margin: 0 0 1rem; white-space: normal; }
+.ficha-pop {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.7rem 0;
+    border-top: 1px solid #e7e4da;
+    border-bottom: 1px solid #e7e4da;
+    margin-bottom: 1rem;
+}
+.ficha-pop span,
+.religioes-titulo {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--limao-escuro);
+}
+.ficha-pop strong { color: var(--verde-800); font-size: 1.05rem; }
+.religioes { display: grid; gap: 0.55rem; white-space: normal; }
+.religioes-titulo { margin-bottom: 0.15rem; }
+.religiao { display: grid; grid-template-columns: 8.5rem 1fr auto; align-items: center; gap: 0.7rem; font-size: 0.86rem; }
+.religiao-nome { color: #2a2e2a; font-weight: 600; line-height: 1.25; }
+.religiao-barra { height: 8px; border-radius: 999px; background: #eeebe1; overflow: hidden; }
+.religiao-barra i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--verde-800), #7d9f52); }
+.religiao-pct { font-weight: 800; color: var(--verde-800); white-space: nowrap; font-size: 0.82rem; }
+.religioes small { font-size: 0.74rem; color: #8c8f88; }
+@media (max-width: 560px) {
+    .religiao { grid-template-columns: 6.5rem 1fr auto; }
+    .ficha-destaque strong { font-size: 1.8rem; }
+}
