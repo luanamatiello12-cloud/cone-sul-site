@@ -2990,3 +2990,79 @@ nav ul.menu { gap: 0.85rem; }
 }
 a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); transform: translateY(-2px); }
 .produto-comprar[aria-disabled="true"] { cursor: default; }
+
+/* =========================================================
+   PORTAL: nivel do mantenedor e "Meu cadastro"
+   ========================================================= */
+.nivel-selo {
+    display: inline-block;
+    margin: 0.6rem 0 0.2rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--areia);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--areia);
+}
+.aviso-cadastro {
+    margin: 0 0 2rem;
+    padding: 0.9rem 1.1rem;
+    background: rgba(201, 215, 128, 0.12);
+    border-left: 3px solid var(--areia);
+    border-radius: 4px;
+    color: var(--creme);
+    font-size: 0.92rem;
+}
+.aviso-cadastro a { color: var(--areia); font-weight: 700; }
+.nivel-beneficios {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.9rem;
+    margin: 1.8rem 0 0;
+    padding: 0;
+}
+.nivel-beneficios li {
+    position: relative;
+    padding: 1rem 1rem 1rem 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    color: var(--creme);
+    font-weight: 600;
+    line-height: 1.4;
+}
+.nivel-beneficios li::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 1.05rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: var(--areia) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23122d1e' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 70% no-repeat;
+}
+.meu-cadastro {
+    max-width: 760px;
+    margin-top: 2rem;
+    padding: 2rem;
+    background: #fff;
+    border-top: 3px solid var(--areia);
+    border-radius: 4px;
+    box-shadow: 0 12px 30px rgba(18, 45, 30, 0.08);
+}
+.meu-cadastro .formulario { grid-template-columns: 1fr 1fr; max-width: none; }
+.meu-cadastro fieldset { border: none; display: contents; }
+.meu-cadastro input[readonly] { background: #f3f1ea; color: #6b6f68; cursor: default; }
+@media (max-width: 640px) {
+    .meu-cadastro { padding: 1.4rem; }
+    .meu-cadastro .formulario { grid-template-columns: 1fr; }
+}
+.demo-nivel label { color: var(--areia); }
+.meu-cadastro .campo label,
+.meu-cadastro .opcoes label { color: #2a2e2a; }
+.meu-cadastro legend { color: var(--limao-escuro); }
+.meu-cadastro .btn-primary { background: var(--verde-800); color: var(--creme); box-shadow: none; }
+.meu-cadastro .btn-primary:hover { background: var(--verde-900); color: var(--areia); }
+.meu-cadastro .campo.escolha legend { color: var(--limao-escuro); }
