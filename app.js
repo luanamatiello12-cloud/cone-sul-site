@@ -85,7 +85,7 @@ function montarCabecalho() {
         <ul class="menu">
             ${itens}
             <li><a href="portal.html" class="nav-acesso${PAGINA === 'portal' ? ' ativo' : ''}">Área do Mantenedor</a></li>
-            <li><a href="fazer-parte.html" class="nav-cta${PAGINA === 'fazer-parte' ? ' ativo' : ''}">Faça Parte</a></li>
+            <li><a href="fazer-parte.html" class="nav-cta${PAGINA === 'fazer-parte' ? ' ativo' : ''}">Eu quero fazer parte</a></li>
         </ul>
     </nav>
 </header>`;
