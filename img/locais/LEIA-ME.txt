@@ -1,0 +1,16 @@
+FOTOS DAS CIDADES (pagina Onde Estamos)
+
+Cada cidade do mapa tem uma pasta aqui. Para mostrar fotos de uma cidade:
+
+1. Abra a pasta dela (ex.: chapeco, foz-do-iguacu, ciudad-del-este).
+2. Coloque as fotos com os nomes 01.jpg, 02.jpg, 03.jpg ... (tambem vale
+   .jpeg, .png ou .webp).
+3. Pronto: ao clicar na cidade, as fotos aparecem nessa ordem.
+
+Pelo GitHub: entre na pasta da cidade > "Add file" > "Upload files",
+arraste as fotos ja renomeadas e clique em "Commit changes". Em 1 a 2
+minutos elas estao no site.
+
+Dicas: nao pule numeros (o site para no primeiro que faltar); fotos com
+ate 2000 px de largura carregam mais rapido. Nova cidade no mapa? Crie a
+pasta com o nome dela sem acento e com hifen no lugar dos espacos.
