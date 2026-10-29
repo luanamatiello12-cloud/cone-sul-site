@@ -19,7 +19,7 @@ const PRODUTOS = [
     {
         nome: 'Camiseta Cone Sul',
         descricao: 'Fronteiras que conectam a Cristo.',
-        preco: '',
+        preco: 'R$ 160,00',
         tamanhos: ['P', 'M', 'G', 'GG', 'XGG'],
         estoque: { P: 10, M: 10, G: 5, GG: 2, XGG: 3 },
         medidas: {
