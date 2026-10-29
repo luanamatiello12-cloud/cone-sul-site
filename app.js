@@ -130,6 +130,8 @@ function atualizarContatosNaTela() {
         // Redes e sites abrem em outra aba (so quando ja tem endereco)
         if (k !== 'email' && CONTATO[k] !== '#') { a.target = '_blank'; a.rel = 'noopener'; }
         else a.removeAttribute('target');
+        // Site da igreja ainda nao existe: o item some do rodape ate ter endereco
+        if (k === 'igreja' && a.parentElement.tagName === 'LI') a.parentElement.hidden = CONTATO.igreja === '#';
     });
 }
 
@@ -1060,6 +1062,10 @@ if (PAGINA === 'fazer-parte') {
         const retorno = document.getElementById('cadastro-retorno');
         formCadastro.classList.add('validar');
         cpf.setCustomValidity(cpf.value && !cpfValido(cpf.value) ? 'CPF inválido.' : '');
+        // Respondeu sobre fe e igreja? Entao precisa da autorizacao propria
+        const consentimentoFe = document.getElementById('c-consentimento-fe');
+        consentimentoFe.required = !!formCadastro.querySelector('input[name="cristao"]:checked, input[name="congrega"]:checked')
+            || !!document.getElementById('c-igreja').value.trim();
 
         if (!formCadastro.checkValidity()) {
             const invalido = formCadastro.querySelector(':invalid');
@@ -1067,13 +1073,20 @@ if (PAGINA === 'fazer-parte') {
                 ? 'Confira o CPF: os números não formam um CPF válido.'
                 : invalido?.id === 'c-senha' && invalido.value
                     ? 'A senha precisa ter pelo menos 8 caracteres.'
-                    : 'Preencha todos os campos e marque a autorização.';
+                    : invalido === consentimentoFe
+                        ? 'Para enviar as respostas sobre fé e igreja, marque a autorização logo abaixo delas (ou deixe-as em branco).'
+                        : 'Preencha todos os campos e marque a autorização.';
             invalido?.focus();
             return;
         }
 
         const valor = (id) => document.getElementById(id).value.trim();
-        const escolha = (nome) => formCadastro.querySelector(`input[name="${nome}"]:checked`).value;
+        // Sem a autorizacao de dado sensivel, fe e igreja nao saem do navegador
+        const fe = consentimentoFe.checked;
+        const escolha = (nome) => {
+            const r = formCadastro.querySelector(`input[name="${nome}"]:checked`);
+            return fe && r ? r.value === 'sim' : null;
+        };
         try {
             const usuario = await PORTAL.cadastrar({
                 nome: valor('c-nome'),
@@ -1081,9 +1094,9 @@ if (PAGINA === 'fazer-parte') {
                 nascimento: valor('c-nascimento'),
                 naturalidade: valor('c-naturalidade'),
                 moradia: valor('c-moradia'),
-                cristao: escolha('cristao') === 'sim',
-                congrega: escolha('congrega') === 'sim',
-                igreja: valor('c-igreja'),
+                cristao: escolha('cristao'),
+                congrega: escolha('congrega'),
+                igreja: fe ? valor('c-igreja') : '',
                 email: valor('c-email'),
                 senha: document.getElementById('c-senha').value
             }, CAPTCHA.token(formCadastro));
