@@ -3212,3 +3212,24 @@ body.modo-edicao section img[data-img]:hover { filter: brightness(0.85); }
 .produto-medidas thead th { text-transform: none; letter-spacing: 0; font-size: 0.72rem; font-weight: 700; }
 .produto-medidas th:first-child { width: 2.2rem; }
 .produto-medidas thead th { font-size: 0.68rem; padding-left: 0.1rem; padding-right: 0.1rem; }
+.rotulo-mapa.oceano.lado span { transform: translate(-100%, -50%); text-align: right; line-height: 1.5; }
+
+/* Mapa acompanha a rolagem no computador: a lista de cidades e territorios
+   e longa, e o mapa (com o cartao das fotos) continua a vista */
+@media (min-width: 901px) {
+    .mapa-container { align-items: start; }
+    .mapa-container .mapa-leaflet { position: sticky; top: 90px; }
+}
+
+/* Mapa mais fluido: cartao do pin e dicas entram com suavidade */
+@keyframes cartao-entra { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
+.popup-fotos-wrap .leaflet-popup-content-wrapper { animation: cartao-entra 0.35s var(--ease-suave) both; transform-origin: 50% 100%; }
+.pf-foto img { transition: opacity 0.25s ease; }
+.leaflet-tooltip.mapa-dica { animation: cartao-entra 0.2s ease-out both; }
+.leaflet-container { cursor: grab; }
+.leaflet-container.leaflet-dragging, .leaflet-dragging .leaflet-interactive { cursor: grabbing; }
+.local-btn { transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s var(--ease-suave); }
+.local-btn:active { transform: scale(0.96); }
+@media (prefers-reduced-motion: reduce) {
+    .popup-fotos-wrap .leaflet-popup-content-wrapper, .leaflet-tooltip.mapa-dica { animation: none; }
+}
