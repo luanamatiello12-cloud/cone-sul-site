@@ -12,7 +12,13 @@
             ? `<img src="${esc(fotos[0])}" alt="${esc(p.nome)}" loading="lazy">`
               + (fotos[1] ? `<img class="produto-foto-2" src="${esc(fotos[1])}" alt="" loading="lazy">` : '')
             : `<span class="produto-sem-foto">Foto em breve</span>`;
-        const tamanhos = (p.tamanhos || []).join(' · ');
+        // Tamanhos com a quantidade disponivel, quando informada
+        const estoque = p.estoque || null;
+        const tamanhos = (p.tamanhos || []).map(t => {
+            if (!estoque || estoque[t] === undefined) return `<li>${esc(t)}</li>`;
+            const n = Number(estoque[t]) || 0;
+            return `<li class="${n ? '' : 'esgotado'}"><strong>${esc(t)}</strong><span>${n ? `${n} unid.` : 'esgotado'}</span></li>`;
+        }).join('');
         // Botao Comprar sempre visivel; sem link ainda, aparece mas nao reage
         const comprar = p.link
             ? `<a class="produto-comprar" href="${esc(p.link)}" target="_blank" rel="noopener">Comprar <span aria-hidden="true">→</span></a>`
@@ -27,7 +33,7 @@
                 </div>
                 <h3 class="produto-nome">${esc(p.nome)}</h3>
                 <p class="produto-preco">${p.preco ? esc(p.preco) : 'Preço em breve'}</p>
-                ${tamanhos ? `<p class="produto-tamanhos">${esc(tamanhos)}</p>` : ''}
+                ${tamanhos ? `<div class="produto-tamanhos">${estoque ? '<span class="produto-tamanhos-titulo">Disponíveis</span>' : ''}<ul>${tamanhos}</ul></div>` : ''}
             ${fecha}${comprar}</div>`;
     }).join('');
 })();

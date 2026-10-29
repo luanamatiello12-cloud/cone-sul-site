@@ -4,6 +4,9 @@
    - nome, descricao
    - preco: texto livre, ex. 'R$ 79,90' (vazio = "Preço em breve")
    - tamanhos: lista, ex. ['P', 'M', 'G', 'GG']
+   - estoque (opcional): quantidade de cada tamanho, ex. { P: 10, M: 5 }.
+     Mostrado no card ("10 unid."); tamanho com 0 aparece como esgotado.
+     Atualizar a mao conforme as vendas.
    - fotos: arquivos em img/loja/, ex. ['img/loja/cone-sul-verde-01.jpg']
      (a primeira e a capa; vazio = espaco reservado)
    - link: link de pagamento (Mercado Pago, PagSeguro...). Vazio = o
@@ -15,7 +18,8 @@ const PRODUTOS = [
         nome: 'Camiseta Cone Sul',
         descricao: 'Fronteiras que conectam a Cristo.',
         preco: '',
-        tamanhos: ['P', 'M', 'G', 'GG'],
+        tamanhos: ['P', 'M', 'G', 'GG', 'XGG'],
+        estoque: { P: 10, M: 10, G: 5, GG: 2, XGG: 3 },
         fotos: [],
         link: ''
     }
