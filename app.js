@@ -766,7 +766,7 @@ if (PAGINA === 'portal') {
     const telaLogin = document.getElementById('tela-login');
     const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal', 'tela-portal-senha'].map(id => document.getElementById(id));
     // Telas que dependem do nivel: so aparecem para quem tem esse nivel
-    const SO_NIVEL = { 'tela-portal-expansores': ['expansor'] };
+    const SO_NIVEL = { 'tela-portal-expansores': ['expansor'], 'tela-portal-summit': ['expansor'] };
 
     // Beneficios dos Expansores: vem do banco, que so entrega a lista a quem
     // tem o nivel Expansor (o HTML e publico e nao traz a lista)
