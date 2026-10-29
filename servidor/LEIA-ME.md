@@ -66,8 +66,7 @@ as linhas já organizadas. Só contas da tabela `equipe` conseguem importar.
 
 ### 1. Supabase
 1. Criar um projeto em supabase.com, em nome da igreja.
-2. **SQL Editor**: colar e rodar `supabase/schema.sql` e, depois, `supabase/conteudo-inicial.sql`
-   (lista dos benefícios dos Expansores, que só o banco entrega a quem tem o nível).
+2. **SQL Editor**: colar e rodar `supabase/schema.sql`.
 3. **Authentication > URL Configuration**: em *Site URL* e *Redirect URLs*, colocar o
    endereço do site (ex.: `https://luanamatiello12-cloud.github.io/cone-sul-site/`).
 4. **Authentication > Email Templates**: traduzir para o português o e-mail de
@@ -125,8 +124,9 @@ fica no banco:
 - **Notícias** (`noticias.html`): tabela `noticias`. Só quem entrou com uma conta lê.
   A equipe publica pelo **Table Editor > noticias > Insert row** (categoria: `diario`,
   `noticias`, `historias`, `projetos` ou `contas`; título; resumo; foto e link opcionais).
-- **Benefícios dos Expansores** (`portal.html`): tabela `conteudo_restrito`, chave
-  `beneficios-expansores`. Só quem tem o nível Expansor (e a equipe) lê.
+- **Conteúdo por nível** (ex.: links dos workshops): tabela `conteudo_restrito`, uma linha
+  por bloco, com os níveis que podem ler (`niveis`). Ainda não há nenhum: quando houver,
+  a página que mostra o conteúdo é ajustada junto.
 
 ### Painel (editar.html)
 Além de editar textos nas páginas, a equipe muda pelo painel, sem código:

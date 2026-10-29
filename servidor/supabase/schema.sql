@@ -167,8 +167,8 @@ create policy "equipe envia imagens" on storage.objects
 -- O HTML do site e publico (e o repositorio tambem): o que for exclusivo
 -- fica aqui, e o banco so entrega a quem tem direito.
 
--- Blocos exclusivos de um ou mais niveis. Ex.: chave 'beneficios-expansores',
--- niveis {expansor}. Conteudo inicial: conteudo-inicial.sql
+-- Blocos exclusivos de um ou mais niveis. Ex.: chave 'links-workshops',
+-- niveis {construtor, expansor}. Ainda sem nenhum bloco.
 create table if not exists public.conteudo_restrito (
     chave          text primary key,
     niveis         text[] not null check (cardinality(niveis) > 0),
