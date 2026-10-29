@@ -8,7 +8,7 @@
 const CONTATO = {
     email: 'conesul.missoes@gmail.com',
     instagram: 'https://www.instagram.com/conesul.missoes/',
-    whatsapp: '#',
+    whatsapp: 'https://wa.me/5549991802176',
     igreja: '#'
 };
 
