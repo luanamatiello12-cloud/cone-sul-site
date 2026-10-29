@@ -128,6 +128,18 @@ fica no banco:
 - **Benefícios dos Expansores** (`portal.html`): tabela `conteudo_restrito`, chave
   `beneficios-expansores`. Só quem tem o nível Expansor (e a equipe) lê.
 
+### Painel (editar.html)
+Além de editar textos nas páginas, a equipe muda pelo painel, sem código:
+- **Contatos do rodapé e links de pagamento** dos planos;
+- **Camisetas**: nome, preço, descrição, tamanhos, estoque, medidas, fotos e link;
+- **Cidades do mapa**: fotos (ordem e legenda), mostrar/esconder, cidade nova;
+- **Notícias**: publicar, esconder e apagar (tabela `noticias`).
+
+Os três primeiros são a "configuração do site": cada **Salvar** grava uma versão em
+`site_edicoes` com `pagina = '_config'` (o **Histórico** do painel volta a uma anterior).
+O que está no código (`app.js`, `loja/produtos.js`, `mapa/locais.js`) vale até o
+painel mudar aquela parte.
+
 ### Registro de atividades
 Cada importação e cada senha provisória nova ficam em **Table Editor >
 registro_atividades** (quem fez, quando e, na senha nova, para qual e-mail).

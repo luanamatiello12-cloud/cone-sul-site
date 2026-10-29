@@ -3372,3 +3372,59 @@ body.modo-edicao .so-edicao {
 }
 body.modo-edicao img[data-img] { cursor: pointer; }
 .editar-passos ul { margin: 0.4rem 0 0; padding-left: 1.2rem; display: grid; gap: 0.25rem; list-style: disc; }
+
+/* ===== Painel de configuracoes (editar.html) ===== */
+.painel-config h2 { margin-bottom: 0.8rem; }
+.pc-dica { font-size: 0.88rem; opacity: 0.75; margin: 0.4rem 0 1rem; max-width: 760px; }
+.pc-bloco { margin-top: 1.2rem; background: #fff; border-top: 3px solid var(--verde-600); }
+.pc-bloco > summary { padding: 1.1rem 1.3rem; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
+.pc-bloco > div { padding: 0 1.3rem 1.4rem; }
+.pc-bloco h4 { margin: 1.2rem 0 0.6rem; font-size: 0.95rem; }
+.pc-bloco h5 { margin: 1rem 0 0.5rem; font-size: 0.85rem; }
+.pc-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.9rem 1.2rem; }
+.pc-campo { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; font-weight: 600; }
+.pc-campo small { font-weight: 400; opacity: 0.7; font-size: 0.75rem; }
+.pc-campo input, .pc-campo select, .pc-campo textarea,
+.pc-tabela input, .pc-foto input {
+    width: 100%; padding: 0.55rem 0.65rem; border: 1px solid #cfc9b6; background: #fffdf7;
+    font: inherit; font-weight: 400; font-size: 0.9rem; color: inherit;
+}
+.pc-tabela { border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+.pc-tabela th, .pc-tabela td { padding: 0.3rem 0.4rem; border-bottom: 1px solid #ece6d4; text-align: left; }
+.pc-tabela input { width: 5.5rem; padding: 0.35rem 0.45rem; }
+.pc-produto { padding: 1rem 0 1.4rem; border-bottom: 1px solid #ece6d4; }
+.pc-produto-topo { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.8rem; }
+.pc-fotos { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 0.5rem 0; }
+.pc-foto { width: 150px; display: flex; flex-direction: column; gap: 0.3rem; }
+.pc-foto img { width: 150px; height: 110px; object-fit: cover; display: block; background: #eee; }
+.pc-foto-acoes { display: flex; gap: 0.25rem; }
+.pc-foto-acoes button, .pc-noticia-acoes button, .pc-produto-topo button, .pc-cidade-linha button, .pc-versoes button {
+    padding: 0.3rem 0.55rem; border: 1px solid #cfc9b6; background: #fff; font: inherit; font-size: 0.75rem; cursor: pointer;
+}
+.pc-foto-acoes button:disabled { opacity: 0.35; cursor: default; }
+.pc-perigo { color: #9b2c1a; border-color: #e4b7a8 !important; }
+.pc-foto-nova { width: 150px; height: 110px; border: 2px dashed #cfc9b6; background: transparent; font: inherit; font-size: 0.8rem; cursor: pointer; }
+.pc-cidade-linha { display: flex; align-items: flex-start; gap: 1rem; border-bottom: 1px solid #ece6d4; padding: 0.5rem 0; }
+.pc-cidade { flex: 1; }
+.pc-cidade > summary { cursor: pointer; padding: 0.3rem 0; }
+.pc-cidade > summary span { opacity: 0.65; font-size: 0.85rem; }
+.pc-mostrar { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; white-space: nowrap; padding-top: 0.35rem; }
+.pc-nova-cidade, .pc-noticia-form { margin-top: 1.4rem; display: grid; gap: 0.8rem; justify-items: start; }
+.pc-nova-cidade .pc-grade, .pc-noticia-form .pc-grade { width: 100%; }
+.pc-salvar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.2rem; padding: 0.9rem 1.3rem; background: var(--verde-900); color: var(--areia-clara); }
+.pc-salvar .pc-dica { margin: 0; opacity: 0.9; }
+.pc-salvar .btn-secondary { color: var(--areia-clara); }
+.pc-versoes { margin-top: 0.6rem; padding: 1rem 1.3rem; background: #fff; font-size: 0.85rem; }
+.pc-versoes li { display: flex; gap: 0.8rem; align-items: center; padding: 0.25rem 0; }
+.pc-noticia { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid #ece6d4; }
+.pc-noticia small { display: block; opacity: 0.65; }
+.pc-escondida { opacity: 0.55; }
+.pc-noticia-acoes { display: flex; gap: 0.4rem; align-items: center; }
+.pc-noticia-foto-linha { display: flex; align-items: center; gap: 1rem; }
+.pc-noticia-foto { width: 160px; height: 90px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; overflow: hidden; }
+.pc-noticia-foto img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 640px) {
+    .pc-cidade-linha { flex-direction: column; gap: 0.2rem; }
+    .pc-foto, .pc-foto img, .pc-foto-nova { width: 130px; }
+}
+.pf-legenda { margin: 0; padding: 0.55rem 0.9rem 0; color: rgba(254, 245, 226, 0.85); font-size: 0.8rem; line-height: 1.4; }

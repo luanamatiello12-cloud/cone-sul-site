@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alterações no site | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=69">
+    <link rel="stylesheet" href="styles.css?v=71">
 </head>
 <body data-pagina="editar">
 
@@ -93,6 +93,40 @@
         </div>
     </section>
 
+    <!-- PAINEL: o que nao e texto de pagina (painel.js) -->
+    <section class="sec-clara painel-config" id="painel-config" hidden>
+        <div class="wrap">
+            <span class="sec-kicker">Painel</span>
+            <h2>Contatos, pagamentos, loja, mapa e notícias.</h2>
+            <p class="pc-dica">Contatos, pagamentos, camisetas e cidades só mudam no site ao clicar em <strong>Salvar</strong>, no fim desta parte. As notícias são publicadas na hora.</p>
+
+            <details class="pc-bloco" open>
+                <summary>Contatos e links de pagamento</summary>
+                <div id="pc-contatos"></div>
+            </details>
+            <details class="pc-bloco">
+                <summary>Camisetas</summary>
+                <div id="pc-produtos"></div>
+            </details>
+            <details class="pc-bloco">
+                <summary>Cidades do mapa e fotos</summary>
+                <div id="pc-cidades"></div>
+            </details>
+
+            <div class="pc-salvar">
+                <button type="button" class="btn btn-primary" id="pc-salvar" disabled>Salvar</button>
+                <button type="button" class="btn btn-secondary" id="pc-historico">Histórico</button>
+                <p class="pc-dica" id="pc-status" role="status">Nenhuma alteração.</p>
+            </div>
+            <div class="pc-versoes painel-historico-config" id="pc-versoes" hidden></div>
+
+            <details class="pc-bloco">
+                <summary>Notícias</summary>
+                <div id="pc-noticias"></div>
+            </details>
+        </div>
+    </section>
+
     <section class="sec-escura" id="editar-senha" hidden>
         <div class="wrap">
             <span class="sec-kicker">Sua senha</span>
@@ -116,6 +150,10 @@
         </div>
     </section>
 
-    <script src="app.js?v=50"></script>
+    <script src="loja/produtos.js?v=3"></script>
+    <script src="mapa/locais.js?v=3"></script>
+    <script src="mapa/territorios.js?v=3"></script>
+    <script src="app.js?v=51"></script>
+    <script src="painel.js?v=2"></script>
 </body>
 </html>

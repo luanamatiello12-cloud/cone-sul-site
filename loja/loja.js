@@ -1,12 +1,15 @@
 /* Monta os cards da pagina de camisetas a partir de loja/produtos.js.
    Visual de vitrine: foto em fundo claro, nome e preco embaixo. O card
    inteiro leva ao link de pagamento (quando houver). */
-(function () {
+// As camisetas do Painel (editar.html), quando houver, substituem as de
+// loja/produtos.js; com contas ligadas, espera elas chegarem do banco
+(typeof CONFIG_PRONTA !== 'undefined' ? CONFIG_PRONTA : Promise.resolve()).then(function () {
     const grade = document.getElementById('produtos');
-    if (!grade || typeof PRODUTOS === 'undefined') return;
+    const PRODUTOS_LOJA = (typeof configProdutos === 'function' && configProdutos()) || (typeof PRODUTOS !== 'undefined' ? PRODUTOS : null);
+    if (!grade || !PRODUTOS_LOJA) return;
     const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-    grade.innerHTML = PRODUTOS.map(p => {
+    grade.innerHTML = PRODUTOS_LOJA.map(p => {
         const fotos = p.fotos || [];
         const capa = fotos.length
             ? `<img src="${esc(fotos[0])}" alt="${esc(p.nome)}" loading="lazy">`
@@ -47,4 +50,4 @@
                 ${tamanhos ? `<div class="produto-tamanhos">${estoque ? '<span class="produto-tamanhos-titulo">Disponíveis</span>' : ''}<ul>${tamanhos}</ul></div>` : ''}
             ${fecha}${tabela}${comprar}</div>`;
     }).join('');
-})();
+});

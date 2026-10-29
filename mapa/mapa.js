@@ -17,9 +17,11 @@
    Selecao unica: selecionarTerritorio(id) atualiza mapa, lista e
    painel, venha o clique do mapa ou da lista.
    ========================================================= */
-(function () {
+// Espera as configuracoes do Painel (fotos e cidades mudadas pela equipe)
+(typeof CONFIG_PRONTA !== 'undefined' ? CONFIG_PRONTA : Promise.resolve()).then(function () {
     const elMapa = document.getElementById('mapa-leaflet');
     if (!elMapa || typeof TERRITORIOS === 'undefined') return;
+    if (typeof configLocais === 'function' && typeof LOCAIS !== 'undefined') configLocais(LOCAIS);
 
     const POR_ID = Object.fromEntries(TERRITORIOS.map(t => [t.id, t]));
     const camadas = {};          // id -> camada Leaflet do territorio
@@ -387,6 +389,7 @@
                 <button type="button" class="pf-foto" aria-label="Ampliar foto">
                     <img src="${escapar(f.src)}" alt="${escapar(f.legenda || local.nome)}">
                 </button>
+                ${f.legenda ? `<p class="pf-legenda">${escapar(f.legenda)}</p>` : ''}
                 <div class="pf-rodape">
                     <strong>${escapar(local.nome)}</strong>
                     ${fotos.length > 1 ? `<span class="pf-setas">
@@ -494,4 +497,4 @@
             console.error('Mapa: falha ao carregar os limites geográficos.', erro);
             avisoMapa('Não foi possível carregar os limites do mapa.');
         });
-})();
+});

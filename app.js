@@ -37,6 +37,119 @@ const LINKS_PAGAMENTO = {
     expansores: ''
 };
 
+// ---------- Configuracoes do site (Painel em editar.html) ----------
+// Contatos, links de pagamento, camisetas e cidades do mapa podem ser
+// mudados pela equipe no painel, sem mexer no codigo. Com contas ligadas
+// ficam no banco (site_edicoes, pagina "_config"), lidos por todos; na
+// demonstracao, so no navegador de quem mudou (e vao em "Baixar edicoes").
+// O que estiver aqui no codigo vale ate o painel mudar.
+const CONTAS_LIGADAS = !!(CONTAS.url && CONTAS.chavePublica);
+const CHAVE_CONFIG = 'conesul-edicoes::_config';
+const CHAVE_CONFIG_CACHE = 'conesul-config-publicada';
+const CONTATO_PADRAO = { ...CONTATO };
+const PAGAMENTOS_PADRAO = { ...LINKS_PAGAMENTO };
+let CONFIG_SITE = {};
+const lerJSON = (chave) => { try { return JSON.parse(localStorage.getItem(chave)) || null; } catch { return null; } };
+// So enderecos http(s) completos (o que vem do banco e conferido de novo aqui)
+const httpSeguro = (u) => { try { const x = new URL(String(u ?? '').trim()); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch { return ''; } };
+// Foto: arquivo do proprio site (img/...), http(s) ou imagem embutida
+const fotoSegura = (u) => {
+    const v = String(u ?? '').trim();
+    if (/^img\/[\w./-]+\.(jpe?g|png|webp)$/i.test(v) && !v.includes('..')) return v;
+    if (/^data:image\/(jpeg|png|webp);base64,[a-z0-9+/=]+$/i.test(v)) return v;
+    return httpSeguro(v);
+};
+const textoCurto = (v, max = 300) => String(v ?? '').trim().slice(0, max);
+
+function aplicarConfig(c) {
+    CONFIG_SITE = c && typeof c === 'object' ? c : {};
+    Object.assign(CONTATO, CONTATO_PADRAO);
+    Object.assign(LINKS_PAGAMENTO, PAGAMENTOS_PADRAO);
+    const ct = CONFIG_SITE.contato || {};
+    if (/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(ct.email || '')) CONTATO.email = ct.email.trim();
+    ['instagram', 'whatsapp', 'igreja'].forEach(k => { const u = httpSeguro(ct[k]); if (u) CONTATO[k] = u; });
+    const pg = CONFIG_SITE.pagamentos || {};
+    Object.keys(LINKS_PAGAMENTO).forEach(k => { if (k in pg) LINKS_PAGAMENTO[k] = httpSeguro(pg[k]); });
+}
+
+// Camisetas do painel (null = usar loja/produtos.js)
+function configProdutos() {
+    const lista = CONFIG_SITE.produtos;
+    if (!Array.isArray(lista)) return null;
+    return lista.slice(0, 30).map(p => {
+        const tamanhos = (Array.isArray(p.tamanhos) ? p.tamanhos : []).map(t => textoCurto(t, 8)).filter(Boolean).slice(0, 12);
+        const estoque = {};
+        tamanhos.forEach(t => { const n = Number(p.estoque?.[t]); if (Number.isFinite(n) && n >= 0) estoque[t] = Math.floor(n); });
+        const colunas = (Array.isArray(p.medidas?.colunas) ? p.medidas.colunas : []).map(c => textoCurto(c, 20)).filter(Boolean).slice(0, 6);
+        const linhas = {};
+        if (colunas.length) tamanhos.forEach(t => {
+            const v = p.medidas?.linhas?.[t];
+            linhas[t] = Array.isArray(v) && v.some(n => String(n ?? '').trim()) ? colunas.map((_, i) => textoCurto(v[i], 8)) : null;
+        });
+        return {
+            nome: textoCurto(p.nome, 80) || 'Produto',
+            descricao: textoCurto(p.descricao, 300),
+            preco: textoCurto(p.preco, 30),
+            tamanhos,
+            estoque: Object.keys(estoque).length ? estoque : null,
+            medidas: colunas.length ? { colunas, linhas } : null,
+            fotos: (Array.isArray(p.fotos) ? p.fotos : []).map(fotoSegura).filter(Boolean).slice(0, 8),
+            link: httpSeguro(p.link)
+        };
+    });
+}
+
+// Cidades do mapa: fotos escolhidas no painel, cidades escondidas e novas.
+// Muda a lista LOCAIS (mapa/locais.js) antes de o mapa ser montado.
+function configLocais(locais) {
+    const c = CONFIG_SITE.locais;
+    if (!c || typeof c !== 'object' || !Array.isArray(locais)) return locais;
+    const ocultos = new Set(Array.isArray(c.ocultos) ? c.ocultos : []);
+    const novos = (Array.isArray(c.novos) ? c.novos : []).map(n => ({
+        nome: textoCurto(n.nome, 60),
+        ...(n.pais ? { pais: textoCurto(n.pais, 40) } : { uf: textoCurto(n.uf, 2).toUpperCase() }),
+        territorio: textoCurto(n.territorio, 4),
+        lat: Number(n.lat), lng: Number(n.lng), fotos: []
+    })).filter(n => n.nome && Math.abs(n.lat) <= 90 && Math.abs(n.lng) <= 180 && !locais.some(l => l.nome === n.nome));
+    const todos = [...locais, ...novos].filter(l => !ocultos.has(l.nome));
+    const fotos = c.fotos && typeof c.fotos === 'object' ? c.fotos : {};
+    todos.forEach(l => {
+        const lista = Array.isArray(fotos[l.nome]) ? fotos[l.nome] : null;
+        if (!lista) return;
+        l.fotos = lista.map(f => ({ src: fotoSegura(f?.src), legenda: textoCurto(f?.legenda, 140) })).filter(f => f.src).slice(0, 30);
+        l._procurado = true;                     // nao procura mais na pasta da cidade
+        if (!l.fotos.length) l._pronto = true;   // lista vazia de proposito: "Fotos em breve"
+    });
+    locais.splice(0, locais.length, ...todos);
+    return locais;
+}
+
+// Rodape: os links de contato acompanham a configuracao
+function atualizarContatosNaTela() {
+    document.querySelectorAll('[data-contato]').forEach(a => {
+        const k = a.dataset.contato;
+        a.href = k === 'email' ? 'mailto:' + CONTATO.email : CONTATO[k];
+    });
+}
+
+// Demonstracao: o que foi salvo neste navegador. Contas ligadas: a ultima
+// versao conhecida ja vale na hora, e a do banco chega em seguida (a loja
+// e o mapa esperam por ela, no maximo 2,5 s).
+aplicarConfig(lerJSON(CONTAS_LIGADAS ? CHAVE_CONFIG_CACHE : CHAVE_CONFIG));
+const CONFIG_PRONTA = !CONTAS_LIGADAS ? Promise.resolve() : Promise.race([
+    fetch(`${CONTAS.url}/rest/v1/site_edicoes?pagina=eq._config&select=conteudo&order=id.desc&limit=1`,
+        { headers: { apikey: CONTAS.chavePublica, Authorization: 'Bearer ' + CONTAS.chavePublica } })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+        .then(linhas => {
+            const c = linhas[0] ? linhas[0].conteudo : null;
+            try { if (c) localStorage.setItem(CHAVE_CONFIG_CACHE, JSON.stringify(c)); else localStorage.removeItem(CHAVE_CONFIG_CACHE); } catch { /* sem storage */ }
+            aplicarConfig(c);
+            atualizarContatosNaTela();
+        })
+        .catch(erro => console.warn('Configurações do site indisponíveis:', erro)),
+    new Promise(ok => setTimeout(ok, 2500))
+]);
+
 // ---------- Menu principal (ordem da copy oficial) ----------
 const MENU = [
     { id: 'inicio',      rotulo: 'Início',                    href: 'index.html' },
@@ -127,16 +240,16 @@ function montarRodape() {
         <div class="footer-col">
             <h5>Conecte-se</h5>
             <ul>
-                <li><a href="${CONTATO.instagram}">Instagram</a></li>
-                <li><a href="${CONTATO.whatsapp}">WhatsApp</a></li>
-                <li><a href="mailto:${CONTATO.email}">E-mail</a></li>
+                <li><a href="${CONTATO.instagram}" data-contato="instagram">Instagram</a></li>
+                <li><a href="${CONTATO.whatsapp}" data-contato="whatsapp">WhatsApp</a></li>
+                <li><a href="mailto:${CONTATO.email}" data-contato="email">E-mail</a></li>
             </ul>
         </div>
         <div class="footer-col">
             <h5>Institucional</h5>
             <ul>
                 <li><a href="portal.html">Área do Mantenedor</a></li>
-                <li><a href="${CONTATO.igreja}">Igreja Renovar em Cristo</a></li>
+                <li><a href="${CONTATO.igreja}" data-contato="igreja">Igreja Renovar em Cristo</a></li>
                 <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
                 <li><a href="termos-de-uso.html">Termos de Uso</a></li>
             </ul>
@@ -1103,7 +1216,7 @@ function marcarTextos(raiz, prefixo) {
 function marcarLinks(raiz, prefixo) {
     const vistos = {};
     [...raiz.querySelectorAll('a[href]')].forEach((a, i) => {
-        if (a.closest(NAO_EDITAVEL) || a.matches('[data-pagamento]')) return;
+        if (a.closest(NAO_EDITAVEL) || a.matches('[data-pagamento], [data-contato]')) return;
         let chave;
         if (prefixo) chave = prefixo + '>L' + i;
         else {
@@ -1673,7 +1786,8 @@ document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
     if (a) {
         e.preventDefault();
-        if (a.matches('[data-pagamento]')) { alert('Este botão leva ao link de pagamento do plano, que é alterado no Painel (editar.html).'); return; }
+        if (a.matches('[data-pagamento]')) { alert('Este botão leva ao link de pagamento do plano, que é alterado no Painel (editar.html > Contatos e pagamentos).'); return; }
+        if (a.matches('[data-contato]')) { alert('Os contatos do rodapé são alterados no Painel (editar.html > Contatos e pagamentos).'); return; }
         if (a.dataset.link) mostrarControleLink(a);
         return;
     }
@@ -1895,7 +2009,7 @@ if (PORTAL.MODO_DEMO) {
 if (PAGINA === 'editar') {
     const $ = (id) => document.getElementById(id);
     const telaLogin = $('editar-login');
-    const telasPainel = ['editar-topo', 'editar-paginas', 'editar-senha'].map($);
+    const telasPainel = ['editar-topo', 'editar-paginas', 'painel-config', 'editar-senha'].map($);
     const veioTrocarSenha = /type=recovery|#nova-senha/.test(location.hash);
 
     // Paginas que a equipe pode alterar (as do menu e as demais publicas)
@@ -1920,8 +2034,8 @@ if (PAGINA === 'editar') {
     if (PORTAL.MODO_DEMO) {
         $('editar-demo').hidden = false;
         $('passo-publicar').innerHTML = 'Na demonstração não há Publicar: clique em <strong>Baixar edições</strong> e envie o arquivo para quem publica o site.';
+        telasPainel.splice(telasPainel.indexOf($('editar-senha')), 1);
         $('editar-senha').remove();
-        telasPainel.pop();
     }
 
     const mostrar = (email) => {
