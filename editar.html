@@ -88,7 +88,7 @@
 
             <span class="sec-kicker editar-outros">Outras tarefas</span>
             <ul class="editar-lista">
-                <li><a href="importar.html"><strong>Importar relatório do Eklesia</strong><span>Cria os logins dos mantenedores e atualiza os níveis</span></a></li>
+                <li><a href="#importar" data-abrir="importar"><strong>Importar relatório do Eklesia</strong><span>Cria os logins dos mantenedores e atualiza os níveis</span></a></li>
             </ul>
         </div>
     </section>
@@ -125,6 +125,71 @@
                 <summary>Notícias</summary>
                 <div id="pc-noticias"></div>
             </details>
+
+            <!-- IMPORTAR RELATORIO DO EKLESIA (importar.js): cria os logins dos
+                 mantenedores com senha provisoria e atualiza os niveis -->
+            <details class="pc-bloco" id="importar">
+                <summary>Importar relatório do Eklesia</summary>
+                <div class="importar">
+
+            <p class="importar-aviso" id="importar-aviso" hidden></p>
+
+            <div class="importar-passo">
+                <span class="sec-kicker">1. Relatório</span>
+                <label class="importar-arquivo">
+                    <input type="file" id="arquivo" accept=".xlsx,.xls,.csv">
+                    <span>Escolher arquivo do Eklesia (.xlsx)</span>
+                </label>
+                <p class="importar-nome" id="arquivo-nome"></p>
+            </div>
+
+            <div class="importar-passo" id="passo-colunas" hidden>
+                <span class="sec-kicker">2. Colunas</span>
+                <p class="sec-intro">Confira qual coluna do relatório corresponde a cada dado. E-mail e valor são obrigatórios.</p>
+                <div class="importar-mapa" id="mapeamento"></div>
+                <div class="importar-opcoes">
+                    <label>Mesma pessoa em várias linhas:
+                        <select id="repetidos">
+                            <option value="somar">somar os valores</option>
+                            <option value="maior">usar o maior valor</option>
+                            <option value="ultimo">usar a última linha</option>
+                        </select>
+                    </label>
+                    <label class="importar-check"><input type="checkbox" id="desativar-ausentes"> Quem não estiver neste relatório perde o nível</label>
+                </div>
+            </div>
+
+            <div class="importar-passo" id="passo-previa" hidden>
+                <span class="sec-kicker">3. Prévia</span>
+                <p class="importar-resumo" id="resumo"></p>
+                <div class="importar-tabela"><table id="previa"></table></div>
+                <div class="cta-buttons acoes-secao">
+                    <button type="button" class="btn btn-primary" id="btn-importar">Importar cadastros</button>
+                </div>
+                <p class="form-retorno" id="importar-retorno" role="status"></p>
+            </div>
+
+            <!-- 4. Acessos novos: senha provisoria + mensagem pronta no WhatsApp.
+                 A senha aparece so aqui, uma vez: mandar antes de fechar a pagina. -->
+            <div class="importar-passo" id="passo-acessos" hidden>
+                <span class="sec-kicker">4. Enviar os acessos</span>
+                <p class="sec-intro">Mande o acesso de cada pessoa nova pelo WhatsApp. <strong>As senhas aparecem só agora:</strong> envie antes de fechar esta página (se perder, gere outra senha abaixo).</p>
+                <ul class="acessos" id="acessos"></ul>
+            </div>
+
+            <!-- Nova senha provisoria para quem perdeu a primeira -->
+            <div class="importar-passo">
+                <span class="sec-kicker">Nova senha provisória</span>
+                <p class="sec-intro">Para quem perdeu a senha ou não recebeu a mensagem.</p>
+                <form class="importar-nova-senha" id="form-nova-senha" novalidate>
+                    <input type="email" id="ns-email" placeholder="E-mail do mantenedor" required>
+                    <button type="submit" class="btn btn-primary">Gerar nova senha</button>
+                </form>
+                <p class="form-retorno" id="ns-retorno" role="status"></p>
+                <ul class="acessos" id="ns-acesso"></ul>
+            </div>
+                </div>
+            </details>
         </div>
     </section>
 
@@ -154,7 +219,8 @@
     <script src="loja/produtos.js?v=4"></script>
     <script src="mapa/locais.js?v=3"></script>
     <script src="mapa/territorios.js?v=3"></script>
-    <script src="app.js?v=64"></script>
-    <script src="painel.js?v=3"></script>
+    <script src="app.js?v=65"></script>
+    <script src="painel.js?v=5"></script>
+    <script src="importar.js?v=5"></script>
 </body>
 </html>

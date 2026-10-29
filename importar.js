@@ -1,5 +1,5 @@
 /* =========================================================
-   IMPORTAR RELATORIO (importar.html) — bastidor da equipe
+   IMPORTAR RELATORIO (Painel em editar.html) — bastidor da equipe
    Le o Excel do Eklesia no proprio navegador (SheetJS), deixa escolher
    as colunas, agrupa por e-mail, mostra o nivel de cada um e envia ao
    servidor (funcao importar-planilha). Em modo demonstracao so mostra
@@ -7,6 +7,11 @@
    ========================================================= */
 (function () {
     const $ = (id) => document.getElementById(id);
+    if (!$('arquivo')) return;
+    // Leitor de Excel (SheetJS, pesado): so carrega quando escolhem o arquivo
+    const leitorExcel = () => typeof XLSX !== 'undefined'
+        ? Promise.resolve()
+        : carregarScript('bibliotecas/xlsx/xlsx.full.min.js?v=0.20.3');
     const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
     // Dados que o cadastro aceita; "padrao" adivinha a coluna pelo titulo
@@ -25,16 +30,17 @@
     let linhas = [];    // linhas de dados (arrays)
     let registros = []; // resultado agrupado por e-mail
 
-    if (typeof XLSX === 'undefined') {
-        aviso('Não foi possível carregar o leitor de Excel (sem conexão?). Recarregue a página.');
-        return;
-    }
     if (PORTAL.MODO_DEMO) {
         aviso('Modo demonstração: dá para conferir a prévia, mas nada é gravado até as contas serem ligadas (servidor/LEIA-ME.md).');
     } else {
         PORTAL.iniciar().then(u => {
-            if (!u) aviso('Entre com a conta da equipe em <a href="editar.html">Alterações no site</a> antes de importar.', true);
+            if (!u) aviso('Entre com a conta da equipe (no topo desta página) antes de importar.', true);
             else if (registros.length) $('btn-importar').disabled = false;
+        });
+        // Entrou agora, pelo login desta pagina: libera a importacao
+        document.addEventListener('conesul:equipe-entrou', () => {
+            $('importar-aviso').hidden = true;
+            if (registros.length) $('btn-importar').disabled = false;
         });
     }
 
@@ -52,6 +58,7 @@
         $('arquivo-nome').textContent = arquivo.name;
         $('importar-retorno').textContent = '';
         try {
+            await leitorExcel();
             const livro = XLSX.read(await arquivo.arrayBuffer(), { cellDates: true });
             const folha = livro.Sheets[livro.SheetNames[0]];
             const tudo = XLSX.utils.sheet_to_json(folha, { header: 1, raw: true, defval: '' });
