@@ -769,17 +769,16 @@ if (PAGINA === 'portal') {
     const SO_NIVEL = { 'tela-portal-expansores': ['expansor'], 'tela-portal-summit': ['expansor'] };
 
     // Beneficios dos Expansores: vem do banco, que so entrega a lista a quem
-    // tem o nivel Expansor (o HTML e publico e nao traz a lista)
+    // tem o nivel Expansor (o HTML e publico e nao traz a lista). A secao so
+    // aparece com a lista carregada (na demonstracao, sem banco, fica escondida)
+    const secaoBeneficios = document.getElementById('tela-portal-expansores');
     const listaBeneficios = document.getElementById('beneficios-expansores');
     const avisoBeneficios = document.getElementById('beneficios-expansores-aviso');
     let beneficiosCarregados = false;
     async function carregarBeneficios() {
         if (beneficiosCarregados) return;
         const avisar = (texto) => { avisoBeneficios.hidden = !texto; avisoBeneficios.textContent = texto || ''; };
-        if (PORTAL.MODO_DEMO) {
-            avisar('Demonstração: a lista de benefícios fica guardada no banco de dados e aparece aqui quando as contas estiverem ligadas.');
-            return;
-        }
+        if (PORTAL.MODO_DEMO) return;
         try {
             const itens = await PORTAL.conteudo('beneficios-expansores');
             if (!Array.isArray(itens)) throw new Error('sem acesso');
@@ -791,8 +790,10 @@ if (PAGINA === 'portal') {
             }));
             beneficiosCarregados = true;
             avisar('');
+            secaoBeneficios.hidden = false;
         } catch {
             avisar('Não foi possível carregar os benefícios agora. Recarregue a página.');
+            secaoBeneficios.hidden = false;
         }
     }
     function esquecerBeneficios() {
@@ -823,6 +824,7 @@ if (PAGINA === 'portal') {
             const exige = SO_NIVEL[t.id];
             if (exige) t.hidden = !nivel || !exige.includes(nivel.id);
         });
+        secaoBeneficios.hidden = !beneficiosCarregados;
         if (nivel && nivel.id === 'expansor') carregarBeneficios();
         else esquecerBeneficios();
     }
