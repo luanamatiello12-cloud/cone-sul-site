@@ -14,3 +14,8 @@ minutos elas estao no site.
 Dicas: nao pule numeros (o site para no primeiro que faltar); fotos com
 ate 2000 px de largura carregam mais rapido. Nova cidade no mapa? Crie a
 pasta com o nome dela sem acento e com hifen no lugar dos espacos.
+
+Miniatura da lista: o arquivo mini.jpg de cada pasta (120 x 120 px) e a
+fotinho que aparece ao lado do nome da cidade, na lista ao lado do mapa.
+Sem mini.jpg, a lista usa a primeira foto (mais pesada) ou fica sem
+fotinho. Ao trocar a 01.jpg, peca para gerar a mini.jpg de novo.

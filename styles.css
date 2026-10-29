@@ -3455,3 +3455,50 @@ body.modo-edicao img[data-img] { cursor: pointer; }
 }
 .noticias-faixa .noticia-card { flex: 0 0 min(320px, 82%); scroll-snap-align: start; }
 @media (max-width: 640px) { .faixa-seta { display: none; } }
+
+/* ===== Mapa (Onde Estamos): visual renovado ===== */
+/* Mar: verde profundo com luz no centro e bordas mais escuras */
+.mapa-leaflet.leaflet-container,
+.mapa-leaflet .leaflet-container {
+    background: radial-gradient(ellipse 85% 75% at 58% 42%, #1a4231 0%, #11301f 55%, #0a1e14 100%);
+}
+.mapa-leaflet { border-color: rgba(201, 215, 128, 0.25); border-radius: 10px; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+/* Rotulos com sombra leve, para ler melhor sobre qualquer cor */
+.rotulo-mapa.pais span { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35); }
+.rotulo-mapa.pais.lado span, .rotulo-mapa.vizinho span, .rotulo-mapa.oceano span { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
+
+/* Pins: maiores, com sombra; o escolhido fica dourado e pulsa */
+.pin-local { position: relative; }
+.pin-local svg { width: 30px; height: 40px; display: block; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45)); transition: transform 0.25s var(--ease-suave); transform-origin: 50% 100%; }
+.pin-local svg path { fill: var(--verde-900); stroke: var(--creme); stroke-width: 1.8; }
+.pin-local svg circle { fill: var(--areia); }
+.pin-local:hover svg { transform: scale(1.12); }
+.pin-ativo svg { transform: scale(1.18); }
+.pin-ativo svg path { fill: var(--areia); stroke: var(--verde-900); }
+.pin-ativo svg circle { fill: var(--verde-900); }
+.pin-pulso {
+    position: absolute; left: 50%; bottom: 0; width: 26px; height: 10px; margin-left: -13px;
+    border-radius: 50%; background: rgba(201, 215, 128, 0.55);
+    animation: pinPulso 1.8s ease-out infinite;
+}
+@keyframes pinPulso {
+    from { transform: scale(0.6); opacity: 0.9; }
+    to { transform: scale(2.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .pin-pulso { animation: none; opacity: 0.5; } }
+
+/* Grupos de pins: circulo com anel claro */
+.pin-grupo {
+    background: radial-gradient(circle at 35% 30%, #2a5a3e, var(--verde-900));
+    border: 2px solid var(--areia);
+    box-shadow: 0 0 0 5px rgba(201, 215, 128, 0.18), 0 4px 10px rgba(0, 0, 0, 0.4);
+    color: var(--creme);
+    transition: transform 0.2s var(--ease-suave);
+}
+.pin-grupo:hover { transform: scale(1.08); }
+
+/* Lista de cidades: fotinho ao lado do nome */
+.local-btn { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 36px; }
+.local-mini { display: none; width: 22px; height: 22px; margin-left: -0.35rem; border-radius: 50%; background: center / cover no-repeat; box-shadow: 0 0 0 2px rgba(201, 215, 128, 0.5); flex: none; }
+.local-btn.com-foto .local-mini { display: inline-block; }
+.local-btn.ativo .local-mini { box-shadow: 0 0 0 2px var(--verde-900); }
