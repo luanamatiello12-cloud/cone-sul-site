@@ -3659,3 +3659,27 @@ body.modo-edicao img[data-img] { cursor: pointer; }
                         linear-gradient(to bottom, #000 0, #000 30%, transparent 82%);
             mask-composite: intersect;
 }
+
+/* Pagina inicial: o fundo do topo e a arte do Cone Sul (mapa com os arcos),
+   no lugar dos arcos desenhados e da rosa dos ventos. Mesmo verde da arte */
+body[data-pagina="inicio"] .hero {
+    background: #0f2d1b url('img/fundo-inicio.webp?v=1') right 4% bottom / auto 104% no-repeat;
+}
+body[data-pagina="inicio"] .hero::before,
+body[data-pagina="inicio"] .hero::after { display: none; }
+@media (min-width: 901px) and (max-width: 1600px) {
+    /* Notebook: a arte encosta no titulo; fica menor e mais apagada atras do texto */
+    body[data-pagina="inicio"] .hero {
+        background:
+            linear-gradient(90deg, rgba(15, 45, 27, 0.92) 0%, rgba(15, 45, 27, 0.7) 50%, rgba(15, 45, 27, 0) 72%),
+            #0f2d1b url('img/fundo-inicio.webp?v=1') right -2% bottom / auto 96% no-repeat;
+    }
+}
+@media (max-width: 900px) {
+    /* No celular a arte fica atras do texto: mais apagada */
+    body[data-pagina="inicio"] .hero {
+        background:
+            linear-gradient(rgba(15, 45, 27, 0.72), rgba(15, 45, 27, 0.72)),
+            #0f2d1b url('img/fundo-inicio.webp?v=1') right -30% bottom / auto 100% no-repeat;
+    }
+}
