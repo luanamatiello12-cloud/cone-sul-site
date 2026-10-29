@@ -3627,3 +3627,7 @@ body.modo-edicao img[data-img] { cursor: pointer; }
     .mapa-leaflet .leaflet-control-attribution { margin: 0 18px 16px 0 !important; }
     .rotulo-sat.oceano { display: none; }
 }
+/* Pagina de noticias: mesma faixa que desliza, setas acima, a direita */
+.faixa-controles-pagina { justify-content: flex-end; margin-top: 1.5rem; }
+#noticias-lista { transition: opacity 0.2s ease, transform 0.2s ease; }
+#noticias-lista.filtrando { opacity: 0; transform: translateY(8px); }

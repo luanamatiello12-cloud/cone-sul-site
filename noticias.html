@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notícias | CONE SUL</title>
     <meta name="description" content="Acompanhe as novidades, os registros de campo e os próximos passos do CONE SUL.">
-    <link rel="stylesheet" href="styles.css?v=80">
+    <link rel="stylesheet" href="styles.css?v=81">
 </head>
 <body data-pagina="noticias">
 
@@ -40,7 +40,11 @@
                  a quem entrou na Area do Mantenedor. Nao escrever noticias aqui:
                  o HTML e publico. -->
             <p class="conteudo-restrito-aviso" id="noticias-aviso" role="status">Carregando publicações…</p>
-            <div class="noticias-grid" id="noticias-lista"></div>
+            <div class="faixa-controles faixa-controles-pagina">
+                <button type="button" class="faixa-seta" data-faixa="-1" aria-label="Notícias anteriores">‹</button>
+                <button type="button" class="faixa-seta" data-faixa="1" aria-label="Próximas notícias">›</button>
+            </div>
+            <div class="noticias-faixa" id="noticias-lista"></div>
         </div>
     </section>
 
@@ -78,6 +82,6 @@
         </div>
     </section>
 
-    <script src="app.js?v=57"></script>
+    <script src="app.js?v=58"></script>
 </body>
 </html>
