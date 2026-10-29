@@ -32,7 +32,7 @@ const CONTAS = {
 // Eklesia ou webhook), nunca do plano clicado no site. Enquanto estiver
 // vazio, o cadastro avisa que o pagamento ainda nao esta disponivel.
 const LINKS_PAGAMENTO = {
-    unico: ''
+    unico: 'https://renovaremcristo.org/oferta'
 };
 
 // ---------- Configuracoes do site (Painel em editar.html) ----------
