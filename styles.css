@@ -3631,3 +3631,10 @@ body.modo-edicao img[data-img] { cursor: pointer; }
 .faixa-controles-pagina { justify-content: flex-end; margin-top: 1.5rem; }
 #noticias-lista { transition: opacity 0.2s ease, transform 0.2s ease; }
 #noticias-lista.filtrando { opacity: 0; transform: translateY(8px); }
+/* Faixa de noticias sem barra de rolagem: setas, dedo ou arrastar com o mouse */
+.noticias-faixa { scrollbar-width: none; -ms-overflow-style: none; cursor: grab; user-select: none; }
+.noticias-faixa::-webkit-scrollbar { display: none; }
+.noticias-faixa.arrastando { cursor: grabbing; scroll-snap-type: none; scroll-behavior: auto; }
+.noticias-faixa img { -webkit-user-drag: none; }
+/* Espaco para o cartao subir no hover sem cortar a linha de cima e a sombra */
+.noticias-faixa { padding: 10px 0 28px; margin-top: 0.8rem; }

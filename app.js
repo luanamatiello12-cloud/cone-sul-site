@@ -747,6 +747,33 @@ function ativarFaixa(faixa, botoes) {
         faixa.scrollBy({ left: Number(b.dataset.faixa) * passo, behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth' });
     }));
     faixa.addEventListener('scroll', atualizar, { passive: true });
+    // No computador: arrastar com o mouse (sem barra de rolagem a vista).
+    // Um arrasto de verdade nao conta como clique no link do cartao
+    let inicio = null, arrastou = false;
+    faixa.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        inicio = { x: e.clientX, scroll: faixa.scrollLeft };
+        arrastou = false;
+    });
+    window.addEventListener('pointermove', (e) => {
+        if (!inicio) return;
+        const dx = e.clientX - inicio.x;
+        if (!arrastou && Math.abs(dx) < 5) return;
+        if (!arrastou) { arrastou = true; faixa.classList.add('arrastando'); }
+        faixa.scrollLeft = inicio.scroll - dx;
+    });
+    window.addEventListener('pointerup', () => {
+        if (!inicio) return;
+        inicio = null;
+        if (!arrastou) return;
+        faixa.classList.remove('arrastando');
+        // Encaixa no cartao mais proximo ao soltar
+        const cartao = [...faixa.children].find(c => c.offsetWidth);
+        const passo = (cartao?.offsetWidth || 300) + 24;
+        faixa.scrollTo({ left: Math.round(faixa.scrollLeft / passo) * passo, behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth' });
+    });
+    faixa.addEventListener('click', (e) => { if (arrastou) { e.preventDefault(); e.stopPropagation(); arrastou = false; } }, true);
+    faixa.addEventListener('dragstart', (e) => e.preventDefault());
     // Recalcula quando a faixa aparece (pode comecar escondida) ou muda de tamanho
     if ('ResizeObserver' in window) new ResizeObserver(atualizar).observe(faixa);
     else window.addEventListener('resize', atualizar);
