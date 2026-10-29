@@ -2103,9 +2103,11 @@ if (PAGINA === 'editar') {
         $('editar-senha').remove();
     }
 
-    const mostrar = (email) => {
+    // soSenha: chegou pelo link de "Esqueci minha senha". So aparece o
+    // formulario de senha nova; o painel abre depois de salvar a senha.
+    const mostrar = (email, soSenha = false) => {
         telaLogin.hidden = !!email;
-        telasPainel.forEach(t => { t.hidden = !email; });
+        telasPainel.forEach(t => { t.hidden = !email || (soSenha && !['editar-topo', 'editar-senha'].includes(t.id)); });
         if (email) $('editor-email').textContent = email;
         window.scrollTo(0, 0);
     };
@@ -2115,15 +2117,16 @@ if (PAGINA === 'editar') {
     else {
         mostrar('');
         EDICAO.verificarEquipe().then(user => {
-            // O link de "Esqueci minha senha" ja prova que a pessoa e dona do e-mail
-            if (user && (editorLocal() || veioTrocarSenha)) {
+            if (user && veioTrocarSenha) {
+                // O link do e-mail so serve para criar a senha nova: o painel
+                // (e o acesso guardado neste navegador) vem depois de salvar
+                localStorage.removeItem(CHAVE_EDITOR);
+                mostrar(user.email, true);
+                $('editor-senha-titulo').textContent = 'Crie sua nova senha.';
+                $('ed-nova').focus();
+            } else if (user && editorLocal()) {
                 localStorage.setItem(CHAVE_EDITOR, user.email);
                 mostrar(user.email);
-                if (veioTrocarSenha) {
-                    $('editor-senha-titulo').textContent = 'Crie sua nova senha.';
-                    $('editar-senha').scrollIntoView({ block: 'start' });
-                    $('ed-nova').focus();
-                }
             }
         }).catch(() => {});
     }
@@ -2205,6 +2208,11 @@ if (PAGINA === 'editar') {
             formSenha.reset();
             formSenha.classList.remove('validar');
             $('editor-senha-titulo').textContent = 'Trocar senha.';
+            if (!editorLocal()) {
+                // Veio pelo link do e-mail: com a senha criada, abre o painel
+                localStorage.setItem(CHAVE_EDITOR, session.user.email);
+                mostrar(session.user.email);
+            }
             retorno.textContent = 'Senha alterada. Use a nova senha no próximo login.';
         } catch (erro) {
             retorno.textContent = erro.message;
