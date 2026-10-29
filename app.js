@@ -496,7 +496,9 @@ const PORTAL = {
             // Copia local da biblioteca (bibliotecas/supabase, versao 2.45.4):
             // o login nao depende de codigo servido por terceiros
             await carregarScript('bibliotecas/supabase/supabase.js?v=2.45.4');
-            this._cliente = window.supabase.createClient(CONTAS.url, CONTAS.chavePublica);
+            // Duas chamadas ao mesmo tempo esperam o mesmo script: so a
+            // primeira cria o cliente
+            this._cliente ||= window.supabase.createClient(CONTAS.url, CONTAS.chavePublica);
         }
         return this._cliente;
     },
@@ -616,8 +618,11 @@ const PORTAL = {
         return data;
     },
 
-    // Ha login do Supabase guardado neste navegador?
+    // Ha login do Supabase guardado neste navegador? Ou chegando agora pelo
+    // link de um e-mail (troca de senha, convite): vem no endereco e o
+    // cliente so o guarda depois de carregado
     temLoginGuardado() {
+        if (/access_token=/.test(location.hash)) return true;
         try {
             for (let i = 0; i < localStorage.length; i++) if (/^sb-.*-auth-token$/.test(localStorage.key(i))) return true;
         } catch { /* sem storage */ }
