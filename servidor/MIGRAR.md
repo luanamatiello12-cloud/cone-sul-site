@@ -66,7 +66,9 @@ O ambiente onde eu trabalho só acessa endereços liberados. No menu do ambiente
    envio de acesso pelo WhatsApp, troca de senha, edição e publicação, histórico.
 
 ## 4. Depois da migração
-- O botão **Editar** some para os visitantes e aparece só para a equipe logada.
+- As alterações no site ficam em **`editar.html`** (endereço só da equipe, fora do
+  menu e separado da Área do Mantenedor). Quem entra ali e está na tabela `equipe` vê a
+  barra **Editar** em todas as páginas; os visitantes nunca veem.
 - **Publicar** muda a página para todos; **Histórico** volta a uma versão anterior.
 - Atualizar a Política de Privacidade e os Termos de Uso (o site passa a guardar
   dados de mantenedores).

@@ -33,7 +33,7 @@
         aviso('Modo demonstração: dá para conferir a prévia, mas nada é gravado até as contas serem ligadas (servidor/LEIA-ME.md).');
     } else {
         PORTAL.iniciar().then(u => {
-            if (!u) aviso('Entre com a conta da equipe na <a href="portal.html">Área do Mantenedor</a> antes de importar.', true);
+            if (!u) aviso('Entre com a conta da equipe em <a href="editar.html">Alterações no site</a> antes de importar.', true);
             else if (registros.length) $('btn-importar').disabled = false;
         });
     }

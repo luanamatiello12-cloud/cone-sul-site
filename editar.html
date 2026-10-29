@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alterações no site | CONE SUL</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="styles.css?v=67">
+</head>
+<body data-pagina="editar">
+
+    <!-- BASTIDOR: acesso da equipe para alterar o site, separado da Area do
+         Mantenedor. Nao aparece no menu. Quem entra aqui (e esta na tabela
+         "equipe" do banco) passa a ver a barra Editar em todas as paginas. -->
+
+    <!-- ACESSO -->
+    <section class="hero hero-pagina" id="editar-login">
+        <div class="wrap">
+            <span class="hero-kicker">Equipe — Alterações no site</span>
+            <h1>Entrar para alterar o site.</h1>
+            <p class="hero-lead">Acesso só para a equipe do CONE SUL. Mantenedores entram pela Área do Mantenedor.</p>
+            <p class="editar-demo" id="editar-demo" hidden>Demonstração: as contas ainda não estão ligadas, então qualquer e-mail entra. As alterações ficam só neste navegador; use “Baixar edições” para enviar a quem publica o site.</p>
+
+            <div class="portal-acesso">
+                <form class="formulario" id="form-editor" novalidate>
+                    <div class="campo">
+                        <label for="ed-email">E-mail</label>
+                        <input type="email" id="ed-email" autocomplete="username" required>
+                    </div>
+                    <div class="campo">
+                        <label for="ed-senha">Senha</label>
+                        <input type="password" id="ed-senha" autocomplete="current-password" required>
+                    </div>
+                    <div class="campo">
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                        <p class="form-retorno" id="editor-retorno" role="status"></p>
+                    </div>
+                    <button type="button" class="link-discreto" id="btn-editor-esqueci">Esqueci minha senha</button>
+                </form>
+
+                <form class="formulario" id="form-editor-esqueci" novalidate hidden>
+                    <p class="esqueci-texto">Informe o e-mail da sua conta. Enviaremos um link para você criar uma senha nova.</p>
+                    <div class="campo">
+                        <label for="ed-esqueci-email">E-mail</label>
+                        <input type="email" id="ed-esqueci-email" autocomplete="username" required>
+                    </div>
+                    <div class="campo">
+                        <button type="submit" class="btn btn-primary">Enviar link</button>
+                        <p class="form-retorno" id="editor-esqueci-retorno" role="status"></p>
+                    </div>
+                    <button type="button" class="link-discreto" id="btn-editor-voltar">Voltar para o login</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAINEL (so depois do login) -->
+    <section class="hero hero-pagina" id="editar-topo" hidden>
+        <div class="wrap">
+            <span class="hero-kicker">Equipe — Alterações no site</span>
+            <h1>O que você quer alterar?</h1>
+            <p class="hero-complemento">Conectado como <strong id="editor-email"></strong></p>
+            <div class="cta-buttons">
+                <button type="button" class="btn btn-secondary" id="btn-editor-sair">Sair</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="sec-clara editar-painel" id="editar-paginas" hidden>
+        <div class="wrap">
+            <span class="sec-kicker">Páginas do site</span>
+            <h2>Escolha a página.</h2>
+            <ol class="editar-passos">
+                <li>Abra a página. No canto de baixo aparece a barra com o botão <strong>Editar</strong>.</li>
+                <li>Clique em <strong>Editar</strong>: clique num texto para mudar, numa imagem para trocar, ou passe o mouse sobre um bloco para ocultar ou duplicar.</li>
+                <li>Clique em <strong>Concluir</strong>. A mudança fica como rascunho, só para você.</li>
+                <li id="passo-publicar">Clique em <strong>Publicar</strong> para todos verem. Em <strong>Histórico</strong> dá para voltar a uma versão anterior.</li>
+            </ol>
+            <ul class="editar-lista" id="editar-lista"></ul>
+
+            <span class="sec-kicker editar-outros">Outras tarefas</span>
+            <ul class="editar-lista">
+                <li><a href="importar.html"><strong>Importar relatório do Eklesia</strong><span>Cria os logins dos mantenedores e atualiza os níveis</span></a></li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="sec-escura" id="editar-senha" hidden>
+        <div class="wrap">
+            <span class="sec-kicker">Sua senha</span>
+            <h2 id="editor-senha-titulo">Trocar senha.</h2>
+            <div class="portal-senha">
+                <form class="formulario" id="form-editor-senha" novalidate>
+                    <div class="campo">
+                        <label for="ed-nova">Nova senha (mínimo 8 caracteres)</label>
+                        <input type="password" id="ed-nova" autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <div class="campo">
+                        <label for="ed-confirma">Repita a nova senha</label>
+                        <input type="password" id="ed-confirma" autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <div class="campo campo-largo">
+                        <button type="submit" class="btn btn-primary">Salvar nova senha</button>
+                        <p class="form-retorno" id="editor-senha-retorno" role="status"></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js?v=49"></script>
+</body>
+</html>

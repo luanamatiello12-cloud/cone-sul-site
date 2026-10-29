@@ -456,10 +456,10 @@ const PORTAL = {
 
     // Esqueci minha senha: o Supabase manda o link; ao abrir, a pessoa cai
     // no portal ja logada, com o formulario de senha nova em destaque
-    async esqueciSenha(email, captchaToken) {
+    async esqueciSenha(email, captchaToken, pagina = 'portal.html') {
         if (this.MODO_DEMO) throw new Error('Em demonstração não há e-mail de troca de senha. Com as contas ligadas, o link chega no e-mail informado.');
         const sb = await this.cliente();
-        const destino = new URL('portal.html', location.href);
+        const destino = new URL(pagina, location.href);
         destino.hash = 'nova-senha';
         const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: destino.href, captchaToken });
         if (error) throw new Error('Não foi possível enviar agora. Tente de novo em alguns minutos.');
@@ -477,6 +477,7 @@ const PORTAL = {
     // e espera a resposta: so depois a tela volta ao login
     async sair() {
         try { sessionStorage.removeItem(this.CHAVE); } catch { /* nada a limpar */ }
+        try { localStorage.removeItem(CHAVE_EDITOR); } catch { /* nada a limpar */ }
         if (this.MODO_DEMO) return;
         const sb = this._cliente || (this.temLoginGuardado() ? await this.cliente() : null);
         if (!sb) return;
@@ -511,6 +512,12 @@ const PORTAL = {
         return false;
     }
 };
+
+// Entrou pela pagina de alteracoes (editar.html)? Guarda o e-mail de quem
+// edita. Sozinha nao libera nada: com contas ligadas, o banco ainda confere
+// se a conta esta na tabela "equipe" antes de mostrar a barra.
+const CHAVE_EDITOR = 'conesul-editor';
+const editorLocal = () => { try { return localStorage.getItem(CHAVE_EDITOR) || ''; } catch { return ''; } };
 
 // Carrega um script do proprio site uma vez so
 const scriptsCarregados = {};
@@ -1093,19 +1100,27 @@ const EDICAO = {
     // Ha alguem logado neste navegador? So entao vale carregar o cliente
     temLogin() { return PORTAL.temLoginGuardado(); },
 
-    async verificarEditor() {
-        if (!this.temLogin()) return false;
+    // A conta logada esta na tabela "equipe"? (quem responde e o banco)
+    async verificarEquipe() {
+        if (!this.temLogin()) return null;
         const sb = await PORTAL.cliente();
         const { data: { session } } = await sb.auth.getSession();
-        if (!session) return false;
+        if (!session) return null;
         const { data } = await sb.from('equipe').select('id').eq('id', session.user.id).maybeSingle();
-        return !!data;
+        return data ? session.user : null;
+    },
+
+    // A barra de edicao so aparece para quem entrou por editar.html e e da
+    // equipe (entrar pela Area do Mantenedor nao basta)
+    async verificarEditor() {
+        if (!editorLocal()) return false;
+        return !!(await this.verificarEquipe());
     },
 
     async publicar(estado) {
         const sb = await PORTAL.cliente();
         const { data: { session } } = await sb.auth.getSession();
-        if (!session) throw new Error('Sua sessão expirou. Entre de novo na Área do Mantenedor.');
+        if (!session) throw new Error('Sua sessão expirou. Entre de novo em Alterações no site (editar.html).');
         const { data, error } = await sb.from('site_edicoes')
             .insert({ pagina: PAGINA_ARQUIVO, conteudo: estado, autor: session.user.id, autor_email: session.user.email })
             .select('id').single();
@@ -1409,6 +1424,7 @@ barraEdicao.innerHTML = PORTAL.MODO_DEMO ? `
         <button type="button" id="btn-baixar-edicoes" title="Gera um arquivo com tudo que você editou, para enviar a quem publica o site">Baixar edições</button>
         <button type="button" id="btn-desfazer-edicoes" title="Descarta as edições salvas desta página">Desfazer</button>
     </div>
+    <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
     <button type="button" id="btn-editar" title="Editar os textos e os blocos. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>` : `
     <div id="barra-edicao-extra">
         <span class="dica-edicao" id="estado-edicao"></span>
@@ -1416,6 +1432,7 @@ barraEdicao.innerHTML = PORTAL.MODO_DEMO ? `
         <button type="button" id="btn-desfazer-edicoes" title="Descarta o rascunho e volta à versão publicada">Descartar rascunho</button>
         <button type="button" id="btn-publicar" title="Publica as mudanças desta página para todos os visitantes">Publicar</button>
     </div>
+    <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
     <button type="button" id="btn-editar" title="Editar textos, blocos e imagens. Só vale para todos depois de Publicar.">Editar</button>`;
 document.body.appendChild(barraEdicao);
 document.getElementById('btn-editar').onclick = toggleEditMode;
@@ -1437,8 +1454,12 @@ function atualizarBarra() {
 }
 
 // ---------- Carregar as edicoes ----------
+// A propria pagina de alteracoes nao e editavel
+const PAGINA_EDITAVEL = PAGINA !== 'editar';
 if (PORTAL.MODO_DEMO) {
     aplicarEstado(lerEdicoes());
+    // Demonstracao: a barra so aparece para quem entrou por editar.html
+    barraEdicao.hidden = !PAGINA_EDITAVEL || !editorLocal();
 } else {
     // Contas ligadas: a barra so aparece para a equipe, e a pagina espera a
     // versao publicada (no maximo 2,5 s) para nao piscar o texto antigo
@@ -1458,6 +1479,157 @@ if (PORTAL.MODO_DEMO) {
         aplicarEstado(usarRascunho ? rascunho : publicado && publicado.conteudo);
         clearTimeout(limite);
         liberar();
-        if (EDICAO.editor) { barraEdicao.hidden = false; atualizarBarra(); }
+        if (EDICAO.editor && PAGINA_EDITAVEL) { barraEdicao.hidden = false; atualizarBarra(); }
     })();
+}
+
+/* =========================================================
+   ALTERACOES NO SITE (editar.html): acesso da equipe, separado
+   da Area do Mantenedor. Depois de entrar, a barra Editar aparece
+   em todas as paginas deste navegador.
+   ========================================================= */
+if (PAGINA === 'editar') {
+    const $ = (id) => document.getElementById(id);
+    const telaLogin = $('editar-login');
+    const telasPainel = ['editar-topo', 'editar-paginas', 'editar-senha'].map($);
+    const veioTrocarSenha = /type=recovery|#nova-senha/.test(location.hash);
+
+    // Paginas que a equipe pode alterar (as do menu e as demais publicas)
+    const PAGINAS = [
+        { href: 'index.html', rotulo: 'Início' },
+        ...MENU.filter(m => m.href !== 'index.html').map(m => ({ href: m.href, rotulo: m.rotulo })),
+        { href: 'fazer-parte.html', rotulo: 'Faça parte (cadastro)' },
+        { href: 'portal.html', rotulo: 'Área do Mantenedor' },
+        { href: 'contato.html', rotulo: 'Contato' },
+        { href: 'politica-de-privacidade.html', rotulo: 'Política de Privacidade' },
+        { href: 'termos-de-uso.html', rotulo: 'Termos de Uso' }
+    ].filter((p, i, todas) => todas.findIndex(q => q.href === p.href) === i);
+    $('editar-lista').replaceChildren(...PAGINAS.map(p => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = p.href;
+        a.append(Object.assign(document.createElement('strong'), { textContent: p.rotulo }),
+            Object.assign(document.createElement('span'), { textContent: p.href }));
+        li.append(a);
+        return li;
+    }));
+    if (PORTAL.MODO_DEMO) {
+        $('editar-demo').hidden = false;
+        $('passo-publicar').innerHTML = 'Na demonstração não há Publicar: clique em <strong>Baixar edições</strong> e envie o arquivo para quem publica o site.';
+        $('editar-senha').remove();
+        telasPainel.pop();
+    }
+
+    const mostrar = (email) => {
+        telaLogin.hidden = !!email;
+        telasPainel.forEach(t => { t.hidden = !email; });
+        if (email) $('editor-email').textContent = email;
+        window.scrollTo(0, 0);
+    };
+
+    // Ja entrou antes neste navegador? (com contas, o banco confere de novo)
+    if (PORTAL.MODO_DEMO) mostrar(editorLocal());
+    else {
+        mostrar('');
+        EDICAO.verificarEquipe().then(user => {
+            // O link de "Esqueci minha senha" ja prova que a pessoa e dona do e-mail
+            if (user && (editorLocal() || veioTrocarSenha)) {
+                localStorage.setItem(CHAVE_EDITOR, user.email);
+                mostrar(user.email);
+                if (veioTrocarSenha) {
+                    $('editor-senha-titulo').textContent = 'Crie sua nova senha.';
+                    $('editar-senha').scrollIntoView({ block: 'start' });
+                    $('ed-nova').focus();
+                }
+            }
+        }).catch(() => {});
+    }
+
+    const formLogin = $('form-editor');
+    CAPTCHA.preparar(formLogin);
+    formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = $('editor-retorno');
+        formLogin.classList.add('validar');
+        if (!formLogin.checkValidity()) { retorno.textContent = 'Informe seu e-mail e sua senha.'; return; }
+        const email = $('ed-email').value.trim();
+        try {
+            if (!PORTAL.MODO_DEMO) {
+                await PORTAL.entrar(email, $('ed-senha').value, null, CAPTCHA.token(formLogin));
+                const user = await EDICAO.verificarEquipe();
+                if (!user) {
+                    await PORTAL.sair();
+                    throw new Error('Esta conta não tem acesso às alterações do site. Fale com quem administra o site.');
+                }
+            }
+            localStorage.setItem(CHAVE_EDITOR, email);
+            formLogin.reset();
+            retorno.textContent = '';
+            mostrar(email);
+        } catch (erro) {
+            retorno.textContent = erro.message;
+        }
+        CAPTCHA.reiniciar(formLogin);
+    });
+
+    // Esqueci minha senha: o link volta para esta pagina
+    const formEsqueci = $('form-editor-esqueci');
+    CAPTCHA.preparar(formEsqueci);
+    const trocarForm = (esqueci) => {
+        formLogin.hidden = esqueci;
+        formEsqueci.hidden = !esqueci;
+        if (esqueci) $('ed-esqueci-email').value = $('ed-email').value;
+    };
+    $('btn-editor-esqueci').addEventListener('click', () => trocarForm(true));
+    $('btn-editor-voltar').addEventListener('click', () => trocarForm(false));
+    formEsqueci.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = $('editor-esqueci-retorno');
+        formEsqueci.classList.add('validar');
+        if (!formEsqueci.checkValidity()) { retorno.textContent = 'Informe um e-mail válido.'; return; }
+        try {
+            await PORTAL.esqueciSenha($('ed-esqueci-email').value.trim(), CAPTCHA.token(formEsqueci), 'editar.html');
+            retorno.textContent = 'Pronto! Se este e-mail tiver conta, o link para criar uma senha nova chega em alguns minutos.';
+        } catch (erro) {
+            retorno.textContent = erro.message;
+        }
+        CAPTCHA.reiniciar(formEsqueci);
+    });
+
+    // Trocar senha (so com contas ligadas)
+    const formSenha = $('form-editor-senha');
+    if (formSenha) formSenha.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = $('editor-senha-retorno');
+        const nova = $('ed-nova');
+        const confirma = $('ed-confirma');
+        confirma.setCustomValidity(confirma.value && confirma.value !== nova.value ? 'As senhas não conferem.' : '');
+        formSenha.classList.add('validar');
+        if (!formSenha.checkValidity()) {
+            retorno.textContent = nova.validity.tooShort || nova.validity.valueMissing ? 'A senha precisa ter pelo menos 8 caracteres.' : 'As duas senhas não conferem.';
+            return;
+        }
+        try {
+            const sb = await PORTAL.cliente();
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) throw new Error('Sua sessão expirou. Entre de novo.');
+            const { error } = await sb.auth.updateUser({ password: nova.value });
+            if (error) throw new Error(error.message.includes('different') ? 'A nova senha precisa ser diferente da atual.' : 'Não foi possível trocar a senha. Tente de novo.');
+            await sb.from('mantenedores').update({ senha_provisoria: false }).eq('id', session.user.id);
+            formSenha.reset();
+            formSenha.classList.remove('validar');
+            $('editor-senha-titulo').textContent = 'Trocar senha.';
+            retorno.textContent = 'Senha alterada. Use a nova senha no próximo login.';
+        } catch (erro) {
+            retorno.textContent = erro.message;
+        }
+    });
+
+    $('btn-editor-sair').addEventListener('click', async (e) => {
+        const botao = e.currentTarget;
+        botao.disabled = true;
+        try { await PORTAL.sair(); } catch { /* o acesso local ja foi apagado */ }
+        botao.disabled = false;
+        mostrar('');
+    });
 }
