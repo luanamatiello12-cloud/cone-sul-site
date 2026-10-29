@@ -3645,6 +3645,6 @@ body.modo-edicao img[data-img] { cursor: pointer; }
 .campanha {
     background:
         linear-gradient(180deg, rgba(11, 34, 21, 0.94) 0%, rgba(11, 34, 21, 0.84) 35%, rgba(11, 34, 21, 0.86) 70%, rgba(11, 34, 21, 0.96) 100%),
-        url('img/mosaico-missao.jpg') center / cover no-repeat,
+        url('img/mosaico-missao.jpg?v=2') center / cover no-repeat,
         var(--verde-900);
 }
