@@ -38,7 +38,8 @@ Enquanto a plataforma de pagamento não avisa sozinha, a equipe importa o relat�
 Eklesia em **`importar.html`** (página de bastidor, fora do menu):
 
 1. Baixar o relatório de contribuições do Eklesia em Excel.
-2. Abrir `importar.html` (logado com uma conta da **equipe**, ver abaixo) e escolher o
+2. Entrar em `editar.html` com uma conta da **equipe** (ver abaixo), abrir **Importar
+   relatório do Eklesia** (`importar.html`) e escolher o
    arquivo. A página adivinha as colunas pelo título (e-mail, valor, nome, CPF,
    celular, nascimento, cidade, igreja); dá para trocar qualquer uma.
 3. Se a mesma pessoa aparece em várias linhas (várias contribuições no período):

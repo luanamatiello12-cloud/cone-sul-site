@@ -3246,3 +3246,56 @@ body.modo-edicao section img[data-img]:hover { filter: brightness(0.85); }
 .noticia-imagem { overflow: hidden; }
 .noticia-imagem img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .noticia-corpo a.btn { align-self: flex-start; }
+
+/* ===== Alteracoes no site (editar.html) ===== */
+.editar-demo {
+    margin-top: 1.5rem;
+    max-width: 640px;
+    padding: 0.9rem 1.1rem;
+    border-left: 3px solid var(--areia);
+    background: rgba(201, 215, 128, 0.12);
+    font-size: 0.92rem;
+}
+.editar-passos {
+    margin: 1.5rem 0 2rem;
+    padding-left: 1.3rem;
+    display: grid;
+    gap: 0.5rem;
+    max-width: 720px;
+}
+.editar-lista {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+.editar-lista a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border-top: 3px solid var(--verde-600);
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.editar-lista a:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08); }
+.editar-lista span { font-size: 0.8rem; opacity: 0.65; }
+.editar-outros { margin-top: 2.5rem; }
+
+/* Link de volta ao painel, na barra de edicao */
+#barra-edicao .barra-painel {
+    padding: 0.5rem 0.8rem;
+    background: var(--verde-800);
+    color: var(--areia-clara);
+    border: 1px solid rgba(201, 215, 128, 0.5);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
