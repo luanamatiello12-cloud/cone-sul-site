@@ -1147,7 +1147,10 @@ const TAGS_TEXTO = new Set(['B', 'STRONG', 'I', 'EM', 'BR']);
 const spanPermitido = (el) => el.tagName === 'SPAN'
     && [...el.attributes].every(a => (a.name === 'class' && a.value === 'realce') || (a.name === 'aria-hidden' && a.value === 'true'))
     && el.attributes.length > 0;
-const formatacao = (el) => TAGS_TEXTO.has(el.tagName) || spanPermitido(el);
+// Elemento com id e onde um script escreve (ex.: o e-mail de quem entrou):
+// o texto em volta dele nao vira editavel, senao o editor salvaria o que o
+// script pos ali como se fosse uma edicao
+const formatacao = (el) => !el.id && !el.matches(NAO_EDITAVEL) && (TAGS_TEXTO.has(el.tagName) || spanPermitido(el));
 
 // Blocos que o modo edicao deixa mover, ocultar e apagar.
 // SECOES: tambem recebem secoes novas abaixo. ITENS: tambem duplicar.
