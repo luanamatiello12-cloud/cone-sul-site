@@ -136,14 +136,17 @@
     // ---------- Estilos das camadas ----------
     // Contorno claro e fino, que engrossa ao passar o mouse e ao escolher;
     // cantos arredondados para a linha ficar suave
+    // Todos os territorios no mesmo tom (sem uma cor para cada): creme
+    // discreto; ao passar o mouse clareia; o escolhido fica no verde-claro
+    // de destaque do site
     const estilo = (t, modo) => ({
-        color: '#fef5e2',
-        weight: modo === 'selecionado' ? 2.6 : modo === 'hover' ? 1.8 : 1,
-        opacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.9 : 0.55,
+        color: modo === 'selecionado' ? '#c9d780' : '#fef5e2',
+        weight: modo === 'selecionado' ? 2 : modo === 'hover' ? 1.4 : 0.9,
+        opacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.75 : 0.45,
         lineJoin: 'round',
         lineCap: 'round',
-        fillColor: t.cor,
-        fillOpacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.94 : 0.8
+        fillColor: modo === 'selecionado' ? '#c9d780' : '#fef5e2',
+        fillOpacity: modo === 'selecionado' ? 0.28 : modo === 'hover' ? 0.16 : 0.09
     });
 
     function aplicarEstilo(id) {
