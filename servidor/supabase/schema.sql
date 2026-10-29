@@ -115,3 +115,47 @@ create table if not exists public.equipe (
     nome  text
 );
 alter table public.equipe enable row level security;   -- so o servidor le
+
+-- ---------- Edicao do site (botao Editar > Publicar) ----------
+-- Cada "Publicar" grava uma versao nova da pagina; a mais recente e a que
+-- esta no ar. "Historico" volta a uma versao antiga publicando-a de novo.
+-- Quem pode publicar: as contas da tabela "equipe".
+create table if not exists public.site_edicoes (
+    id           bigint generated always as identity primary key,
+    pagina       text not null,               -- ex.: index.html
+    conteudo     jsonb not null,              -- { textos, clones, ocultos, imagens }
+    autor        uuid references auth.users (id) on delete set null,
+    autor_email  text,
+    criado_em    timestamptz not null default now()
+);
+create index if not exists site_edicoes_pagina on public.site_edicoes (pagina, id desc);
+alter table public.site_edicoes enable row level security;
+
+drop policy if exists "todos leem o site" on public.site_edicoes;
+create policy "todos leem o site" on public.site_edicoes
+    for select to anon, authenticated using (true);
+
+drop policy if exists "equipe publica" on public.site_edicoes;
+create policy "equipe publica" on public.site_edicoes
+    for insert to authenticated
+    with check (autor = auth.uid() and exists (select 1 from public.equipe e where e.id = auth.uid()));
+
+grant select on public.site_edicoes to anon, authenticated;
+grant insert on public.site_edicoes to authenticated;
+
+-- Cada pessoa da equipe consegue ver a propria linha (o site usa isso
+-- para mostrar o botao Editar so para a equipe)
+drop policy if exists "ve a si mesmo" on public.equipe;
+create policy "ve a si mesmo" on public.equipe
+    for select to authenticated using (id = auth.uid());
+grant select on public.equipe to authenticated;
+
+-- Imagens trocadas pelo editor: armazenamento publico "site"
+insert into storage.buckets (id, name, public)
+values ('site', 'site', true)
+on conflict (id) do nothing;
+
+drop policy if exists "equipe envia imagens" on storage.objects;
+create policy "equipe envia imagens" on storage.objects
+    for insert to authenticated
+    with check (bucket_id = 'site' and exists (select 1 from public.equipe e where e.id = auth.uid()));
