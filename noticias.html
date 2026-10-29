@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notícias | CONE SUL</title>
     <meta name="description" content="Acompanhe as novidades, os registros de campo e os próximos passos do CONE SUL.">
-    <link rel="stylesheet" href="styles.css?v=65">
+    <link rel="stylesheet" href="styles.css?v=66">
 </head>
 <body data-pagina="noticias">
 
@@ -36,61 +36,11 @@
                 <li><button type="button" data-cat="contas">Prestação de Contas</button></li>
             </ul>
 
-            <div class="aviso-implantacao" style="opacity: 1;">
-                <strong>Modelo de layout.</strong> Ainda não há publicações. Os cards abaixo mostram como as notícias vão aparecer e devem ser substituídos pelas publicações reais.
-            </div>
-
-            <div class="noticias-grid">
-                <article class="noticia-card" data-cat="diario">
-                    <div class="noticia-imagem">Foto da publicação</div>
-                    <div class="noticia-corpo">
-                        <span class="noticia-cat">Diário de Campo</span>
-                        <h3>[Título da publicação]</h3>
-                        <p>[Resumo de duas ou três linhas sobre o registro do campo missionário.]</p>
-                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
-                    </div>
-                </article>
-                <article class="noticia-card" data-cat="noticias">
-                    <div class="noticia-imagem">Foto da publicação</div>
-                    <div class="noticia-corpo">
-                        <span class="noticia-cat">Notícias da Missão</span>
-                        <h3>[Título da publicação]</h3>
-                        <p>[Resumo de duas ou três linhas sobre um acontecimento da missão.]</p>
-                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
-                    </div>
-                </article>
-                <article class="noticia-card" data-cat="historias">
-                    <div class="noticia-imagem">Foto da publicação</div>
-                    <div class="noticia-corpo">
-                        <span class="noticia-cat">Histórias e Testemunhos</span>
-                        <h3>[Título da publicação]</h3>
-                        <p>[Resumo de duas ou três linhas sobre uma história ou testemunho.]</p>
-                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
-                    </div>
-                </article>
-                <article class="noticia-card" data-cat="projetos">
-                    <div class="noticia-imagem">Foto da publicação</div>
-                    <div class="noticia-corpo">
-                        <span class="noticia-cat">Projetos e Expansão</span>
-                        <h3>[Título da publicação]</h3>
-                        <p>[Resumo de duas ou três linhas sobre um projeto em desenvolvimento.]</p>
-                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
-                    </div>
-                </article>
-                <article class="noticia-card" data-cat="contas">
-                    <div class="noticia-imagem">Documento</div>
-                    <div class="noticia-corpo">
-                        <span class="noticia-cat">Prestação de Contas</span>
-                        <h3>[Título da publicação]</h3>
-                        <p>[Resumo de duas ou três linhas sobre a aplicação dos recursos.]</p>
-                        <button type="button" class="btn btn-secondary" disabled>Ler notícia</button>
-                    </div>
-                </article>
-            </div>
-
-            <div class="cta-buttons acoes-secao" style="justify-content: center;">
-                <button type="button" class="btn btn-secondary" disabled>Ver mais notícias</button>
-            </div>
+            <!-- As publicacoes vem do banco (tabela noticias), que so as entrega
+                 a quem entrou na Area do Mantenedor. Nao escrever noticias aqui:
+                 o HTML e publico. -->
+            <p class="conteudo-restrito-aviso" id="noticias-aviso" role="status">Carregando publicações…</p>
+            <div class="noticias-grid" id="noticias-lista"></div>
         </div>
     </section>
 
@@ -128,6 +78,6 @@
         </div>
     </section>
 
-    <script src="app.js?v=47"></script>
+    <script src="app.js?v=48"></script>
 </body>
 </html>

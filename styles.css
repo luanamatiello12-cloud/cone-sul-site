@@ -3233,3 +3233,16 @@ body.modo-edicao section img[data-img]:hover { filter: brightness(0.85); }
 @media (prefers-reduced-motion: reduce) {
     .popup-fotos-wrap .leaflet-popup-content-wrapper, .leaflet-tooltip.mapa-dica { animation: none; }
 }
+
+/* Conteudo exclusivo vindo do banco (noticias e beneficios dos Expansores) */
+.conteudo-restrito-aviso {
+    margin-top: 2rem;
+    padding: 1rem 1.2rem;
+    border-left: 3px solid var(--areia);
+    background: rgba(201, 215, 128, 0.09);
+    font-size: 0.95rem;
+}
+.conteudo-restrito-aviso[hidden] { display: none; }
+.noticia-imagem { overflow: hidden; }
+.noticia-imagem img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.noticia-corpo a.btn { align-self: flex-start; }

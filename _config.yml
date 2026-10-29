@@ -1,0 +1,8 @@
+# Configuracao da publicacao no GitHub Pages.
+# O Pages publica o repositorio inteiro; o que esta em "exclude" fica so
+# no repositorio e nao vira endereco do site. Documentacao interna e o
+# codigo do servidor nao precisam (nem devem) estar no ar.
+exclude:
+  - servidor
+  - mapa/README.md
+  - _config.yml

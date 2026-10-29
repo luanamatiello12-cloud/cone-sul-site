@@ -19,7 +19,11 @@ const CONTATO = {
 // site: o que protege os dados sao as regras do banco (schema.sql).
 const CONTAS = {
     url: '',
-    chavePublica: ''
+    chavePublica: '',
+    // Chave do site do Cloudflare Turnstile (CAPTCHA). Vazio = sem CAPTCHA.
+    // Ligar junto com "Captcha protection" no Supabase (servidor/LEIA-ME.md):
+    // um sem o outro faz o login falhar.
+    captcha: ''
 };
 
 // ---------- Links de pagamento da campanha (seja-mantenedor.html) ----------
@@ -368,8 +372,10 @@ const PORTAL = {
     // ----- Contas reais (Supabase), carregado so quando configurado -----
     async cliente() {
         if (!this._cliente) {
-            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm');
-            this._cliente = createClient(CONTAS.url, CONTAS.chavePublica);
+            // Copia local da biblioteca (bibliotecas/supabase, versao 2.45.4):
+            // o login nao depende de codigo servido por terceiros
+            await carregarScript('bibliotecas/supabase/supabase.js?v=2.45.4');
+            this._cliente = window.supabase.createClient(CONTAS.url, CONTAS.chavePublica);
         }
         return this._cliente;
     },
@@ -406,13 +412,13 @@ const PORTAL = {
     // Com contas reais, o login devolve o cadastro guardado no servidor; o
     // nivel vem da contribuicao aprovada (ver servidor/LEIA-ME.md). Na demonstracao, entra sem contribuicao; para ver
     // um nivel, abrir portal.html?demo=<valor> (ex.: ?demo=1500 = Expansor).
-    async entrar(email, senha, valorDemo) {
+    async entrar(email, senha, valorDemo, captchaToken) {
         if (this.MODO_DEMO) {
             const valor = Number(valorDemo) || 0;
             return { email, nome: '', valor };
         }
         const sb = await this.cliente();
-        const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+        const { data, error } = await sb.auth.signInWithPassword({ email, password: senha, options: { captchaToken } });
         if (error) throw new Error('E-mail ou senha incorretos.');
         return this.perfil(sb, data.user);
     },
@@ -421,13 +427,13 @@ const PORTAL = {
     // nenhum: so abre a sessao com nome e e-mail. Com contas reais, os dados
     // vao junto da conta e o banco cria a linha em "mantenedores" (gatilho
     // em schema.sql); o nivel so aparece quando a contribuicao for aprovada.
-    async cadastrar(dados) {
+    async cadastrar(dados, captchaToken) {
         if (this.MODO_DEMO) return { nome: dados.nome, email: dados.email };
         const sb = await this.cliente();
         const { senha, ...perfil } = dados;
         const { data, error } = await sb.auth.signUp({
             email: dados.email, password: senha,
-            options: { data: perfil, emailRedirectTo: new URL('portal.html', location.href).href }
+            options: { data: perfil, emailRedirectTo: new URL('portal.html', location.href).href, captchaToken }
         });
         if (error) throw new Error(error.message.includes('registered') ? 'Este e-mail já tem cadastro. Entre na Área do Mantenedor.' : 'Não foi possível concluir o cadastro.');
         if (!data.session) throw new Error('Quase lá: enviamos um e-mail para confirmar seu cadastro. Abra o link para entrar.');
@@ -450,12 +456,12 @@ const PORTAL = {
 
     // Esqueci minha senha: o Supabase manda o link; ao abrir, a pessoa cai
     // no portal ja logada, com o formulario de senha nova em destaque
-    async esqueciSenha(email) {
+    async esqueciSenha(email, captchaToken) {
         if (this.MODO_DEMO) throw new Error('Em demonstração não há e-mail de troca de senha. Com as contas ligadas, o link chega no e-mail informado.');
         const sb = await this.cliente();
         const destino = new URL('portal.html', location.href);
         destino.hash = 'nova-senha';
-        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: destino.href });
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: destino.href, captchaToken });
         if (error) throw new Error('Não foi possível enviar agora. Tente de novo em alguns minutos.');
     },
 
@@ -467,9 +473,92 @@ const PORTAL = {
         try { sessionStorage.setItem(this.CHAVE, JSON.stringify(usuario)); } catch { /* sem storage: sessao so dura a pagina */ }
     },
 
-    sair() {
+    // Encerra a sessao no servidor (invalida o login em todos os aparelhos)
+    // e espera a resposta: so depois a tela volta ao login
+    async sair() {
         try { sessionStorage.removeItem(this.CHAVE); } catch { /* nada a limpar */ }
-        if (!this.MODO_DEMO && this._cliente) this._cliente.auth.signOut();
+        if (this.MODO_DEMO) return;
+        const sb = this._cliente || (this.temLoginGuardado() ? await this.cliente() : null);
+        if (!sb) return;
+        const { error } = await sb.auth.signOut();
+        // Sem resposta do servidor: ao menos apaga o login deste navegador
+        if (error) await sb.auth.signOut({ scope: 'local' });
+    },
+
+    // Conteudo exclusivo (tabela conteudo_restrito): o banco so entrega a
+    // quem tem um dos niveis da linha; para os demais volta null
+    async conteudo(chave) {
+        const sb = await this.cliente();
+        const { data, error } = await sb.from('conteudo_restrito').select('conteudo').eq('chave', chave).maybeSingle();
+        if (error) throw error;
+        return data ? data.conteudo : null;
+    },
+
+    // Publicacoes da pagina de noticias (so para quem entrou)
+    async noticias() {
+        const sb = await this.cliente();
+        const { data, error } = await sb.from('noticias').select('categoria, titulo, resumo, imagem, link, publicado_em')
+            .eq('publicada', true).order('publicado_em', { ascending: false }).limit(60);
+        if (error) throw error;
+        return data;
+    },
+
+    // Ha login do Supabase guardado neste navegador?
+    temLoginGuardado() {
+        try {
+            for (let i = 0; i < localStorage.length; i++) if (/^sb-.*-auth-token$/.test(localStorage.key(i))) return true;
+        } catch { /* sem storage */ }
+        return false;
+    }
+};
+
+// Carrega um script do proprio site uma vez so
+const scriptsCarregados = {};
+function carregarScript(src) {
+    if (!scriptsCarregados[src]) scriptsCarregados[src] = new Promise((ok, falha) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = ok;
+        s.onerror = () => { delete scriptsCarregados[src]; falha(new Error('Não foi possível carregar a página. Verifique a conexão e tente de novo.')); };
+        document.head.appendChild(s);
+    });
+    return scriptsCarregados[src];
+}
+
+// ---------- CAPTCHA (Cloudflare Turnstile) ----------
+// So com contas reais e CONTAS.captcha preenchido. Poe a caixa "Confirme
+// que voce e humano" antes do botao de enviar de cada formulario de acesso
+// e entrega o comprovante (vale uma vez) para o Supabase conferir.
+const CAPTCHA = {
+    ativo: !!CONTAS.captcha && !PORTAL.MODO_DEMO,
+    preparar(form) {
+        if (!this.ativo || !form || form.querySelector('.cf-turnstile')) return;
+        const caixa = document.createElement('div');
+        caixa.className = 'cf-turnstile campo campo-largo';
+        caixa.dataset.sitekey = CONTAS.captcha;
+        caixa.dataset.language = 'pt-br';
+        const botao = form.querySelector('[type="submit"]');
+        (botao.closest('.campo') || botao).before(caixa);
+        if (!document.querySelector('script[src*="challenges.cloudflare.com"]')) {
+            const s = document.createElement('script');
+            s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+            s.async = true;
+            document.head.appendChild(s);
+        }
+    },
+    // Comprovante do formulario; vazio = a pessoa ainda nao confirmou
+    token(form) {
+        if (!this.ativo) return undefined;
+        const t = form.querySelector('[name="cf-turnstile-response"]')?.value;
+        if (!t) throw new Error('Confirme que você não é um robô (a caixa acima do botão).');
+        return t;
+    },
+    // Depois de cada tentativa o comprovante vence: pede outro
+    reiniciar(form) {
+        if (this.ativo && window.turnstile) {
+            const caixa = form.querySelector('.cf-turnstile');
+            if (caixa) window.turnstile.reset(caixa);
+        }
     }
 };
 
@@ -485,6 +574,66 @@ function cpfValido(cpf) {
     return verificador(9) === Number(d[9]) && verificador(10) === Number(d[10]);
 }
 
+// Endereco vindo do banco: so http(s), nunca "javascript:"
+const enderecoSeguro = (url) => {
+    try { const u = new URL(url, location.href); return /^https?:$/.test(u.protocol) ? u.href : ''; } catch { return ''; }
+};
+const novoElemento = (tag, classe, texto) => {
+    const el = document.createElement(tag);
+    if (classe) el.className = classe;
+    if (texto !== undefined) el.textContent = texto;
+    return el;
+};
+
+// Publicacoes de noticias: vem do banco, nunca do HTML (que e publico)
+if (PAGINA === 'noticias') {
+    const CATEGORIAS = {
+        diario: 'Diário de Campo', noticias: 'Notícias da Missão', historias: 'Histórias e Testemunhos',
+        projetos: 'Projetos e Expansão', contas: 'Prestação de Contas'
+    };
+    const lista = document.getElementById('noticias-lista');
+    const aviso = document.getElementById('noticias-aviso');
+    const card = (n) => {
+        const artigo = novoElemento('article', 'noticia-card');
+        artigo.dataset.cat = n.categoria;
+        const foto = novoElemento('div', 'noticia-imagem');
+        const src = n.imagem && enderecoSeguro(n.imagem);
+        if (src) { const img = novoElemento('img'); img.src = src; img.alt = ''; img.loading = 'lazy'; foto.append(img); }
+        else foto.textContent = n.categoria === 'contas' ? 'Documento' : 'Foto da publicação';
+        const corpo = novoElemento('div', 'noticia-corpo');
+        corpo.append(novoElemento('span', 'noticia-cat', CATEGORIAS[n.categoria] || ''), novoElemento('h3', '', n.titulo), novoElemento('p', '', n.resumo));
+        const href = n.link && enderecoSeguro(n.link);
+        if (href) {
+            const a = novoElemento('a', 'btn btn-secondary', 'Ler notícia');
+            a.href = href; a.target = '_blank'; a.rel = 'noopener';
+            corpo.append(a);
+        }
+        artigo.append(foto, corpo);
+        return artigo;
+    };
+    const mostrarAviso = (texto) => { aviso.hidden = !texto; aviso.textContent = texto || ''; };
+
+    if (PORTAL.MODO_DEMO) {
+        // Demonstracao: cards de exemplo, so para ver o layout
+        lista.replaceChildren(...Object.entries(CATEGORIAS).map(([categoria]) => card({
+            categoria, titulo: '[Título da publicação]', resumo: '[Resumo de duas ou três linhas da publicação.]'
+        })));
+        mostrarAviso('Modelo de layout. Com as contas ligadas, as publicações vêm do banco de dados e só aparecem para quem entrou na Área do Mantenedor.');
+    } else {
+        PORTAL.iniciar()
+            .then(u => {
+                if (!u) { location.replace('portal.html'); return null; }
+                return PORTAL.noticias();
+            })
+            .then(itens => {
+                if (!itens) return;
+                lista.replaceChildren(...itens.map(card));
+                mostrarAviso(itens.length ? '' : 'Ainda não há publicações. Volte em breve.');
+            })
+            .catch(() => mostrarAviso('Não foi possível carregar as publicações agora. Recarregue a página.'));
+    }
+}
+
 if (PAGINA === 'portal') {
     // Veio pelo link de "Esqueci minha senha"? (o Supabase poe type=recovery
     // no endereco; guardar antes de o cliente limpar o endereco)
@@ -498,6 +647,38 @@ if (PAGINA === 'portal') {
     const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal', 'tela-portal-senha'].map(id => document.getElementById(id));
     // Telas que dependem do nivel: so aparecem para quem tem esse nivel
     const SO_NIVEL = { 'tela-portal-expansores': ['expansor'] };
+
+    // Beneficios dos Expansores: vem do banco, que so entrega a lista a quem
+    // tem o nivel Expansor (o HTML e publico e nao traz a lista)
+    const listaBeneficios = document.getElementById('beneficios-expansores');
+    const avisoBeneficios = document.getElementById('beneficios-expansores-aviso');
+    let beneficiosCarregados = false;
+    async function carregarBeneficios() {
+        if (beneficiosCarregados) return;
+        const avisar = (texto) => { avisoBeneficios.hidden = !texto; avisoBeneficios.textContent = texto || ''; };
+        if (PORTAL.MODO_DEMO) {
+            avisar('Demonstração: a lista de benefícios fica guardada no banco de dados e aparece aqui quando as contas estiverem ligadas.');
+            return;
+        }
+        try {
+            const itens = await PORTAL.conteudo('beneficios-expansores');
+            if (!Array.isArray(itens)) throw new Error('sem acesso');
+            listaBeneficios.replaceChildren(...itens.map((b, i) => {
+                const li = novoElemento('li', 'beneficio');
+                li.append(novoElemento('span', 'beneficio-num', String(i + 1).padStart(2, '0')), novoElemento('h4', '', b.titulo));
+                (b.paragrafos || []).forEach(t => li.append(novoElemento('p', '', t)));
+                return li;
+            }));
+            beneficiosCarregados = true;
+            avisar('');
+        } catch {
+            avisar('Não foi possível carregar os benefícios agora. Recarregue a página.');
+        }
+    }
+    function esquecerBeneficios() {
+        beneficiosCarregados = false;
+        listaBeneficios.replaceChildren();
+    }
 
     // Seu nivel, beneficios e resumo da contribuicao
     function mostrarNivel(usuario) {
@@ -522,6 +703,8 @@ if (PAGINA === 'portal') {
             const exige = SO_NIVEL[t.id];
             if (exige) t.hidden = !nivel || !exige.includes(nivel.id);
         });
+        if (nivel && nivel.id === 'expansor') carregarBeneficios();
+        else esquecerBeneficios();
     }
 
     // Poe ou tira "Noticias" do menu conforme o login, sem recarregar
@@ -548,6 +731,7 @@ if (PAGINA === 'portal') {
         atualizarMenu(!!usuario);
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
+        if (!usuario) esquecerBeneficios();
         if (usuario) {
             document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
             mostrarNivel(usuario);
@@ -578,6 +762,7 @@ if (PAGINA === 'portal') {
     }).catch(() => {});
 
     const formLogin = document.getElementById('form-login');
+    CAPTCHA.preparar(formLogin);
     formLogin.addEventListener('submit', async (e) => {
         e.preventDefault();
         const retorno = document.getElementById('login-retorno');
@@ -594,7 +779,8 @@ if (PAGINA === 'portal') {
                 document.getElementById('p-email').value.trim(),
                 document.getElementById('p-senha').value,
                 // Bastidor: portal.html?demo=1500 simula o valor mensal na demonstracao
-                new URLSearchParams(location.search).get('demo')
+                new URLSearchParams(location.search).get('demo'),
+                CAPTCHA.token(formLogin)
             );
             PORTAL.salvar(usuario);
             formLogin.reset();
@@ -602,10 +788,12 @@ if (PAGINA === 'portal') {
         } catch (erro) {
             retorno.textContent = erro.message;
         }
+        CAPTCHA.reiniciar(formLogin);
     });
 
     // Esqueci minha senha
     const formEsqueci = document.getElementById('form-esqueci');
+    CAPTCHA.preparar(formEsqueci);
     const trocarForm = (esqueci) => {
         formLogin.hidden = esqueci;
         formEsqueci.hidden = !esqueci;
@@ -619,11 +807,12 @@ if (PAGINA === 'portal') {
         formEsqueci.classList.add('validar');
         if (!formEsqueci.checkValidity()) { retorno.textContent = 'Informe um e-mail válido.'; return; }
         try {
-            await PORTAL.esqueciSenha(document.getElementById('e-email').value.trim());
+            await PORTAL.esqueciSenha(document.getElementById('e-email').value.trim(), CAPTCHA.token(formEsqueci));
             retorno.textContent = 'Pronto! Se este e-mail tiver cadastro, o link para criar uma senha nova chega em alguns minutos.';
         } catch (erro) {
             retorno.textContent = erro.message;
         }
+        CAPTCHA.reiniciar(formEsqueci);
     });
 
     // Trocar senha (opcional)
@@ -636,7 +825,7 @@ if (PAGINA === 'portal') {
         confirma.setCustomValidity(confirma.value && confirma.value !== nova.value ? 'As senhas não conferem.' : '');
         formSenha.classList.add('validar');
         if (!formSenha.checkValidity()) {
-            retorno.textContent = nova.validity.tooShort || nova.validity.valueMissing ? 'A senha precisa ter pelo menos 6 caracteres.' : 'As duas senhas não conferem.';
+            retorno.textContent = nova.validity.tooShort || nova.validity.valueMissing ? 'A senha precisa ter pelo menos 8 caracteres.' : 'As duas senhas não conferem.';
             return;
         }
         try {
@@ -651,8 +840,11 @@ if (PAGINA === 'portal') {
         }
     });
 
-    document.getElementById('btn-sair').addEventListener('click', () => {
-        PORTAL.sair();
+    document.getElementById('btn-sair').addEventListener('click', async (e) => {
+        const botao = e.currentTarget;
+        botao.disabled = true;
+        try { await PORTAL.sair(); } catch { /* a sessao local ja foi apagada */ }
+        botao.disabled = false;
         mostrar(null, true);
     });
 }
@@ -685,6 +877,7 @@ if (PAGINA === 'fazer-parte') {
         }
     }
     const cpf = document.getElementById('c-cpf');
+    CAPTCHA.preparar(formCadastro);
 
     // Mascara 000.000.000-00 enquanto digita
     cpf.addEventListener('input', () => {
@@ -711,7 +904,9 @@ if (PAGINA === 'fazer-parte') {
             const invalido = formCadastro.querySelector(':invalid');
             retorno.textContent = invalido === cpf && cpf.value
                 ? 'Confira o CPF: os números não formam um CPF válido.'
-                : 'Preencha todos os campos e marque a autorização.';
+                : invalido?.id === 'c-senha' && invalido.value
+                    ? 'A senha precisa ter pelo menos 8 caracteres.'
+                    : 'Preencha todos os campos e marque a autorização.';
             invalido?.focus();
             return;
         }
@@ -730,7 +925,7 @@ if (PAGINA === 'fazer-parte') {
                 igreja: valor('c-igreja'),
                 email: valor('c-email'),
                 senha: document.getElementById('c-senha').value
-            });
+            }, CAPTCHA.token(formCadastro));
             PORTAL.salvar(usuario);
             if (nivelPlano && linkPlano) { location.href = linkPlano; return; }
             if (nivelPlano) {
@@ -741,6 +936,7 @@ if (PAGINA === 'fazer-parte') {
             location.href = 'portal.html';
         } catch (erro) {
             retorno.textContent = erro.message;
+            CAPTCHA.reiniciar(formCadastro);
         }
     });
 }
@@ -895,12 +1091,7 @@ const EDICAO = {
     },
 
     // Ha alguem logado neste navegador? So entao vale carregar o cliente
-    temLogin() {
-        try {
-            for (let i = 0; i < localStorage.length; i++) if (/^sb-.*-auth-token$/.test(localStorage.key(i))) return true;
-        } catch { /* sem storage */ }
-        return false;
-    },
+    temLogin() { return PORTAL.temLoginGuardado(); },
 
     async verificarEditor() {
         if (!this.temLogin()) return false;
@@ -943,9 +1134,13 @@ const EDICAO = {
         return new Promise(ok => c.toBlob(b => ok(b || arquivo), 'image/jpeg', 0.85));
     },
 
+    // So JPG, PNG ou WebP de ate 5 MB (o armazenamento "site" recusa o resto:
+    // schema.sql)
     async enviarImagem(arquivo) {
+        if (!/^image\/(jpeg|png|webp)$/.test(arquivo.type)) throw new Error('Use uma imagem JPG, PNG ou WebP.');
         const sb = await PORTAL.cliente();
         const blob = await this.reduzir(arquivo);
+        if (blob.size > 5 * 1024 * 1024) throw new Error('A imagem ficou maior que 5 MB. Use uma foto menor.');
         const nome = arquivo.name.toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').slice(0, 40) || 'imagem';
         const caminho = `${PAGINA_ARQUIVO.replace('.html', '')}/${Date.now()}-${nome}.jpg`;
         const { error } = await sb.storage.from('site').upload(caminho, blob, { contentType: blob.type || 'image/jpeg', upsert: false });
@@ -1193,7 +1388,8 @@ async function abrirHistorico() {
             } catch (erro) { alert(erro.message); }
         });
     } catch (erro) {
-        painel.innerHTML = `<p>${erro.message}</p><button type="button" class="fechar-historico">Fechar</button>`;
+        painel.innerHTML = `<p></p><button type="button" class="fechar-historico">Fechar</button>`;
+        painel.querySelector('p').textContent = erro.message;
         painel.querySelector('.fechar-historico').onclick = () => painel.remove();
     }
 }

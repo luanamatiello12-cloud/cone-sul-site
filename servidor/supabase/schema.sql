@@ -151,11 +151,87 @@ create policy "ve a si mesmo" on public.equipe
 grant select on public.equipe to authenticated;
 
 -- Imagens trocadas pelo editor: armazenamento publico "site"
-insert into storage.buckets (id, name, public)
-values ('site', 'site', true)
-on conflict (id) do nothing;
+-- So imagens JPG, PNG ou WebP de ate 5 MB (o editor reduz as fotos antes)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('site', 'site', true, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update
+    set file_size_limit = excluded.file_size_limit,
+        allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "equipe envia imagens" on storage.objects;
 create policy "equipe envia imagens" on storage.objects
     for insert to authenticated
     with check (bucket_id = 'site' and exists (select 1 from public.equipe e where e.id = auth.uid()));
+
+-- ---------- Conteudo so para mantenedores ----------
+-- O HTML do site e publico (e o repositorio tambem): o que for exclusivo
+-- fica aqui, e o banco so entrega a quem tem direito.
+
+-- Blocos exclusivos de um ou mais niveis. Ex.: chave 'beneficios-expansores',
+-- niveis {expansor}. Conteudo inicial: conteudo-inicial.sql
+create table if not exists public.conteudo_restrito (
+    chave          text primary key,
+    niveis         text[] not null check (cardinality(niveis) > 0),
+    conteudo       jsonb not null,
+    atualizado_em  timestamptz not null default now()
+);
+alter table public.conteudo_restrito enable row level security;
+
+drop policy if exists "le quem tem o nivel" on public.conteudo_restrito;
+create policy "le quem tem o nivel" on public.conteudo_restrito
+    for select to authenticated using (
+        exists (select 1 from public.mantenedores m where m.id = auth.uid() and m.nivel = any (niveis))
+        or exists (select 1 from public.equipe e where e.id = auth.uid())
+    );
+drop policy if exists "equipe altera" on public.conteudo_restrito;
+create policy "equipe altera" on public.conteudo_restrito
+    for all to authenticated
+    using (exists (select 1 from public.equipe e where e.id = auth.uid()))
+    with check (exists (select 1 from public.equipe e where e.id = auth.uid()));
+revoke all on public.conteudo_restrito from anon;
+grant select, insert, update, delete on public.conteudo_restrito to authenticated;
+
+-- Publicacoes da pagina de noticias: so para quem entrou com uma conta.
+-- Por enquanto a equipe publica pelo painel do Supabase (Table Editor).
+create table if not exists public.noticias (
+    id            bigint generated always as identity primary key,
+    categoria     text not null check (categoria in ('diario', 'noticias', 'historias', 'projetos', 'contas')),
+    titulo        text not null,
+    resumo        text not null,
+    imagem        text,      -- endereco da foto (opcional)
+    link          text,      -- texto completo ou documento (opcional)
+    publicada     boolean not null default true,
+    publicado_em  timestamptz not null default now(),
+    autor         uuid references auth.users (id) on delete set null
+);
+create index if not exists noticias_data on public.noticias (publicado_em desc);
+alter table public.noticias enable row level security;
+
+drop policy if exists "contas leem" on public.noticias;
+create policy "contas leem" on public.noticias
+    for select to authenticated using (
+        publicada or exists (select 1 from public.equipe e where e.id = auth.uid())
+    );
+drop policy if exists "equipe publica noticias" on public.noticias;
+create policy "equipe publica noticias" on public.noticias
+    for all to authenticated
+    using (exists (select 1 from public.equipe e where e.id = auth.uid()))
+    with check (exists (select 1 from public.equipe e where e.id = auth.uid()));
+revoke all on public.noticias from anon;
+grant select, insert, update, delete on public.noticias to authenticated;
+
+-- ---------- Registro de atividades da equipe ----------
+-- Quem importou relatorio e quem gerou senha provisoria para quem.
+-- Sem politicas: so as funcoes do servidor gravam; ler pelo painel
+-- (Table Editor > registro_atividades).
+create table if not exists public.registro_atividades (
+    id           bigint generated always as identity primary key,
+    quando       timestamptz not null default now(),
+    autor        uuid references auth.users (id) on delete set null,
+    autor_email  text,
+    acao         text not null,     -- 'importacao', 'nova-senha'
+    alvo         text,              -- e-mail afetado (nova-senha)
+    detalhes     jsonb
+);
+alter table public.registro_atividades enable row level security;
+revoke all on public.registro_atividades from anon, authenticated;

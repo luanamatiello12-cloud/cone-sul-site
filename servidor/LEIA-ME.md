@@ -45,7 +45,7 @@ Eklesia em **`importar.html`** (página de bastidor, fora do menu):
    somar, usar o maior valor ou a última linha.
 4. Conferir a prévia (nível de cada pessoa) e clicar em **Importar cadastros**:
    - quem é **novo** ganha um login pronto: o e-mail e uma **senha provisória**
-     (`Cone-` e seis números);
+     (`Cone-` e oito letras e números, ex.: `Cone-7KQ4-M9TX`);
    - quem **já existe** tem valor e nível atualizados (dados que a pessoa já editou não
      são sobrescritos; a senha não muda).
 5. Aparece a lista **Enviar os acessos**: para cada pessoa nova, a senha e o botão
@@ -65,14 +65,22 @@ as linhas já organizadas. Só contas da tabela `equipe` conseguem importar.
 
 ### 1. Supabase
 1. Criar um projeto em supabase.com, em nome da igreja.
-2. **SQL Editor**: colar e rodar `supabase/schema.sql`.
+2. **SQL Editor**: colar e rodar `supabase/schema.sql` e, depois, `supabase/conteudo-inicial.sql`
+   (lista dos benefícios dos Expansores, que só o banco entrega a quem tem o nível).
 3. **Authentication > URL Configuration**: em *Site URL* e *Redirect URLs*, colocar o
    endereço do site (ex.: `https://luanamatiello12-cloud.github.io/cone-sul-site/`).
 4. **Authentication > Email Templates**: traduzir para o português o e-mail de
    **Reset password** ("Esqueci minha senha") e o de **Invite user** (usado só pelo
    webhook de pagamento, se um dia for ligado).
-5. **Authentication > Providers > Email**: deixar ligado; "Confirm email" pode ficar
-   ligado (os logins criados pela importação já nascem confirmados).
+5. **Authentication > Providers > Email**: deixar ligado, com **"Confirm email" ligado**
+   (sem ele, alguém poderia criar conta com o e-mail de outra pessoa; os logins criados
+   pela importação já nascem confirmados). **Minimum password length: 8**.
+   - **Authentication > Attack Protection**: ligar **Captcha protection** com o
+     Cloudflare Turnstile (conta gratuita em cloudflare.com > Turnstile > Add site).
+     A *Secret key* vai no Supabase; a *Site key* vai em `CONTAS.captcha` no `app.js`.
+     Ligar os dois juntos: um sem o outro faz o login falhar.
+   - **Authentication > Sessions** (se o plano permitir): *JWT expiry* de 900 segundos.
+     Depois de "Sair", um acesso copiado deixa de valer em até 15 minutos.
 6. **Project Settings > API**: copiar a *Project URL* e a chave *anon public* para
    `CONTAS` no topo do `app.js`. Isso tira o portal do modo demonstração.
 
@@ -85,6 +93,9 @@ supabase functions deploy webhook-pagamento --no-verify-jwt
 supabase secrets set PROVEDOR_PAGAMENTO=asaas \
   WEBHOOK_TOKEN=<uma senha longa inventada> \
   SITE_URL=https://luanamatiello12-cloud.github.io/cone-sul-site
+# Endereços de onde a importação pode ser chamada (padrão: o do SITE_URL).
+# Com domínio próprio, listar os dois enquanto durar a troca:
+supabase secrets set ORIGENS_PERMITIDAS=https://conesul.org.br,https://luanamatiello12-cloud.github.io
 # e a chave da plataforma escolhida:
 supabase secrets set ASAAS_API_KEY=...            # Asaas
 supabase secrets set MERCADOPAGO_ACCESS_TOKEN=... # ou Mercado Pago
@@ -106,6 +117,20 @@ Quem vai importar o relatório cria a conta pelo site (Faça parte) e é incluí
 Os tradutores do Asaas e do Mercado Pago (`provedores/`) foram escritos pela
 documentação e **ainda não foram testados com uma conta real**: conferir no primeiro
 pagamento de teste. Outra plataforma = um arquivo novo em `provedores/` no mesmo formato.
+
+### Conteúdo só para mantenedores
+O HTML do site é público (qualquer um vê o código-fonte), então o que é exclusivo
+fica no banco:
+- **Notícias** (`noticias.html`): tabela `noticias`. Só quem entrou com uma conta lê.
+  A equipe publica pelo **Table Editor > noticias > Insert row** (categoria: `diario`,
+  `noticias`, `historias`, `projetos` ou `contas`; título; resumo; foto e link opcionais).
+- **Benefícios dos Expansores** (`portal.html`): tabela `conteudo_restrito`, chave
+  `beneficios-expansores`. Só quem tem o nível Expansor (e a equipe) lê.
+
+### Registro de atividades
+Cada importação e cada senha provisória nova ficam em **Table Editor >
+registro_atividades** (quem fez, quando e, na senha nova, para qual e-mail).
+A senha nova não pode ser gerada para contas da equipe: elas usam "Esqueci minha senha".
 
 ### 5. Antes de abrir ao público
 - Atualizar a **Política de Privacidade**: o site passa a guardar CPF, telefone e dados
