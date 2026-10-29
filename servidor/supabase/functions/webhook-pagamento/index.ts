@@ -47,8 +47,8 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const r = await gravarContribuicao(db, evento, provedor.nome);
-        return responder(200, r === 'criado' ? 'conta criada' : 'atualizado');
+        const { resultado } = await gravarContribuicao(db, evento, provedor.nome, 'convite');
+        return responder(200, resultado === 'criado' ? 'conta criada' : 'atualizado');
     } catch (e) {
         await db.from('eventos_pagamento').delete().eq('id', evento.id);   // deixa reprocessar
         return responder(500, (e as Error).message);

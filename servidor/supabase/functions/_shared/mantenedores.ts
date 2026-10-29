@@ -1,7 +1,9 @@
 // Grava uma contribuicao no cadastro do mantenedor. Usado pelo webhook
 // (plataforma de pagamento) e pela importacao do relatorio (Eklesia).
-// - Sem cadastro com este e-mail: cria a conta e manda o convite por e-mail
-//   ("seu cadastro esta pronto"), com os dados que vieram.
+// - Sem cadastro com este e-mail: cria a conta, de um destes jeitos:
+//     'convite' (webhook): o Supabase manda o e-mail "seu cadastro esta pronto";
+//     'senha' (importacao): login pronto com SENHA PROVISORIA, devolvida aqui
+//     uma unica vez para a equipe mandar pelo WhatsApp (nao fica guardada).
 // - Com cadastro: so preenche os campos vazios (nao apaga o que a pessoa
 //   editou) e atualiza valor e status. O nivel e calculado pelo banco.
 
@@ -19,20 +21,33 @@ export interface DadosContribuicao {
     assinaturaId?: string;
 }
 
-export type Resultado = 'criado' | 'atualizado';
+export interface Resultado { resultado: 'criado' | 'atualizado'; senha?: string }
+
+// Senha provisoria facil de digitar: Cone- e seis numeros (o login tambem
+// exige o e-mail, e o Supabase limita tentativas)
+export function senhaProvisoria(): string {
+    const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000;
+    return `Cone-${String(n).padStart(6, '0')}`;
+}
 
 // deno-lint-ignore no-explicit-any
-export async function gravarContribuicao(db: any, d: DadosContribuicao, provedor: string): Promise<Resultado> {
+export async function gravarContribuicao(db: any, d: DadosContribuicao, provedor: string, modo: 'convite' | 'senha' = 'convite'): Promise<Resultado> {
     const email = d.email.trim().toLowerCase();
     let { data: m } = await db.from('mantenedores').select('*').eq('email', email).maybeSingle();
     let criado = false;
+    let senha: string | undefined;
 
     if (!m) {
-        const { data, error } = await db.auth.admin.inviteUserByEmail(email, {
-            redirectTo: `${Deno.env.get('SITE_URL')}/portal.html`,
-            data: { nome: d.nome ?? '', cpf: d.cpf ?? '' }
-        });
-        if (error || !data?.user) throw new Error(`convite para ${email}: ${error?.message ?? 'sem usuario'}`);
+        const dados = { nome: d.nome ?? '', cpf: d.cpf ?? '' };
+        let resposta;
+        if (modo === 'senha') {
+            senha = senhaProvisoria();
+            resposta = await db.auth.admin.createUser({ email, password: senha, email_confirm: true, user_metadata: dados });
+        } else {
+            resposta = await db.auth.admin.inviteUserByEmail(email, { redirectTo: `${Deno.env.get('SITE_URL')}/portal.html`, data: dados });
+        }
+        const { data, error } = resposta;
+        if (error || !data?.user) throw new Error(`criar conta de ${email}: ${error?.message ?? 'sem usuario'}`);
         criado = true;
         ({ data: m } = await db.from('mantenedores').select('*').eq('id', data.user.id).maybeSingle());
         if (!m) throw new Error(`cadastro de ${email} nao foi criado`);
@@ -51,8 +66,8 @@ export async function gravarContribuicao(db: any, d: DadosContribuicao, provedor
         provedor,
         cliente_id: d.clienteId ?? m.cliente_id,
         assinatura_id: d.assinaturaId ?? m.assinatura_id,
-        ...(criado ? { cadastro_automatico: true } : {})
+        ...(criado ? { cadastro_automatico: true, senha_provisoria: modo === 'senha' } : {})
     }).eq('id', m.id);
     if (error) throw new Error(`atualizar ${email}: ${error.message}`);
-    return criado ? 'criado' : 'atualizado';
+    return { resultado: criado ? 'criado' : 'atualizado', senha };
 }

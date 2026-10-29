@@ -3113,3 +3113,59 @@ a.produto-comprar:hover { background: var(--verde-900); color: var(--areia); tra
 #btn-importar:disabled { opacity: 0.5; cursor: not-allowed; }
 .importar .btn-primary { background: var(--verde-800); color: var(--creme); box-shadow: none; }
 .importar .btn-primary:hover:not(:disabled) { background: var(--verde-900); color: var(--areia); }
+
+/* Portal: senha provisoria, trocar senha e "esqueci minha senha" */
+button.link-discreto { background: none; border: none; padding: 0; font: inherit; font-size: 0.85rem; text-decoration: underline; cursor: pointer; }
+.esqueci-texto { margin: 0; font-size: 0.9rem; color: rgba(254, 245, 226, 0.8); }
+.aviso-senha {
+    display: inline-block;
+    margin: 0.4rem 0 0;
+    padding: 0.6rem 0.9rem;
+    background: rgba(201, 215, 128, 0.12);
+    border-left: 3px solid var(--areia);
+    border-radius: 4px;
+    font-size: 0.88rem;
+    color: var(--creme);
+}
+.aviso-senha a { color: var(--areia); font-weight: 700; }
+.portal-senha {
+    max-width: 560px;
+    margin-top: 1.6rem;
+    padding: 1.8rem;
+    background: #fff;
+    border-top: 3px solid var(--areia);
+    border-radius: 4px;
+    box-shadow: 0 12px 30px rgba(18, 45, 30, 0.08);
+}
+.portal-senha .formulario { grid-template-columns: 1fr 1fr; max-width: none; }
+.portal-senha label { color: #2a2e2a; }
+.portal-senha .btn-primary { background: var(--verde-800); color: var(--creme); box-shadow: none; }
+.portal-senha .btn-primary:hover { background: var(--verde-900); color: var(--areia); }
+@media (max-width: 640px) { .portal-senha .formulario { grid-template-columns: 1fr; } }
+
+/* Importar: lista de acessos para mandar pelo WhatsApp */
+.acessos { list-style: none; display: grid; gap: 0.8rem; margin: 1.2rem 0 0; padding: 0; }
+.acesso {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    background: #fff;
+    border-left: 4px solid var(--areia);
+    border-radius: 4px;
+    box-shadow: 0 8px 22px rgba(18, 45, 30, 0.07);
+}
+.acesso.enviado { border-left-color: #7fa33a; opacity: 0.75; }
+.acesso.enviado .acesso-dados strong::after { content: '  ✓ enviado'; font-size: 0.75rem; color: #5f7424; }
+.acesso-dados { display: grid; gap: 0.15rem; font-size: 0.88rem; color: #4a4f4a; }
+.acesso-dados strong { font-size: 1rem; color: #1d211d; }
+.acesso-dados code { font-size: 0.95rem; font-weight: 800; color: var(--verde-800); background: #f3f1ea; padding: 0.05rem 0.4rem; border-radius: 3px; }
+.acesso-sem-tel { color: #9a5a2a; font-size: 0.8rem; }
+.acesso-acoes { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.btn-whats { background: #1f8f4e; color: #fff; border-radius: 999px; padding: 0.7rem 1.2rem; font-size: 0.75rem; }
+.btn-whats:hover { background: #17733e; color: #fff; }
+.btn-copiar { background: none; border: none; padding: 0; font: inherit; font-size: 0.82rem; color: var(--verde-800); text-decoration: underline; cursor: pointer; }
+.importar-nova-senha { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
+.importar-nova-senha input { flex: 1 1 260px; max-width: 380px; padding: 0.75rem 0.9rem; border: 1px solid #d7d4c8; border-radius: 4px; font: inherit; }

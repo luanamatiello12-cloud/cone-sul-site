@@ -43,10 +43,19 @@ Eklesia em **`importar.html`** (página de bastidor, fora do menu):
    celular, nascimento, cidade, igreja); dá para trocar qualquer uma.
 3. Se a mesma pessoa aparece em várias linhas (várias contribuições no período):
    somar, usar o maior valor ou a última linha.
-4. Conferir a prévia (nível de cada pessoa) e clicar em **Importar cadastros**: quem é
-   novo recebe o convite "seu cadastro está pronto"; quem já existe tem valor e nível
-   atualizados. Dados que a pessoa já editou não são sobrescritos.
-5. Opcional: "quem não estiver neste relatório perde o nível" (só afeta quem veio do
+4. Conferir a prévia (nível de cada pessoa) e clicar em **Importar cadastros**:
+   - quem é **novo** ganha um login pronto: o e-mail e uma **senha provisória**
+     (`Cone-` e seis números);
+   - quem **já existe** tem valor e nível atualizados (dados que a pessoa já editou não
+     são sobrescritos; a senha não muda).
+5. Aparece a lista **Enviar os acessos**: para cada pessoa nova, a senha e o botão
+   **Enviar no WhatsApp**, que abre a conversa com o celular do relatório e a mensagem
+   pronta (site, login e senha). Também dá para copiar a mensagem.
+   **As senhas aparecem só nessa hora** (não ficam guardadas em lugar nenhum): enviar
+   antes de fechar a página. Perdeu? Em **Nova senha provisória**, gerar outra pelo e-mail.
+6. A pessoa entra no portal com e-mail e senha. Enquanto usa a senha provisória, o portal
+   sugere trocar (opcional). **Esqueci minha senha** manda um link por e-mail.
+7. Opcional: "quem não estiver neste relatório perde o nível" (só afeta quem veio do
    Eklesia).
 
 A leitura do Excel acontece no navegador; ao servidor (função `importar-planilha`) só vão
@@ -59,9 +68,12 @@ as linhas já organizadas. Só contas da tabela `equipe` conseguem importar.
 2. **SQL Editor**: colar e rodar `supabase/schema.sql`.
 3. **Authentication > URL Configuration**: em *Site URL* e *Redirect URLs*, colocar o
    endereço do site (ex.: `https://luanamatiello12-cloud.github.io/cone-sul-site/`).
-4. **Authentication > Email Templates > Invite user**: ajustar o texto do e-mail
-   ("Seu cadastro no Cone Sul está pronto...").
-5. **Project Settings > API**: copiar a *Project URL* e a chave *anon public* para
+4. **Authentication > Email Templates**: traduzir para o português o e-mail de
+   **Reset password** ("Esqueci minha senha") e o de **Invite user** (usado só pelo
+   webhook de pagamento, se um dia for ligado).
+5. **Authentication > Providers > Email**: deixar ligado; "Confirm email" pode ficar
+   ligado (os logins criados pela importação já nascem confirmados).
+6. **Project Settings > API**: copiar a *Project URL* e a chave *anon public* para
    `CONTAS` no topo do `app.js`. Isso tira o portal do modo demonstração.
 
 ### 2. Funções (webhook e importação)
