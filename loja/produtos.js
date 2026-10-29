@@ -19,14 +19,14 @@ const PRODUTOS = [
     {
         nome: 'Camiseta Cone Sul',
         descricao: 'Fronteiras que conectam a Cristo.',
-        preco: 'R$ 160,00',
+        preco: 'R$ 180,00',
         tamanhos: ['P', 'M', 'G', 'GG', 'XGG'],
         estoque: { P: 10, M: 10, G: 5, GG: 2, XGG: 3 },
         medidas: {
             colunas: ['Ombro', 'Largura', 'Comprimento'],
             linhas: { P: [40, 48, 68], M: [42, 51, 70], G: [44, 54, 72], GG: [46, 57, 74], XGG: null }
         },
-        fotos: [],
+        fotos: ['img/loja/camiseta-cone-sul.webp'],
         link: ''
     }
 ];
