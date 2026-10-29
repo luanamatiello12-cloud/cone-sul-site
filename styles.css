@@ -3428,3 +3428,11 @@ body.modo-edicao img[data-img] { cursor: pointer; }
     .pc-foto, .pc-foto img, .pc-foto-nova { width: 130px; }
 }
 .pf-legenda { margin: 0; padding: 0.55rem 0.9rem 0; color: rgba(254, 245, 226, 0.85); font-size: 0.8rem; line-height: 1.4; }
+/* Barra de edicao: Painel e Baixar edicoes sempre a mao (demonstracao) */
+#barra-edicao .barra-linha { display: flex; gap: 0.5rem; align-items: center; }
+#barra-edicao .barra-baixar {
+    padding: 0.5rem 0.8rem;
+    background: var(--areia-clara);
+    color: var(--verde-900);
+    font-size: 0.66rem;
+}

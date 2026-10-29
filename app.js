@@ -1933,10 +1933,12 @@ barraEdicao.id = 'barra-edicao';
 barraEdicao.innerHTML = PORTAL.MODO_DEMO ? `
     <div id="barra-edicao-extra" hidden>
         <span class="dica-edicao">${DICA_EDICAO}</span>
-        <button type="button" id="btn-baixar-edicoes" title="Gera um arquivo com tudo que você editou, para enviar a quem publica o site">Baixar edições</button>
         <button type="button" id="btn-desfazer-edicoes" title="Descarta as edições salvas desta página">Desfazer</button>
     </div>
-    <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
+    <div class="barra-linha">
+        <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
+        <button type="button" id="btn-baixar-edicoes" class="barra-baixar" title="Gera um arquivo com tudo que você editou (todas as páginas, fotos e Painel), para enviar a quem publica o site">Baixar edições</button>
+    </div>
     <button type="button" id="btn-editar" title="Editar a página. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>` : `
     <div id="barra-edicao-extra">
         <span class="dica-edicao" id="estado-edicao"></span>

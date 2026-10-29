@@ -380,6 +380,15 @@
         }
     });
     const btnHistorico = $('#pc-historico');
+    // Demonstracao: o arquivo com tudo (paginas e Painel) para enviar
+    if (PORTAL.MODO_DEMO) {
+        const baixar = $('#pc-baixar');
+        baixar.hidden = false;
+        baixar.addEventListener('click', () => {
+            if (alterado && !confirm('Há alterações no Painel que ainda não foram salvas e não vão no arquivo. Baixar mesmo assim?')) return;
+            baixarEdicoes();
+        });
+    }
     if (PORTAL.MODO_DEMO) btnHistorico.hidden = true;
     else btnHistorico.addEventListener('click', async () => {
         const caixa = $('#pc-versoes');
