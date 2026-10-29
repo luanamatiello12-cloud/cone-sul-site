@@ -3212,3 +3212,11 @@ body.modo-edicao section img[data-img]:hover { filter: brightness(0.85); }
 .produto-medidas thead th { text-transform: none; letter-spacing: 0; font-size: 0.72rem; font-weight: 700; }
 .produto-medidas th:first-child { width: 2.2rem; }
 .produto-medidas thead th { font-size: 0.68rem; padding-left: 0.1rem; padding-right: 0.1rem; }
+.rotulo-mapa.oceano.lado span { transform: translate(-100%, -50%); text-align: right; line-height: 1.5; }
+
+/* Mapa acompanha a rolagem no computador: a lista de cidades e territorios
+   e longa, e o mapa (com o cartao das fotos) continua a vista */
+@media (min-width: 901px) {
+    .mapa-container { align-items: start; }
+    .mapa-container .mapa-leaflet { position: sticky; top: 90px; }
+}

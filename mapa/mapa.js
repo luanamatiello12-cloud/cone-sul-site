@@ -218,9 +218,12 @@
         { txt: 'Uruguai', em: [-33.2, -55.6], cls: 'vizinho' },
         { txt: 'Brasil', em: [-20.8, -52.5], cls: 'vizinho' },
         { txt: 'Bolívia', em: [-20.4, -63.6], cls: 'vizinho' },
-        { txt: 'Oceano Pacífico', em: [-44, -79.6], cls: 'oceano' },
+        { txt: 'Oceano<br>Pacífico', em: [-49.5, -76.4], cls: 'oceano lado' },
         { txt: 'Oceano Atlântico', em: [-41, -51], cls: 'oceano' }
     ];
+    // Dica de territorio nao fica presa na tela quando o mapa anda sozinho
+    map.on('movestart zoomstart', () => Object.values(camadas).forEach(c => c.closeTooltip()));
+
     ROTULOS.forEach(r => L.marker(r.em, {
         interactive: false,
         keyboard: false,
