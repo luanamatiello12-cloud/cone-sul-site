@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=1">
     <title>Faça Parte | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=88">
+    <link rel="stylesheet" href="styles.css?v=89">
 </head>
 <body data-pagina="fazer-parte">
 
@@ -62,20 +62,28 @@
                     <fieldset class="campo escolha">
                         <legend>Você é cristão?</legend>
                         <div class="opcoes">
-                            <label><input type="radio" name="cristao" value="sim" required> Sim</label>
+                            <label><input type="radio" name="cristao" value="sim"> Sim</label>
                             <label><input type="radio" name="cristao" value="nao"> Não</label>
                         </div>
                     </fieldset>
                     <fieldset class="campo escolha">
                         <legend>Congrega em alguma igreja?</legend>
                         <div class="opcoes">
-                            <label><input type="radio" name="congrega" value="sim" required> Sim</label>
+                            <label><input type="radio" name="congrega" value="sim"> Sim</label>
                             <label><input type="radio" name="congrega" value="nao"> Não</label>
                         </div>
                     </fieldset>
                     <div class="campo campo-largo">
                         <label for="c-igreja">Nome da igreja</label>
                         <input type="text" id="c-igreja" placeholder="Se você congrega, qual igreja?">
+                    </div>
+                    <!-- Dado sensivel (LGPD art. 11): consentimento proprio e opcional.
+                         Sem ele, as respostas sobre fe e igreja nao sao enviadas. -->
+                    <div class="campo campo-largo consentimento">
+                        <label>
+                            <input type="checkbox" id="c-consentimento-fe">
+                            <span><strong>Perguntas sobre fé e igreja (opcionais).</strong> Se respondeu, autorizo o CONE SUL a tratar essas respostas, que são dados sensíveis, apenas para conhecer quem caminha com a missão e oferecer acompanhamento pastoral. Posso revogar quando quiser.</span>
+                        </label>
                     </div>
 
                     <div class="campo">
@@ -90,7 +98,7 @@
                     <div class="campo campo-largo consentimento">
                         <label>
                             <input type="checkbox" required>
-                            <span>Autorizo o CONE SUL a tratar os meus dados para o cadastro de mantenedor.</span>
+                            <span>Autorizo o CONE SUL a tratar os meus dados para o cadastro de mantenedor, conforme a <a href="politica-de-privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
                         </label>
                     </div>
                     <div class="campo campo-largo">
@@ -103,6 +111,6 @@
         </div>
     </section>
 
-    <script src="app.js?v=70"></script>
+    <script src="app.js?v=71"></script>
 </body>
 </html>

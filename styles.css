@@ -3688,3 +3688,6 @@ body[data-pagina="inicio"] .hero::after { display: none; }
 nav .logo { display: inline-flex; align-items: center; line-height: 0; }
 nav .logo img { height: 46px; width: auto; display: block; }
 @media (max-width: 700px) { nav .logo img { height: 40px; } }
+
+/* Link da Politica de Privacidade nas autorizacoes do cadastro */
+.consentimento a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
