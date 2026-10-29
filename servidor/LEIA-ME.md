@@ -10,8 +10,10 @@ abrir o portal com o valor no endereço: `portal.html?demo=1500` (Expansor),
 1. A pessoa escolhe um plano (Semeador, Construtor, Expansor). O botão leva primeiro
    ao **cadastro** (`fazer-parte.html?plano=...`): nome, CPF, nascimento, igreja, e-mail
    e senha. A conta é criada nesse momento, ainda sem nível.
-2. Concluído o cadastro, o site leva ao **link de pagamento** do plano
-   (`LINKS_PAGAMENTO` no `app.js`). Quem já tem cadastro vai direto ao pagamento.
+2. Concluído o cadastro, o site leva ao **link de pagamento**, que é um só para
+   todos os planos (`LINKS_PAGAMENTO.unico` no `app.js`, ou no Painel). A pessoa
+   escolhe o valor lá; o nível no login sai do valor contribuído, não do plano
+   clicado. Quem já tem cadastro vai direto ao pagamento.
 3. A plataforma avisa o **webhook** (`supabase/functions/webhook-pagamento`), que
    encontra o cadastro **pelo e-mail** do pagamento. Por isso o site pede para usar o
    mesmo e-mail nos dois. (Se o e-mail não tiver cadastro, o webhook cria a conta e
@@ -108,8 +110,8 @@ Quem vai importar o relatório cria a conta pelo site (Faça parte) e é incluí
 `equipe` (comando no fim do `schema.sql`).
 
 ### 4. Plataforma de pagamento (quando houver)
-- Criar a contribuição mensal (assinatura) de cada plano e colar os links em
-  `LINKS_PAGAMENTO` no `app.js`.
+- Criar a página de contribuição (uma só, com valor escolhido pela pessoa) e colar
+  o link no Painel ou em `LINKS_PAGAMENTO.unico` no `app.js`.
 - Cadastrar o webhook na plataforma apontando para
   `https://<projeto>.supabase.co/functions/v1/webhook-pagamento`, com o `WEBHOOK_TOKEN`
   (Asaas: campo "token de autenticação"; Mercado Pago: `?token=...` no fim da URL).
@@ -130,7 +132,7 @@ fica no banco:
 
 ### Painel (editar.html)
 Além de editar textos nas páginas, a equipe muda pelo painel, sem código:
-- **Contatos do rodapé e links de pagamento** dos planos;
+- **Contatos do rodapé e o link de pagamento** (um só para todos os planos);
 - **Camisetas**: nome, preço, descrição, tamanhos, estoque, medidas, fotos e link;
 - **Cidades do mapa**: fotos (ordem e legenda), mostrar/esconder, cidade nova;
 - **Notícias**: publicar, esconder e apagar (tabela `noticias`).

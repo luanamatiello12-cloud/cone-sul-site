@@ -39,7 +39,7 @@ O ambiente onde eu trabalho só acessa endereços liberados. No menu do ambiente
   Settings > API). A chave pública ("anon") eu pego com o token.
 - O **domínio**, se houver.
 - Os **e-mails da equipe** que vão editar o site e importar o relatório.
-- Os **links de pagamento** dos planos e das camisetas, se já existirem.
+- O **link de pagamento** (um só para todos os planos) e os das camisetas, se já existirem.
 
 ## 3. O que eu faço
 1. Rodo o `supabase/schema.sql` (cadastros, níveis, equipe, edição do site,
