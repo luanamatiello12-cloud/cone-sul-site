@@ -582,8 +582,9 @@ const PORTAL = {
     async esqueciSenha(email, captchaToken, pagina = 'portal.html') {
         if (this.MODO_DEMO) throw new Error('Em demonstração não há e-mail de troca de senha. Com as contas ligadas, o link chega no e-mail informado.');
         const sb = await this.cliente();
+        // Sem #: o Supabase poe o login depois de um # no endereco de volta
+        // (com type=recovery), e um segundo # impede o cliente de le-lo
         const destino = new URL(pagina, location.href);
-        destino.hash = 'nova-senha';
         const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: destino.href, captchaToken });
         if (error) throw new Error('Não foi possível enviar agora. Tente de novo em alguns minutos.');
     },
@@ -819,7 +820,7 @@ if (PAGINA === 'noticias') {
 if (PAGINA === 'portal') {
     // Veio pelo link de "Esqueci minha senha"? (o Supabase poe type=recovery
     // no endereco; guardar antes de o cliente limpar o endereco)
-    const veioTrocarSenha = /type=recovery|#nova-senha/.test(location.hash);
+    const veioTrocarSenha = /type=recovery/.test(location.hash);
     // Endereco antigo do cadastro (portal.html#cadastro) leva a pagina nova
     const irParaCadastro = () => { if (location.hash === '#cadastro') location.replace('fazer-parte.html'); };
     irParaCadastro();
@@ -2074,7 +2075,7 @@ if (PAGINA === 'editar') {
     const $ = (id) => document.getElementById(id);
     const telaLogin = $('editar-login');
     const telasPainel = ['editar-topo', 'editar-paginas', 'painel-config', 'editar-senha'].map($);
-    const veioTrocarSenha = /type=recovery|#nova-senha/.test(location.hash);
+    const veioTrocarSenha = /type=recovery/.test(location.hash);
 
     // Paginas que a equipe pode alterar (as do menu e as demais publicas)
     const PAGINAS = [
