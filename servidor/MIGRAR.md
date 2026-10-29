@@ -19,6 +19,12 @@ fazem, o que vocês me passam e o que eu faço.
 6. Ter em mãos o acesso ao painel onde o domínio foi comprado, para criar os
    registros que eu indicar (passo 3 abaixo).
 
+### CAPTCHA (contra cadastros e tentativas de login em massa)
+Criar uma conta gratuita em **cloudflare.com** e, em **Turnstile > Add site**,
+cadastrar o endereço do site. Ficam duas chaves: a *Site key* (pública: podem me
+passar no chat) e a *Secret key* (**não mandem pelo chat**: criem o segredo
+`TURNSTILE_SECRET_KEY` no ambiente, como no passo 8 abaixo).
+
 ### Liberar o meu acesso nesta sessão (configuração do ambiente)
 O ambiente onde eu trabalho só acessa endereços liberados. No menu do ambiente
 (barra de título da sessão > ambiente > **Edit**):
@@ -37,11 +43,13 @@ O ambiente onde eu trabalho só acessa endereços liberados. No menu do ambiente
 
 ## 3. O que eu faço
 1. Rodo o `supabase/schema.sql` (cadastros, níveis, equipe, edição do site,
-   armazenamento de imagens).
+   armazenamento de imagens, notícias, conteúdo exclusivo, registro de atividades)
+   e o `supabase/conteudo-inicial.sql` (benefícios dos Expansores).
 2. Publico as funções `importar-planilha` e `webhook-pagamento` e configuro os
    segredos delas (endereço do site, token do webhook).
 3. Configuro o login: endereço do site e de retorno, e-mails em português
-   (troca de senha).
+   (troca de senha), confirmação de e-mail, senha mínima de 8 caracteres,
+   CAPTCHA e validade curta da sessão (LEIA-ME, passo 5).
 4. Coloco a URL e a chave pública em `CONTAS` no `app.js`: o site sai do modo
    demonstração.
 5. Domínio: crio o arquivo `CNAME` no site e passo a vocês os registros para o

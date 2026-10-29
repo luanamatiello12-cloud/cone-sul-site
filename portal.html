@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Mantenedor | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=65">
+    <link rel="stylesheet" href="styles.css?v=66">
 </head>
 <body data-pagina="portal">
 
@@ -81,48 +81,11 @@
         <div class="wrap">
             <span class="sec-kicker">Benefícios dos Expansores</span>
             <h2>O que o mantenedor empresarial recebe.</h2>
-            <ul class="beneficios">
-                <li class="beneficio">
-                    <span class="beneficio-num">01</span>
-                    <h4>Workshop Empresarial</h4>
-                    <p>De forma trimestral, um encontro presencial com transmissão ao vivo, para empresários e suas equipes, com temas como inteligência artificial, tráfego pago, marketing, liderança, empreendedorismo, vendas e gestão.</p>
-                    <p>Proposta: encontros no templo ou espaço da Renovar, conduzidos por profissionais convidados e membros qualificados da igreja.</p>
-                </li>
-                <li class="beneficio">
-                    <span class="beneficio-num">02</span>
-                    <h4>Devocional do Empreendedor</h4>
-                    <p>Todas as segundas-feiras, às 6h, uma chamada on-line com leitura bíblica, reflexão e oração, para começar a semana com direção e propósito.</p>
-                    <p>Participação voluntária, aberta aos mantenedores que desejarem.</p>
-                </li>
-                <li class="beneficio">
-                    <span class="beneficio-num">03</span>
-                    <h4>Devocional Mensal</h4>
-                    <p>Um material enviado mensalmente ao empresário, com mensagem bíblica, reflexão prática, perguntas para discussão e oração.</p>
-                    <p>Pode ser utilizado voluntariamente em encontros com a equipe, respeitando as crenças individuais dos colaboradores.</p>
-                </li>
-                <li class="beneficio">
-                    <span class="beneficio-num">04</span>
-                    <h4>Encontros de Família e Relacionamentos</h4>
-                    <p>De forma trimestral.</p>
-                    <p>Palestras e workshops sobre casamento, educação dos filhos, equilíbrio entre trabalho e família, saúde emocional e relacionamentos.</p>
-                </li>
-                <li class="beneficio">
-                    <span class="beneficio-num">05</span>
-                    <h4>Comunidade e Networking</h4>
-                    <p>Um ambiente para conhecer outros empresários, trocar experiências, desenvolver relacionamentos e construir conexões profissionais.</p>
-                </li>
-                <li class="beneficio">
-                    <span class="beneficio-num">06</span>
-                    <h4>Summit Anual</h4>
-                    <p>Um grande evento de summit para todos os expansores.</p>
-                </li>
-                <li class="beneficio">
-                    <span class="beneficio-num">07</span>
-                    <h4>Acompanhamento da Missão</h4>
-                    <p>Acesso ao portal de mantenedores do CONE SUL, com notícias do campo, fotografias, vídeos, necessidades, projetos e prestação de contas.</p>
-                    <p>O empresário acompanha como a parceria contribui para a continuidade do trabalho missionário.</p>
-                </li>
-            </ul>
+            <!-- A lista vem do banco (tabela conteudo_restrito, chave
+                 "beneficios-expansores"): so chega a quem tem o nivel Expansor.
+                 Nao escrever os beneficios aqui: o HTML e publico. -->
+            <ul class="beneficios" id="beneficios-expansores"></ul>
+            <p class="conteudo-restrito-aviso" id="beneficios-expansores-aviso" hidden></p>
         </div>
     </section>
 
@@ -293,12 +256,12 @@
             <div class="portal-senha">
                 <form class="formulario" id="form-senha" novalidate>
                     <div class="campo">
-                        <label for="s-nova">Nova senha</label>
-                        <input type="password" id="s-nova" autocomplete="new-password" minlength="6" required>
+                        <label for="s-nova">Nova senha (mínimo 8 caracteres)</label>
+                        <input type="password" id="s-nova" autocomplete="new-password" minlength="8" required>
                     </div>
                     <div class="campo">
                         <label for="s-confirma">Repita a nova senha</label>
-                        <input type="password" id="s-confirma" autocomplete="new-password" minlength="6" required>
+                        <input type="password" id="s-confirma" autocomplete="new-password" minlength="8" required>
                     </div>
                     <div class="campo campo-largo">
                         <button type="submit" class="btn btn-primary">Salvar nova senha</button>
@@ -309,6 +272,6 @@
         </div>
     </section>
 
-    <script src="app.js?v=47"></script>
+    <script src="app.js?v=48"></script>
 </body>
 </html>

@@ -23,11 +23,18 @@ export interface DadosContribuicao {
 
 export interface Resultado { resultado: 'criado' | 'atualizado'; senha?: string }
 
-// Senha provisoria facil de digitar: Cone- e seis numeros (o login tambem
-// exige o e-mail, e o Supabase limita tentativas)
+// Senha provisoria: Cone- e dois grupos de 4 caracteres sem os que se
+// confundem (0/O, 1/I/L), ex.: Cone-7KQ4-M9TX. 31^8 = ~850 bilhoes de
+// combinacoes: nao da para adivinhar, mesmo sem o limite de tentativas.
+const ALFABETO = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export function senhaProvisoria(): string {
-    const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000;
-    return `Cone-${String(n).padStart(6, '0')}`;
+    const letras: string[] = [];
+    while (letras.length < 8) {
+        // Descarta o fim da faixa para todas as letras terem a mesma chance
+        const n = crypto.getRandomValues(new Uint8Array(1))[0];
+        if (n < 248) letras.push(ALFABETO[n % ALFABETO.length]);
+    }
+    return `Cone-${letras.slice(0, 4).join('')}-${letras.slice(4).join('')}`;
 }
 
 // deno-lint-ignore no-explicit-any

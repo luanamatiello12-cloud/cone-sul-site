@@ -168,7 +168,7 @@
         const primeiro = (a.nome || '').trim().split(/\s+/)[0];
         return `Olá${primeiro ? ', ' + primeiro : ''}! Seu acesso à Área do Mantenedor do Cone Sul está pronto.\n\n`
             + `Site: ${PORTAL_URL}\nLogin: ${a.email}\nSenha: ${a.senha}\n\n`
-            + 'Ao entrar, você pode trocar a senha se quiser. Obrigado por caminhar conosco!';
+            + 'Por segurança, ao entrar troque esta senha por uma sua (Área do Mantenedor > Trocar senha). Obrigado por caminhar conosco!';
     }
     function mostrarAcessos(lista, alvo) {
         alvo.innerHTML = lista.map((a, i) => {
@@ -198,7 +198,11 @@
         }
     });
     // Senha de exemplo (so na demonstracao; as reais vem do servidor)
-    const senhaDemo = () => 'Cone-' + String(Math.floor(Math.random() * 1e6)).padStart(6, '0');
+    const senhaDemo = () => {
+        const a = '23456789ABCDEFGHJKMNPQRSTUVWXYZ', n = crypto.getRandomValues(new Uint8Array(8));
+        const c = [...n].map(x => a[x % a.length]).join('');
+        return 'Cone-' + c.slice(0, 4) + '-' + c.slice(4);
+    };
 
     // ---------- 4. Importar ----------
     $('btn-importar').addEventListener('click', async () => {

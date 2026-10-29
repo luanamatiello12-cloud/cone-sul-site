@@ -7,24 +7,37 @@
 // pelo WhatsApp; de quem ja existe, atualiza valor e nivel.
 // Opcional: quem veio do Eklesia e nao esta no relatorio perde o nivel.
 // Tambem: { acao: 'nova-senha', email } gera outra senha provisoria.
-// So contas listadas na tabela "equipe" podem usar (schema.sql).
+// So contas listadas na tabela "equipe" podem usar (schema.sql), e so a
+// partir do endereco do site (SITE_URL, ou a lista ORIGENS_PERMITIDAS).
+// Cada importacao e cada senha nova ficam em "registro_atividades".
 // =========================================================
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { gravarContribuicao, senhaProvisoria } from '../_shared/mantenedores.ts';
 
-const CORS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
-const json = (status: number, corpo: unknown) =>
-    new Response(JSON.stringify(corpo), { status, headers: { ...CORS, 'content-type': 'application/json' } });
+// Enderecos (origens) que podem chamar esta funcao pelo navegador
+const ORIGENS = (Deno.env.get('ORIGENS_PERMITIDAS') ?? Deno.env.get('SITE_URL') ?? '')
+    .split(',').map(o => { try { return new URL(o.trim()).origin; } catch { return ''; } }).filter(Boolean);
+
+function cors(req: Request): Record<string, string> {
+    const origem = req.headers.get('origin') ?? '';
+    return {
+        ...(ORIGENS.includes(origem) ? { 'Access-Control-Allow-Origin': origem } : {}),
+        'Vary': 'Origin',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    };
+}
 
 interface Linha { email: string; valor: number; nome?: string; cpf?: string; telefone?: string; nascimento?: string; moradia?: string; igreja?: string }
 
 Deno.serve(async (req) => {
-    if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+    const json = (status: number, corpo: unknown) =>
+        new Response(JSON.stringify(corpo), { status, headers: { ...cors(req), 'content-type': 'application/json' } });
+    if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) });
     if (req.method !== 'POST') return json(405, { erro: 'use POST' });
+    // Chamada de outro site pelo navegador: recusa
+    const origem = req.headers.get('origin');
+    if (origem && !ORIGENS.includes(origem)) return json(403, { erro: 'origem nao permitida' });
 
     const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
@@ -35,6 +48,9 @@ Deno.serve(async (req) => {
     const { data: membro } = await db.from('equipe').select('id').eq('id', quem.user.id).maybeSingle();
     if (!membro) return json(403, { erro: 'esta conta nao e da equipe' });
 
+    const registrar = (acao: string, alvo: string | null, detalhes: unknown) =>
+        db.from('registro_atividades').insert({ autor: quem.user.id, autor_email: quem.user.email, acao, alvo, detalhes });
+
     let corpo: { registros?: Linha[]; desativarAusentes?: boolean; acao?: string; email?: string };
     try { corpo = await req.json(); } catch { return json(400, { erro: 'corpo invalido' }); }
 
@@ -43,10 +59,15 @@ Deno.serve(async (req) => {
         const email = String(corpo.email ?? '').trim().toLowerCase();
         const { data: m } = await db.from('mantenedores').select('id, nome, telefone').eq('email', email).maybeSingle();
         if (!m) return json(404, { erro: 'nenhum cadastro com este e-mail' });
+        // Contas da equipe nao: trocar a senha de um colega seria tomar a conta
+        // dele. Quem e da equipe usa "Esqueci minha senha".
+        const { data: colega } = await db.from('equipe').select('id').eq('id', m.id).maybeSingle();
+        if (colega) return json(403, { erro: 'esta conta e da equipe: use "Esqueci minha senha" na Área do Mantenedor' });
         const senha = senhaProvisoria();
         const { error } = await db.auth.admin.updateUserById(m.id, { password: senha });
-        if (error) return json(500, { erro: error.message });
+        if (error) return json(500, { erro: 'nao foi possivel gerar a senha agora' });
         await db.from('mantenedores').update({ senha_provisoria: true }).eq('id', m.id);
+        await registrar('nova-senha', email, null);
         return json(200, { email, nome: m.nome, telefone: m.telefone, senha });
     }
 
@@ -85,5 +106,6 @@ Deno.serve(async (req) => {
         desativados = data?.length ?? 0;
     }
 
+    await registrar('importacao', null, { linhas: registros.length, criados, atualizados, desativados, erros: erros.length });
     return json(200, { criados, atualizados, desativados, erros, novos });
 });
