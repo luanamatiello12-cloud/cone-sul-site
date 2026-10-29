@@ -27,6 +27,6 @@ const PRODUTOS = [
             linhas: { P: [40, 48, 68], M: [42, 51, 70], G: [44, 54, 72], GG: [46, 57, 74] }
         },
         fotos: ['img/loja/camiseta-cone-sul.webp'],
-        link: ''
+        link: 'https://gestaoweb.eklesiaonline.com.br/divulgacao/n/bb71fabe6c8b9ba2e74c'
     }
 ];
