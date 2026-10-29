@@ -3502,3 +3502,29 @@ body.modo-edicao img[data-img] { cursor: pointer; }
 .local-mini { display: none; width: 22px; height: 22px; margin-left: -0.35rem; border-radius: 50%; background: center / cover no-repeat; box-shadow: 0 0 0 2px rgba(201, 215, 128, 0.5); flex: none; }
 .local-btn.com-foto .local-mini { display: inline-block; }
 .local-btn.ativo .local-mini { box-shadow: 0 0 0 2px var(--verde-900); }
+
+/* Mapa: nome das cidades ao lado do pin */
+.leaflet-tooltip.rotulo-cidade {
+    padding: 0.15rem 0.5rem;
+    background: rgba(14, 34, 24, 0.82);
+    border: 1px solid rgba(201, 215, 128, 0.35);
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    color: var(--creme);
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.leaflet-tooltip.rotulo-cidade::before { display: none; }
+.leaflet-tooltip.rotulo-cidade.rotulo-ativo { background: var(--areia); color: var(--verde-900); border-color: var(--areia); font-weight: 800; z-index: 1; }
+/* Lista de cidades de um grupo de pins (ao passar o mouse) */
+.leaflet-tooltip.mapa-dica {
+    background: var(--verde-900);
+    color: var(--creme);
+    border: 1px solid rgba(201, 215, 128, 0.4);
+    border-left: 3px solid var(--areia);
+}
+.leaflet-tooltip.mapa-dica::before { display: none; }

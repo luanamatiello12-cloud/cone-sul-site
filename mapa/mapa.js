@@ -240,8 +240,6 @@
         { txt: 'Oceano<br>Pacífico', em: [-49.5, -76.4], cls: 'oceano lado' },
         { txt: 'Oceano Atlântico', em: [-41, -51], cls: 'oceano' }
     ];
-    // Dica de territorio nao fica presa na tela quando o mapa anda sozinho
-    map.on('movestart zoomstart', () => Object.values(camadas).forEach(c => c.closeTooltip()));
 
     ROTULOS.forEach(r => L.marker(r.em, {
         interactive: false,
@@ -288,16 +286,39 @@
         LOCAIS.forEach((local, i) => {
             const onde = local.uf || local.pais;
             const marcador = L.marker([local.lat, local.lng], { icon: ICONE_PIN, title: `${local.nome} — ${onde}`, keyboard: true });
-            marcador.bindTooltip(`<strong>${escapar(local.nome)}</strong> · ${escapar(onde)}`, { direction: 'top', className: 'mapa-dica' });
+            // Nome da cidade escrito ao lado do pin (some junto com o pin quando
+            // ele entra num grupo; nomes que se encostariam ficam escondidos)
+            marcador.bindTooltip(escapar(local.nome), { permanent: true, direction: 'right', offset: [14, 10], className: 'rotulo-cidade', interactive: false });
             marcador.on('click', () => selecionarLocal(i));
             grupo.addLayer(marcador);
             pins.push({ local, marcador });
         });
         grupo.addTo(map);
         grupoPins = grupo;
+        map.on('zoomend moveend', arrumarRotulos);
+        grupo.on('animationend spiderfied unspiderfied', arrumarRotulos);
+        setTimeout(arrumarRotulos, 0);
 
         const lista = document.getElementById('locais-lista');
         if (lista) montarLista(lista, grupo);
+    }
+
+    // Nomes das cidades: esconde os que encostariam num nome ja mostrado
+    // (a cidade escolhida tem prioridade); aproximar o mapa revela os outros
+    function arrumarRotulos() {
+        const rotulos = pins.map(({ marcador }) => {
+            const el = marcador.getTooltip()?.getElement();
+            if (el) el.classList.toggle('rotulo-ativo', marcador === pinAtivo);
+            return el;
+        }).filter(el => el && el.isConnected);
+        rotulos.sort((a, b) => b.classList.contains('rotulo-ativo') - a.classList.contains('rotulo-ativo'));
+        const ocupados = [];
+        rotulos.forEach(el => {
+            el.style.visibility = '';
+            const r = el.getBoundingClientRect();
+            const bate = ocupados.some(o => r.left < o.right + 4 && r.right + 4 > o.left && r.top < o.bottom + 2 && r.bottom + 2 > o.top);
+            if (bate) el.style.visibility = 'hidden'; else ocupados.push(r);
+        });
     }
 
     let pinAtivo = null;
@@ -306,6 +327,7 @@
         if (pinAtivo) { pinAtivo.setIcon(ICONE_PIN); pinAtivo.setZIndexOffset(0); }
         pinAtivo = pins[i] ? pins[i].marcador : null;
         if (pinAtivo) { pinAtivo.setIcon(ICONE_PIN_ATIVO); pinAtivo.setZIndexOffset(1000); }
+        arrumarRotulos();
     }
 
     // Lista de cidades agrupada por estado/pais; clicar leva ate o pin
@@ -392,7 +414,6 @@
         const fotos = local.fotos || [];
         if (!fotos.length) {
             // Sem fotos ainda: cartao pequeno, so com o nome e o aviso
-            marcador.closeTooltip();
             popupFotos.setLatLng(marcador.getLatLng()).setContent(`
                 <div class="popup-fotos popup-sem-fotos">
                     <div class="pf-rodape">
@@ -406,7 +427,6 @@
         }
         n = (n + fotos.length) % fotos.length;
         const f = fotos[n];
-        marcador.closeTooltip();
         popupFotos.setLatLng(marcador.getLatLng()).setContent(`
             <div class="popup-fotos" data-local="${i}" data-n="${n}">
                 <button type="button" class="pf-foto" aria-label="Ampliar foto">
@@ -504,7 +524,6 @@
                 onEachFeature: (f, camada) => {
                     const t = POR_ID[f.properties.id];
                     camadas[t.id] = camada;
-                    camada.bindTooltip(`<strong>${escapar(t.nome)}</strong><br>${escapar(t.rotulo)}`, { sticky: true, direction: 'top', className: 'mapa-dica' });
                     camada.on({
                         click: () => selecionarTerritorio(t.id),
                         mouseover: () => { if (t.id !== selecionado) camada.setStyle(estilo(t, 'hover')); },
