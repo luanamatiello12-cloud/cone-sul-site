@@ -706,38 +706,43 @@ const novoElemento = (tag, classe, texto) => {
 };
 
 // Publicacoes de noticias: vem do banco, nunca do HTML (que e publico)
+// Cartao de uma noticia (pagina de noticias e faixa da Area do Mantenedor)
+const CATEGORIAS_NOTICIAS = {
+    diario: 'Diário de Campo', noticias: 'Notícias da Missão', historias: 'Histórias e Testemunhos',
+    projetos: 'Projetos e Expansão', contas: 'Prestação de Contas'
+};
+function cartaoNoticia(n) {
+    const artigo = novoElemento('article', 'noticia-card');
+    artigo.dataset.cat = n.categoria;
+    const foto = novoElemento('div', 'noticia-imagem');
+    const src = n.imagem && enderecoSeguro(n.imagem);
+    if (src) { const img = novoElemento('img'); img.src = src; img.alt = ''; img.loading = 'lazy'; foto.append(img); }
+    else foto.textContent = n.categoria === 'contas' ? 'Documento' : 'Foto da publicação';
+    const corpo = novoElemento('div', 'noticia-corpo');
+    const data = n.publicado_em ? ' · ' + new Date(n.publicado_em).toLocaleDateString('pt-BR') : '';
+    corpo.append(novoElemento('span', 'noticia-cat', (CATEGORIAS_NOTICIAS[n.categoria] || '') + data), novoElemento('h3', '', n.titulo), novoElemento('p', '', n.resumo));
+    const href = n.link && enderecoSeguro(n.link);
+    if (href) {
+        const a = novoElemento('a', 'btn btn-secondary', 'Ler notícia');
+        a.href = href; a.target = '_blank'; a.rel = 'noopener';
+        corpo.append(a);
+    }
+    artigo.append(foto, corpo);
+    return artigo;
+}
+// Demonstracao (sem banco): cards de exemplo, so para ver o layout
+const noticiasExemplo = () => Object.keys(CATEGORIAS_NOTICIAS).map(categoria => ({
+    categoria, titulo: '[Título da publicação]', resumo: '[Resumo de duas ou três linhas da publicação.]'
+}));
+
 if (PAGINA === 'noticias') {
-    const CATEGORIAS = {
-        diario: 'Diário de Campo', noticias: 'Notícias da Missão', historias: 'Histórias e Testemunhos',
-        projetos: 'Projetos e Expansão', contas: 'Prestação de Contas'
-    };
     const lista = document.getElementById('noticias-lista');
     const aviso = document.getElementById('noticias-aviso');
-    const card = (n) => {
-        const artigo = novoElemento('article', 'noticia-card');
-        artigo.dataset.cat = n.categoria;
-        const foto = novoElemento('div', 'noticia-imagem');
-        const src = n.imagem && enderecoSeguro(n.imagem);
-        if (src) { const img = novoElemento('img'); img.src = src; img.alt = ''; img.loading = 'lazy'; foto.append(img); }
-        else foto.textContent = n.categoria === 'contas' ? 'Documento' : 'Foto da publicação';
-        const corpo = novoElemento('div', 'noticia-corpo');
-        corpo.append(novoElemento('span', 'noticia-cat', CATEGORIAS[n.categoria] || ''), novoElemento('h3', '', n.titulo), novoElemento('p', '', n.resumo));
-        const href = n.link && enderecoSeguro(n.link);
-        if (href) {
-            const a = novoElemento('a', 'btn btn-secondary', 'Ler notícia');
-            a.href = href; a.target = '_blank'; a.rel = 'noopener';
-            corpo.append(a);
-        }
-        artigo.append(foto, corpo);
-        return artigo;
-    };
+    const card = cartaoNoticia;
     const mostrarAviso = (texto) => { aviso.hidden = !texto; aviso.textContent = texto || ''; };
 
     if (PORTAL.MODO_DEMO) {
-        // Demonstracao: cards de exemplo, so para ver o layout
-        lista.replaceChildren(...Object.entries(CATEGORIAS).map(([categoria]) => card({
-            categoria, titulo: '[Título da publicação]', resumo: '[Resumo de duas ou três linhas da publicação.]'
-        })));
+        lista.replaceChildren(...noticiasExemplo().map(card));
         mostrarAviso('Modelo de layout. Com as contas ligadas, as publicações vêm do banco de dados e só aparecem para quem entrou na Área do Mantenedor.');
     } else {
         PORTAL.iniciar()
@@ -769,17 +774,16 @@ if (PAGINA === 'portal') {
     const SO_NIVEL = { 'tela-portal-expansores': ['expansor'], 'tela-portal-summit': ['expansor'] };
 
     // Beneficios dos Expansores: vem do banco, que so entrega a lista a quem
-    // tem o nivel Expansor (o HTML e publico e nao traz a lista)
+    // tem o nivel Expansor (o HTML e publico e nao traz a lista). A secao so
+    // aparece com a lista carregada (na demonstracao, sem banco, fica escondida)
+    const secaoBeneficios = document.getElementById('tela-portal-expansores');
     const listaBeneficios = document.getElementById('beneficios-expansores');
     const avisoBeneficios = document.getElementById('beneficios-expansores-aviso');
     let beneficiosCarregados = false;
     async function carregarBeneficios() {
         if (beneficiosCarregados) return;
         const avisar = (texto) => { avisoBeneficios.hidden = !texto; avisoBeneficios.textContent = texto || ''; };
-        if (PORTAL.MODO_DEMO) {
-            avisar('Demonstração: a lista de benefícios fica guardada no banco de dados e aparece aqui quando as contas estiverem ligadas.');
-            return;
-        }
+        if (PORTAL.MODO_DEMO) return;
         try {
             const itens = await PORTAL.conteudo('beneficios-expansores');
             if (!Array.isArray(itens)) throw new Error('sem acesso');
@@ -791,8 +795,10 @@ if (PAGINA === 'portal') {
             }));
             beneficiosCarregados = true;
             avisar('');
+            secaoBeneficios.hidden = false;
         } catch {
             avisar('Não foi possível carregar os benefícios agora. Recarregue a página.');
+            secaoBeneficios.hidden = false;
         }
     }
     function esquecerBeneficios() {
@@ -823,6 +829,7 @@ if (PAGINA === 'portal') {
             const exige = SO_NIVEL[t.id];
             if (exige) t.hidden = !nivel || !exige.includes(nivel.id);
         });
+        secaoBeneficios.hidden = !beneficiosCarregados;
         if (nivel && nivel.id === 'expansor') carregarBeneficios();
         else esquecerBeneficios();
     }
@@ -847,8 +854,44 @@ if (PAGINA === 'portal') {
         if (!logado && noRodape) noRodape.parentElement.remove();
     };
 
+    // Faixa com as ultimas noticias (desliza para o lado)
+    const faixa = document.getElementById('faixa-noticias');
+    const avisoFaixa = document.getElementById('faixa-noticias-aviso');
+    let faixaCarregada = false;
+    async function carregarFaixa() {
+        if (faixaCarregada || !faixa) return;
+        faixaCarregada = true;
+        const avisar = (texto) => { avisoFaixa.hidden = !texto; avisoFaixa.textContent = texto || ''; };
+        try {
+            const itens = PORTAL.MODO_DEMO ? noticiasExemplo() : (await PORTAL.noticias()).slice(0, 10);
+            faixa.replaceChildren(...itens.map(cartaoNoticia));
+            avisar(itens.length ? '' : 'Ainda não há notícias. Volte em breve.');
+        } catch {
+            faixaCarregada = false;
+            avisar('Não foi possível carregar as notícias agora. Recarregue a página.');
+        }
+        atualizarSetas();
+    }
+    function atualizarSetas() {
+        const fim = faixa.scrollWidth - faixa.clientWidth - 2;
+        document.querySelectorAll('[data-faixa]').forEach(b => {
+            b.disabled = b.dataset.faixa === '-1' ? faixa.scrollLeft <= 0 : faixa.scrollLeft >= fim;
+        });
+    }
+    if (faixa) {
+        document.querySelectorAll('[data-faixa]').forEach(b => b.addEventListener('click', () => {
+            const passo = (faixa.firstElementChild?.offsetWidth || 300) + 24;
+            faixa.scrollBy({ left: Number(b.dataset.faixa) * passo, behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth' });
+        }));
+        faixa.addEventListener('scroll', atualizarSetas, { passive: true });
+        // Recalcula quando a faixa aparece (a tela comeca escondida) ou muda de tamanho
+        if ('ResizeObserver' in window) new ResizeObserver(atualizarSetas).observe(faixa);
+        else window.addEventListener('resize', atualizarSetas);
+    }
+
     const mostrar = (usuario, animar = false) => {
         atualizarMenu(!!usuario);
+        if (usuario) carregarFaixa();
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
         if (!usuario) esquecerBeneficios();
@@ -1092,7 +1135,7 @@ const NAO_EDITAVEL = [
     '#barra-edicao', '#ctrl-bloco', '#ctrl-link', '.painel-historico', 'script', 'style', 'noscript', 'svg',
     'select', 'option', 'textarea', 'input', 'iframe', 'button', '.so-edicao',
     '#produtos', '.leaflet-container', '#mapa-leaflet', '.card-info', '#locais-lista', '#lista-territorios',
-    '#noticias-lista', '#noticias-aviso', '#beneficios-expansores', '#beneficios-expansores-aviso',
+    '#noticias-lista', '#noticias-aviso', '#faixa-noticias', '#faixa-noticias-aviso', '#beneficios-expansores', '#beneficios-expansores-aviso',
     '#nivel-titulo', '#nivel-resumo', '#nivel-beneficios', '#nivel-acoes', '#contribuicao-resumo',
     '#usuario-email', '#usuario-nivel', '#plano-nome', '#plano-faixa', '#plano-ja-email', '#cadastro-lead',
     '#senha-titulo', '#editor-email', '#editor-senha-titulo', '.form-retorno', '[role="status"]', '.importar-aviso',
