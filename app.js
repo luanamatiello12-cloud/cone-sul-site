@@ -808,7 +808,7 @@ if (PAGINA === 'portal') {
         if (nivel) selo.textContent = `Mantenedor ${nivel.nome}`;
         document.getElementById('nivel-titulo').textContent = nivel ? `Você é ${nivel.nome}.` : 'Escolha como contribuir.';
         document.getElementById('nivel-resumo').textContent = nivel
-            ? `Sua contribuição de ${reais(usuario.valor)} por mês garante os benefícios abaixo. Se o valor mudar, seu nível acompanha.`
+            ? 'Veja seus benefícios:'
             : 'Seu cadastro está feito. Os benefícios chegam com a contribuição mensal: o nível depende do valor.';
         document.getElementById('nivel-beneficios').innerHTML = nivel
             ? nivel.beneficios.map(b => `<li>${b.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])}</li>`).join('')
