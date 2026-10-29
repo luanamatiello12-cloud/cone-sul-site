@@ -213,7 +213,7 @@ function montarCabecalho() {
     return `
 <header>
     <nav>
-        <a href="index.html" class="logo">Cone Sul</a>
+        <a href="index.html" class="logo" aria-label="Cone Sul, página inicial"><img src="img/logo-cone-sul.webp?v=1" alt="Cone Sul" width="151" height="120"></a>
         <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">Menu</button>
         <ul class="menu">
             ${itens}
