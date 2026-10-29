@@ -386,7 +386,8 @@ const PORTAL = {
             nascimento: r.nascimento || '', naturalidade: r.naturalidade || '', moradia: r.moradia || '', igreja: r.igreja || '',
             ...(r.cristao === null || r.cristao === undefined ? {} : { cristao: r.cristao }),
             ...(r.congrega === null || r.congrega === undefined ? {} : { congrega: r.congrega }),
-            valor: r.status_contribuicao === 'ativa' ? Number(r.valor_mensal) : 0
+            valor: r.status_contribuicao === 'ativa' ? Number(r.valor_mensal) : 0,
+            senhaProvisoria: !!r.senha_provisoria
         };
     },
 
@@ -433,6 +434,31 @@ const PORTAL = {
         return this.perfil(sb, data.user);
     },
 
+    // Troca de senha (opcional). Tira o aviso de senha provisoria.
+    async trocarSenha(nova) {
+        const atual = this.sessao() || {};
+        if (!this.MODO_DEMO) {
+            const sb = await this.cliente();
+            const { error } = await sb.auth.updateUser({ password: nova });
+            if (error) throw new Error(error.message.includes('different') ? 'A nova senha precisa ser diferente da atual.' : 'Não foi possível trocar a senha. Tente de novo.');
+            await sb.from('mantenedores').update({ senha_provisoria: false }).eq('id', atual.id);
+        }
+        const novo = { ...atual, senhaProvisoria: false };
+        this.salvar(novo);
+        return novo;
+    },
+
+    // Esqueci minha senha: o Supabase manda o link; ao abrir, a pessoa cai
+    // no portal ja logada, com o formulario de senha nova em destaque
+    async esqueciSenha(email) {
+        if (this.MODO_DEMO) throw new Error('Em demonstração não há e-mail de troca de senha. Com as contas ligadas, o link chega no e-mail informado.');
+        const sb = await this.cliente();
+        const destino = new URL('portal.html', location.href);
+        destino.hash = 'nova-senha';
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: destino.href });
+        if (error) throw new Error('Não foi possível enviar agora. Tente de novo em alguns minutos.');
+    },
+
     sessao() {
         try { return JSON.parse(sessionStorage.getItem(this.CHAVE)); } catch { return null; }
     },
@@ -460,13 +486,16 @@ function cpfValido(cpf) {
 }
 
 if (PAGINA === 'portal') {
+    // Veio pelo link de "Esqueci minha senha"? (o Supabase poe type=recovery
+    // no endereco; guardar antes de o cliente limpar o endereco)
+    const veioTrocarSenha = /type=recovery|#nova-senha/.test(location.hash);
     // Endereco antigo do cadastro (portal.html#cadastro) leva a pagina nova
     const irParaCadastro = () => { if (location.hash === '#cadastro') location.replace('fazer-parte.html'); };
     irParaCadastro();
     window.addEventListener('hashchange', irParaCadastro);
 
     const telaLogin = document.getElementById('tela-login');
-    const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal'].map(id => document.getElementById(id));
+    const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal', 'tela-portal-senha'].map(id => document.getElementById(id));
     // Telas que dependem do nivel: so aparecem para quem tem esse nivel
     const SO_NIVEL = { 'tela-portal-expansores': ['expansor'] };
 
@@ -522,6 +551,7 @@ if (PAGINA === 'portal') {
         if (usuario) {
             document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
             mostrarNivel(usuario);
+            document.getElementById('aviso-senha').hidden = !usuario.senhaProvisoria;
         }
         window.scrollTo(0, 0);
 
@@ -537,7 +567,15 @@ if (PAGINA === 'portal') {
 
     mostrar(PORTAL.sessao());
     // Contas reais: confere a sessao no servidor (e a do link do e-mail)
-    if (!PORTAL.MODO_DEMO) PORTAL.iniciar().then(u => mostrar(u)).catch(() => {});
+    if (!PORTAL.MODO_DEMO) PORTAL.iniciar().then(u => {
+        mostrar(u);
+        // Chegou pelo link de troca de senha: leva direto ao formulario
+        if (u && veioTrocarSenha) {
+            document.getElementById('senha-titulo').textContent = 'Crie sua nova senha.';
+            document.getElementById('tela-portal-senha').scrollIntoView({ block: 'start' });
+            document.getElementById('s-nova').focus();
+        }
+    }).catch(() => {});
 
     const formLogin = document.getElementById('form-login');
     formLogin.addEventListener('submit', async (e) => {
@@ -561,6 +599,53 @@ if (PAGINA === 'portal') {
             PORTAL.salvar(usuario);
             formLogin.reset();
             mostrar(usuario, true);
+        } catch (erro) {
+            retorno.textContent = erro.message;
+        }
+    });
+
+    // Esqueci minha senha
+    const formEsqueci = document.getElementById('form-esqueci');
+    const trocarForm = (esqueci) => {
+        formLogin.hidden = esqueci;
+        formEsqueci.hidden = !esqueci;
+        if (esqueci) document.getElementById('e-email').value = document.getElementById('p-email').value;
+    };
+    document.getElementById('btn-esqueci').addEventListener('click', () => trocarForm(true));
+    document.getElementById('btn-voltar-login').addEventListener('click', () => trocarForm(false));
+    formEsqueci.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = document.getElementById('esqueci-retorno');
+        formEsqueci.classList.add('validar');
+        if (!formEsqueci.checkValidity()) { retorno.textContent = 'Informe um e-mail válido.'; return; }
+        try {
+            await PORTAL.esqueciSenha(document.getElementById('e-email').value.trim());
+            retorno.textContent = 'Pronto! Se este e-mail tiver cadastro, o link para criar uma senha nova chega em alguns minutos.';
+        } catch (erro) {
+            retorno.textContent = erro.message;
+        }
+    });
+
+    // Trocar senha (opcional)
+    const formSenha = document.getElementById('form-senha');
+    formSenha.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = document.getElementById('senha-retorno');
+        const nova = document.getElementById('s-nova');
+        const confirma = document.getElementById('s-confirma');
+        confirma.setCustomValidity(confirma.value && confirma.value !== nova.value ? 'As senhas não conferem.' : '');
+        formSenha.classList.add('validar');
+        if (!formSenha.checkValidity()) {
+            retorno.textContent = nova.validity.tooShort || nova.validity.valueMissing ? 'A senha precisa ter pelo menos 6 caracteres.' : 'As duas senhas não conferem.';
+            return;
+        }
+        try {
+            await PORTAL.trocarSenha(nova.value);
+            formSenha.reset();
+            formSenha.classList.remove('validar');
+            document.getElementById('aviso-senha').hidden = true;
+            document.getElementById('senha-titulo').textContent = 'Trocar senha.';
+            retorno.textContent = PORTAL.MODO_DEMO ? 'Demonstração: com as contas ligadas, a senha nova passa a valer no próximo login.' : 'Senha alterada. Use a nova senha no próximo login.';
         } catch (erro) {
             retorno.textContent = erro.message;
         }

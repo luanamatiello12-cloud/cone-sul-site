@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Importar relatório | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=59">
+    <link rel="stylesheet" href="styles.css?v=60">
 </head>
 <body data-pagina="importar">
 
@@ -16,7 +16,7 @@
         <div class="wrap">
             <span class="hero-kicker">Equipe — Importar relatório</span>
             <h1>Cadastros a partir do Eklesia.</h1>
-            <p class="hero-lead">Envie o relatório em Excel. Confira a prévia e confirme: quem é novo recebe o cadastro pronto por e-mail, e quem já existe tem o valor e o nível atualizados.</p>
+            <p class="hero-lead">Envie o relatório em Excel e confira a prévia. Ao confirmar, quem é novo ganha um login pronto com senha provisória, para vocês mandarem pelo WhatsApp; quem já existe tem o valor e o nível atualizados.</p>
         </div>
     </section>
 
@@ -58,11 +58,31 @@
                 </div>
                 <p class="form-retorno" id="importar-retorno" role="status"></p>
             </div>
+
+            <!-- 4. Acessos novos: senha provisoria + mensagem pronta no WhatsApp.
+                 A senha aparece so aqui, uma vez: mandar antes de fechar a pagina. -->
+            <div class="importar-passo" id="passo-acessos" hidden>
+                <span class="sec-kicker">4. Enviar os acessos</span>
+                <p class="sec-intro">Mande o acesso de cada pessoa nova pelo WhatsApp. <strong>As senhas aparecem só agora:</strong> envie antes de fechar esta página (se perder, gere outra senha abaixo).</p>
+                <ul class="acessos" id="acessos"></ul>
+            </div>
+
+            <!-- Nova senha provisoria para quem perdeu a primeira -->
+            <div class="importar-passo">
+                <span class="sec-kicker">Nova senha provisória</span>
+                <p class="sec-intro">Para quem perdeu a senha ou não recebeu a mensagem.</p>
+                <form class="importar-nova-senha" id="form-nova-senha" novalidate>
+                    <input type="email" id="ns-email" placeholder="E-mail do mantenedor" required>
+                    <button type="submit" class="btn btn-primary">Gerar nova senha</button>
+                </form>
+                <p class="form-retorno" id="ns-retorno" role="status"></p>
+                <ul class="acessos" id="ns-acesso"></ul>
+            </div>
         </div>
     </section>
 
-    <script src="app.js?v=45"></script>
+    <script src="app.js?v=46"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="importar.js?v=1"></script>
+    <script src="importar.js?v=2"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Mantenedor | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=59">
+    <link rel="stylesheet" href="styles.css?v=60">
 </head>
 <body data-pagina="portal">
 
@@ -30,7 +30,21 @@
                         <button type="submit" class="btn btn-primary">Entrar</button>
                         <p class="form-retorno" id="login-retorno" role="status"></p>
                     </div>
-                    <a href="contato.html?interesse=mantenedor" class="link-discreto">Esqueci minha senha</a>
+                    <button type="button" class="link-discreto" id="btn-esqueci">Esqueci minha senha</button>
+                </form>
+
+                <!-- Esqueci minha senha: manda o link de troca para o e-mail -->
+                <form class="formulario" id="form-esqueci" novalidate hidden>
+                    <p class="esqueci-texto">Informe o e-mail do seu cadastro. Enviaremos um link para você criar uma senha nova.</p>
+                    <div class="campo">
+                        <label for="e-email">E-mail</label>
+                        <input type="email" id="e-email" autocomplete="username" required>
+                    </div>
+                    <div class="campo">
+                        <button type="submit" class="btn btn-primary">Enviar link</button>
+                        <p class="form-retorno" id="esqueci-retorno" role="status"></p>
+                    </div>
+                    <button type="button" class="link-discreto" id="btn-voltar-login">Voltar para o login</button>
                 </form>
             </div>
         </div>
@@ -44,6 +58,7 @@
             <p class="hero-lead">Obrigado por caminhar conosco.</p>
             <p class="nivel-selo" id="usuario-nivel" hidden></p>
             <p class="hero-complemento">Conectado como <strong id="usuario-email"></strong></p>
+            <p class="aviso-senha" id="aviso-senha" hidden>Você está usando a senha provisória que recebeu. <a href="#tela-portal-senha">Trocar senha</a> (opcional).</p>
             <div class="cta-buttons" style="margin-top: 2rem;">
                 <button type="button" class="btn btn-secondary" id="btn-sair">Sair</button>
             </div>
@@ -269,6 +284,31 @@
     </section>
 
 
-    <script src="app.js?v=45"></script>
+    <!-- TROCAR SENHA: opcional (quem recebeu a senha provisoria pelo
+         WhatsApp, ou quem veio pelo link de "Esqueci minha senha") -->
+    <section class="sec-branca" id="tela-portal-senha" hidden>
+        <div class="wrap">
+            <span class="sec-kicker">Minha senha</span>
+            <h2 id="senha-titulo">Trocar senha.</h2>
+            <div class="portal-senha">
+                <form class="formulario" id="form-senha" novalidate>
+                    <div class="campo">
+                        <label for="s-nova">Nova senha</label>
+                        <input type="password" id="s-nova" autocomplete="new-password" minlength="6" required>
+                    </div>
+                    <div class="campo">
+                        <label for="s-confirma">Repita a nova senha</label>
+                        <input type="password" id="s-confirma" autocomplete="new-password" minlength="6" required>
+                    </div>
+                    <div class="campo campo-largo">
+                        <button type="submit" class="btn btn-primary">Salvar nova senha</button>
+                        <p class="form-retorno" id="senha-retorno" role="status"></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js?v=46"></script>
 </body>
 </html>

@@ -32,7 +32,10 @@
     if (PORTAL.MODO_DEMO) {
         aviso('Modo demonstração: dá para conferir a prévia, mas nada é gravado até as contas serem ligadas (servidor/LEIA-ME.md).');
     } else {
-        PORTAL.iniciar().then(u => { if (!u) aviso('Entre com a conta da equipe na <a href="portal.html">Área do Mantenedor</a> antes de importar.', true); });
+        PORTAL.iniciar().then(u => {
+            if (!u) aviso('Entre com a conta da equipe na <a href="portal.html">Área do Mantenedor</a> antes de importar.', true);
+            else if (registros.length) $('btn-importar').disabled = false;
+        });
     }
 
     function aviso(html, bloquear) {
@@ -154,12 +157,57 @@
         $('btn-importar').disabled = !registros.length || (!PORTAL.MODO_DEMO && !PORTAL.sessao());
     }
 
+    // ---------- Mensagem de acesso pelo WhatsApp ----------
+    const PORTAL_URL = new URL('portal.html', location.href).href;
+    function telefoneWhats(t) {
+        let d = String(t || '').replace(/\D/g, '').replace(/^0+/, '');
+        if (d.length === 10 || d.length === 11) d = '55' + d;   // DDD + numero, sem o 55
+        return d.length >= 12 ? d : '';
+    }
+    function mensagemAcesso(a) {
+        const primeiro = (a.nome || '').trim().split(/\s+/)[0];
+        return `Olá${primeiro ? ', ' + primeiro : ''}! Seu acesso à Área do Mantenedor do Cone Sul está pronto.\n\n`
+            + `Site: ${PORTAL_URL}\nLogin: ${a.email}\nSenha: ${a.senha}\n\n`
+            + 'Ao entrar, você pode trocar a senha se quiser. Obrigado por caminhar conosco!';
+    }
+    function mostrarAcessos(lista, alvo) {
+        alvo.innerHTML = lista.map((a, i) => {
+            const tel = telefoneWhats(a.telefone);
+            const link = `https://wa.me/${tel}?text=${encodeURIComponent(mensagemAcesso(a))}`;
+            return `<li class="acesso">
+                <div class="acesso-dados">
+                    <strong>${esc(a.nome) || esc(a.email)}</strong>
+                    <span>${esc(a.email)}</span>
+                    <span>Senha: <code>${esc(a.senha)}</code></span>
+                    ${tel ? '' : '<span class="acesso-sem-tel">Sem celular no relatório: escolha o contato no WhatsApp</span>'}
+                </div>
+                <div class="acesso-acoes">
+                    <a class="btn btn-whats" href="${link}" target="_blank" rel="noopener" data-enviado="${i}">Enviar no WhatsApp</a>
+                    <button type="button" class="btn-copiar" data-copiar="${esc(mensagemAcesso(a))}">Copiar mensagem</button>
+                </div>
+            </li>`;
+        }).join('');
+    }
+    document.addEventListener('click', async (e) => {
+        const enviar = e.target.closest('[data-enviado]');
+        if (enviar) enviar.closest('.acesso').classList.add('enviado');
+        const copiar = e.target.closest('[data-copiar]');
+        if (copiar) {
+            try { await navigator.clipboard.writeText(copiar.dataset.copiar); copiar.textContent = 'Copiada ✓'; }
+            catch { copiar.textContent = 'Não foi possível copiar'; }
+        }
+    });
+    // Senha de exemplo (so na demonstracao; as reais vem do servidor)
+    const senhaDemo = () => 'Cone-' + String(Math.floor(Math.random() * 1e6)).padStart(6, '0');
+
     // ---------- 4. Importar ----------
     $('btn-importar').addEventListener('click', async () => {
         const retorno = $('importar-retorno');
         if (!registros.length) return;
         if (PORTAL.MODO_DEMO) {
-            retorno.textContent = `Modo demonstração: nada foi gravado. Com as contas ligadas, ${registros.length} cadastro(s) seriam criados ou atualizados.`;
+            retorno.textContent = `Modo demonstração: nada foi gravado. Abaixo, como fica a lista de acessos (senhas de exemplo, que não funcionam).`;
+            mostrarAcessos(registros.map(r => ({ ...r, senha: senhaDemo() })), $('acessos'));
+            $('passo-acessos').hidden = false;
             return;
         }
         $('btn-importar').disabled = true;
@@ -170,13 +218,38 @@
                 body: { registros, desativarAusentes: $('desativar-ausentes').checked }
             });
             if (error) throw error;
-            retorno.textContent = `Pronto: ${data.criados} cadastro(s) criado(s) com convite por e-mail, ${data.atualizados} atualizado(s)`
+            if (data.novos?.length) { mostrarAcessos(data.novos, $('acessos')); $('passo-acessos').hidden = false; }
+            retorno.textContent = `Pronto: ${data.criados} login(s) novo(s) com senha provisória, ${data.atualizados} atualizado(s)`
                 + (data.desativados ? `, ${data.desativados} sem contribuição neste relatório` : '')
                 + (data.erros?.length ? `. ${data.erros.length} com erro: ${data.erros.slice(0, 3).join('; ')}` : '.');
         } catch (erro) {
             retorno.textContent = 'Não foi possível importar. Confira se você entrou com a conta da equipe. (' + (erro.message || erro) + ')';
         } finally {
             $('btn-importar').disabled = false;
+        }
+    });
+
+    // ---------- Nova senha provisoria ----------
+    $('form-nova-senha').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const retorno = $('ns-retorno');
+        const email = $('ns-email').value.trim().toLowerCase();
+        $('ns-acesso').innerHTML = '';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { retorno.textContent = 'Informe um e-mail válido.'; return; }
+        if (PORTAL.MODO_DEMO) {
+            retorno.textContent = 'Modo demonstração: senha de exemplo, não funciona.';
+            mostrarAcessos([{ email, senha: senhaDemo() }], $('ns-acesso'));
+            return;
+        }
+        retorno.textContent = 'Gerando…';
+        try {
+            const sb = await PORTAL.cliente();
+            const { data, error } = await sb.functions.invoke('importar-planilha', { body: { acao: 'nova-senha', email } });
+            if (error) throw error;
+            retorno.textContent = 'Senha nova gerada. A anterior deixou de valer.';
+            mostrarAcessos([data], $('ns-acesso'));
+        } catch (erro) {
+            retorno.textContent = 'Não foi possível gerar: confira o e-mail e se você entrou com a conta da equipe.';
         }
     });
 })();

@@ -43,9 +43,13 @@ create table if not exists public.mantenedores (
     assinatura_id        text,     -- id da assinatura (contribuicao mensal)
     cadastro_automatico  boolean not null default false,  -- criado pelo pagamento
     conferido            boolean not null default false,  -- a pessoa ja revisou os dados
+    senha_provisoria     boolean not null default false,  -- entrou com a senha mandada pelo WhatsApp
     criado_em            timestamptz not null default now(),
     atualizado_em        timestamptz not null default now()
 );
+
+-- Projeto criado com uma versao anterior deste arquivo: colunas novas
+alter table public.mantenedores add column if not exists senha_provisoria boolean not null default false;
 
 -- Eventos ja processados: a plataforma pode reenviar o mesmo aviso
 create table if not exists public.eventos_pagamento (
@@ -98,7 +102,7 @@ create policy "edita o proprio cadastro" on public.mantenedores
 -- Pelo site, so os dados pessoais podem mudar (nunca valor, status ou nivel)
 revoke insert, update, delete on public.mantenedores from anon, authenticated;
 grant select on public.mantenedores to authenticated;
-grant update (nome, telefone, nascimento, naturalidade, moradia, cristao, congrega, igreja, conferido)
+grant update (nome, telefone, nascimento, naturalidade, moradia, cristao, congrega, igreja, conferido, senha_provisoria)
     on public.mantenedores to authenticated;
 
 -- ---------- Equipe (pagina importar.html) ----------

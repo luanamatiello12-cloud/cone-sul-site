@@ -2,13 +2,15 @@
 // IMPORTAR RELATORIO (Supabase Edge Function)
 // Chamada pela pagina importar.html, com o login de alguem da equipe.
 // Recebe as linhas ja lidas do Excel do Eklesia (agrupadas por e-mail)
-// e grava cada uma como contribuicao: cria o cadastro com convite por
-// e-mail para quem e novo, atualiza valor e nivel de quem ja existe.
+// e grava cada uma como contribuicao: para quem e novo, cria o login com
+// SENHA PROVISORIA e devolve a senha (uma vez so) para a equipe mandar
+// pelo WhatsApp; de quem ja existe, atualiza valor e nivel.
 // Opcional: quem veio do Eklesia e nao esta no relatorio perde o nivel.
+// Tambem: { acao: 'nova-senha', email } gera outra senha provisoria.
 // So contas listadas na tabela "equipe" podem usar (schema.sql).
 // =========================================================
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
-import { gravarContribuicao } from '../_shared/mantenedores.ts';
+import { gravarContribuicao, senhaProvisoria } from '../_shared/mantenedores.ts';
 
 const CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -33,23 +35,40 @@ Deno.serve(async (req) => {
     const { data: membro } = await db.from('equipe').select('id').eq('id', quem.user.id).maybeSingle();
     if (!membro) return json(403, { erro: 'esta conta nao e da equipe' });
 
-    let corpo: { registros?: Linha[]; desativarAusentes?: boolean };
+    let corpo: { registros?: Linha[]; desativarAusentes?: boolean; acao?: string; email?: string };
     try { corpo = await req.json(); } catch { return json(400, { erro: 'corpo invalido' }); }
+
+    // Nova senha provisoria para quem perdeu a primeira (ou nunca recebeu)
+    if (corpo.acao === 'nova-senha') {
+        const email = String(corpo.email ?? '').trim().toLowerCase();
+        const { data: m } = await db.from('mantenedores').select('id, nome, telefone').eq('email', email).maybeSingle();
+        if (!m) return json(404, { erro: 'nenhum cadastro com este e-mail' });
+        const senha = senhaProvisoria();
+        const { error } = await db.auth.admin.updateUserById(m.id, { password: senha });
+        if (error) return json(500, { erro: error.message });
+        await db.from('mantenedores').update({ senha_provisoria: true }).eq('id', m.id);
+        return json(200, { email, nome: m.nome, telefone: m.telefone, senha });
+    }
+
     const registros = (corpo.registros ?? []).filter(r => r && typeof r.email === 'string' && Number.isFinite(r.valor));
     if (!registros.length) return json(400, { erro: 'nenhuma linha valida' });
     if (registros.length > 2000) return json(400, { erro: 'relatorio grande demais: envie em partes' });
 
     let criados = 0, atualizados = 0;
     const erros: string[] = [];
+    const novos: { email: string; nome?: string; telefone?: string; senha: string }[] = [];
     for (const r of registros) {
         try {
-            const resultado = await gravarContribuicao(db, {
+            const { resultado, senha } = await gravarContribuicao(db, {
                 email: r.email, nome: r.nome, cpf: r.cpf, telefone: r.telefone,
                 nascimento: r.nascimento || undefined, moradia: r.moradia, igreja: r.igreja,
                 valorMensal: r.valor,
                 status: r.valor > 0 ? 'ativa' : 'cancelada'
-            }, 'eklesia');
-            if (resultado === 'criado') criados++; else atualizados++;
+            }, 'eklesia', 'senha');
+            if (resultado === 'criado') {
+                criados++;
+                if (senha) novos.push({ email: r.email.trim().toLowerCase(), nome: r.nome, telefone: r.telefone, senha });
+            } else atualizados++;
         } catch (e) {
             erros.push((e as Error).message);
         }
@@ -66,5 +85,5 @@ Deno.serve(async (req) => {
         desativados = data?.length ?? 0;
     }
 
-    return json(200, { criados, atualizados, desativados, erros });
+    return json(200, { criados, atualizados, desativados, erros, novos });
 });
