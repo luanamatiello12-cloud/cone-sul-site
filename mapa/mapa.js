@@ -6,8 +6,9 @@
    - territorios.geojson: os seis territorios em destaque
        PR, SC, RS: uniao dos municipios da malha do IBGE
        PY, AR, CL: Natural Earth 1:10m
-   - referencia.geojson: demais paises da America do Sul e demais
-     estados do Brasil (Natural Earth 1:10m), em tom neutro
+   - fundo: mapa CARTO Voyager (dados OpenStreetMap), carregado da rede.
+     (referencia.geojson, os demais paises em tom neutro, nao e mais usado:
+     fica guardado para o caso de voltar ao mapa sem fundo)
 
    Pins (opcional): se a pagina carregar mapa/locais.js, cada cidade
    vira um pin; pins proximos se agrupam (Leaflet.markercluster, em
@@ -136,17 +137,17 @@
     // ---------- Estilos das camadas ----------
     // Contorno claro e fino, que engrossa ao passar o mouse e ao escolher;
     // cantos arredondados para a linha ficar suave
-    // Todos os territorios no mesmo tom (sem uma cor para cada): creme
-    // discreto; ao passar o mouse clareia; o escolhido fica no verde-claro
-    // de destaque do site
+    // Sobre o mapa de fundo: os territorios so contornados em verde; ao
+    // passar o mouse ganham um veu leve; o escolhido fica destacado
     const estilo = (t, modo) => ({
-        color: modo === 'selecionado' ? '#c9d780' : '#fef5e2',
-        weight: modo === 'selecionado' ? 2 : modo === 'hover' ? 1.4 : 0.9,
-        opacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.75 : 0.45,
+        color: '#1d4a33',
+        weight: modo === 'selecionado' ? 3 : modo === 'hover' ? 2.2 : 1.6,
+        opacity: modo === 'selecionado' ? 1 : 0.8,
+        dashArray: modo === 'normal' ? '6 4' : null,
         lineJoin: 'round',
         lineCap: 'round',
-        fillColor: modo === 'selecionado' ? '#c9d780' : '#fef5e2',
-        fillOpacity: modo === 'selecionado' ? 0.28 : modo === 'hover' ? 0.16 : 0.09
+        fillColor: '#2f6b48',
+        fillOpacity: modo === 'selecionado' ? 0.16 : modo === 'hover' ? 0.08 : 0
     });
 
     function aplicarEstilo(id) {
@@ -228,27 +229,18 @@
     const REGIAO = L.latLngBounds([[-55.9, -75.8], [-19.2, -47.9]]);
     map.fitBounds(REGIAO, { padding: [16, 16], animate: false });
 
-    // Sem mapa de ruas por baixo: o mar e o fundo verde do proprio mapa
-    // (CSS) e as terras vem dos GeoJSON, nas cores da identidade.
-    map.attributionControl.addAttribution('Limites: IBGE, Natural Earth');
+    // Mapa de verdade por baixo (ruas, cidades, rios), como o Google Maps:
+    // CARTO Voyager, com dados do OpenStreetMap, carregado pelo navegador de
+    // quem visita. Os territorios vem por cima, so contornados.
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 19,
+        detectRetina: false,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+    }).addTo(map);
+    map.attributionControl.addAttribution('Limites: IBGE');
 
-    // Rotulos fixos (paises vizinhos, oceanos e os territorios)
-    const ROTULOS = [
-        { txt: 'Argentina', em: [-37.6, -65.6], cls: 'pais' },
-        { txt: 'Paraguai', em: [-22.9, -59.4], cls: 'pais' },
-        { txt: 'Chile', em: [-31.5, -76.6], cls: 'pais lado' },
-        { txt: 'Uruguai', em: [-33.2, -55.6], cls: 'vizinho' },
-        { txt: 'Brasil', em: [-20.8, -52.5], cls: 'vizinho' },
-        { txt: 'Bolívia', em: [-20.4, -63.6], cls: 'vizinho' },
-        { txt: 'Oceano<br>Pacífico', em: [-49.5, -76.4], cls: 'oceano lado' },
-        { txt: 'Oceano Atlântico', em: [-41, -51], cls: 'oceano' }
-    ];
-
-    ROTULOS.forEach(r => L.marker(r.em, {
-        interactive: false,
-        keyboard: false,
-        icon: L.divIcon({ className: 'rotulo-mapa ' + r.cls, html: `<span>${r.txt}</span>`, iconSize: null })
-    }).addTo(map));
+    // Os nomes de paises, estados e cidades ja vem no mapa de fundo
 
     // Reajusta o tamanho quando o container muda (responsivo)
     if ('ResizeObserver' in window) new ResizeObserver(() => map.invalidateSize()).observe(elMapa);
@@ -510,14 +502,9 @@
         return r.json();
     });
 
-    Promise.all([carregar('mapa/referencia.geojson'), carregar('mapa/territorios.geojson')])
-        .then(([referencia, territorios]) => {
-            // Referencia neutra, por baixo e sem interacao
-            L.geoJSON(referencia, {
-                interactive: false,
-                smoothFactor: 1.5,
-                style: { color: '#fef5e2', weight: 0.6, opacity: 0.14, lineJoin: 'round', fill: false }
-            }).addTo(map);
+    carregar('mapa/territorios.geojson')
+        .then((territorios) => {
+            // (os paises vizinhos ja aparecem no mapa de fundo)
 
             // Os seis territorios
             L.geoJSON(territorios, {

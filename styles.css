@@ -3566,3 +3566,18 @@ body.modo-edicao img[data-img] { cursor: pointer; }
 /* Mapa sem cores por territorio: nomes claros sobre o fundo escuro */
 .rotulo-mapa.pais span { color: var(--creme); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
 .rotulo-mapa.pais.lado span { color: var(--creme); }
+
+/* ===== Mapa com fundo de mapa de verdade (CARTO / OpenStreetMap) =====
+   Volta a moldura (o fundo e claro) e sai o esfumacado das bordas */
+.mapa-leaflet,
+.mapa-leaflet.leaflet-container {
+    background: #f2efe9 !important;
+    border: 1px solid rgba(201, 215, 128, 0.35);
+    border-radius: 10px;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4);
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+}
+.mapa-leaflet .leaflet-control-zoom { margin: 12px 0 0 12px !important; }
+.mapa-leaflet .leaflet-control-attribution { margin: 0 !important; background: rgba(255, 255, 255, 0.8); color: #555; }
+.mapa-leaflet .leaflet-control-attribution a { color: #2f6b48; }
