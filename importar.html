@@ -5,84 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Importar relatório | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=85">
+    <!-- A importacao agora fica dentro do Painel (editar.html). Este endereco
+         antigo so leva ate la. -->
+    <meta http-equiv="refresh" content="0; url=editar.html#importar">
+    <script>location.replace('editar.html#importar');</script>
 </head>
-<body data-pagina="importar">
-
-    <!-- BASTIDOR: so a equipe usa. Nao aparece no menu.
-         Le o relatorio do Eklesia (Excel), mostra a previa e cria/atualiza os
-         cadastros de mantenedor com o nivel pelo valor (ver servidor/LEIA-ME.md) -->
-    <section class="hero hero-pagina">
-        <div class="wrap">
-            <span class="hero-kicker">Equipe — Importar relatório</span>
-            <h1>Cadastros a partir do Eklesia.</h1>
-            <p class="hero-lead">Envie o relatório em Excel e confira a prévia. Ao confirmar, quem é novo ganha um login pronto com senha provisória, para vocês mandarem pelo WhatsApp; quem já existe tem o valor e o nível atualizados.</p>
-        </div>
-    </section>
-
-    <section class="sec-clara importar">
-        <div class="wrap">
-            <p class="importar-aviso" id="importar-aviso" hidden></p>
-
-            <div class="importar-passo">
-                <span class="sec-kicker">1. Relatório</span>
-                <label class="importar-arquivo">
-                    <input type="file" id="arquivo" accept=".xlsx,.xls,.csv">
-                    <span>Escolher arquivo do Eklesia (.xlsx)</span>
-                </label>
-                <p class="importar-nome" id="arquivo-nome"></p>
-            </div>
-
-            <div class="importar-passo" id="passo-colunas" hidden>
-                <span class="sec-kicker">2. Colunas</span>
-                <p class="sec-intro">Confira qual coluna do relatório corresponde a cada dado. E-mail e valor são obrigatórios.</p>
-                <div class="importar-mapa" id="mapeamento"></div>
-                <div class="importar-opcoes">
-                    <label>Mesma pessoa em várias linhas:
-                        <select id="repetidos">
-                            <option value="somar">somar os valores</option>
-                            <option value="maior">usar o maior valor</option>
-                            <option value="ultimo">usar a última linha</option>
-                        </select>
-                    </label>
-                    <label class="importar-check"><input type="checkbox" id="desativar-ausentes"> Quem não estiver neste relatório perde o nível</label>
-                </div>
-            </div>
-
-            <div class="importar-passo" id="passo-previa" hidden>
-                <span class="sec-kicker">3. Prévia</span>
-                <p class="importar-resumo" id="resumo"></p>
-                <div class="importar-tabela"><table id="previa"></table></div>
-                <div class="cta-buttons acoes-secao">
-                    <button type="button" class="btn btn-primary" id="btn-importar">Importar cadastros</button>
-                </div>
-                <p class="form-retorno" id="importar-retorno" role="status"></p>
-            </div>
-
-            <!-- 4. Acessos novos: senha provisoria + mensagem pronta no WhatsApp.
-                 A senha aparece so aqui, uma vez: mandar antes de fechar a pagina. -->
-            <div class="importar-passo" id="passo-acessos" hidden>
-                <span class="sec-kicker">4. Enviar os acessos</span>
-                <p class="sec-intro">Mande o acesso de cada pessoa nova pelo WhatsApp. <strong>As senhas aparecem só agora:</strong> envie antes de fechar esta página (se perder, gere outra senha abaixo).</p>
-                <ul class="acessos" id="acessos"></ul>
-            </div>
-
-            <!-- Nova senha provisoria para quem perdeu a primeira -->
-            <div class="importar-passo">
-                <span class="sec-kicker">Nova senha provisória</span>
-                <p class="sec-intro">Para quem perdeu a senha ou não recebeu a mensagem.</p>
-                <form class="importar-nova-senha" id="form-nova-senha" novalidate>
-                    <input type="email" id="ns-email" placeholder="E-mail do mantenedor" required>
-                    <button type="submit" class="btn btn-primary">Gerar nova senha</button>
-                </form>
-                <p class="form-retorno" id="ns-retorno" role="status"></p>
-                <ul class="acessos" id="ns-acesso"></ul>
-            </div>
-        </div>
-    </section>
-
-    <script src="app.js?v=64"></script>
-    <script src="bibliotecas/xlsx/xlsx.full.min.js?v=0.20.3"></script>
-    <script src="importar.js?v=4"></script>
+<body>
+    <p>A importação agora fica no <a href="editar.html#importar">Painel</a>.</p>
 </body>
 </html>

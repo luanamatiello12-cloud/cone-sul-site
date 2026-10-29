@@ -2117,14 +2117,17 @@ if (PAGINA === 'editar') {
         const email = $('ed-email').value.trim();
         try {
             if (!PORTAL.MODO_DEMO) {
-                await PORTAL.entrar(email, $('ed-senha').value, null, CAPTCHA.token(formLogin));
+                const perfil = await PORTAL.entrar(email, $('ed-senha').value, null, CAPTCHA.token(formLogin));
                 const user = await EDICAO.verificarEquipe();
                 if (!user) {
                     await PORTAL.sair();
                     throw new Error('Esta conta não tem acesso às alterações do site. Fale com quem administra o site.');
                 }
+                PORTAL.salvar(perfil);
             }
             localStorage.setItem(CHAVE_EDITOR, email);
+            // Avisa o Painel (importacao) que a equipe entrou, sem recarregar
+            document.dispatchEvent(new CustomEvent('conesul:equipe-entrou'));
             formLogin.reset();
             retorno.textContent = '';
             mostrar(email);

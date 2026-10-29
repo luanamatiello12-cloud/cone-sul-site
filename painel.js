@@ -290,7 +290,8 @@
         const carregar = async () => {
             const { data, error } = await sb.from('noticias').select('id, categoria, titulo, resumo, imagem, link, publicada, publicado_em').order('publicado_em', { ascending: false }).limit(100);
             if (error) { lista.replaceChildren(el('p', { className: 'pc-dica', textContent: 'Não foi possível carregar as notícias.' })); return; }
-            lista.replaceChildren(...(data.length ? data.map(n => el('div', { className: 'pc-noticia' + (n.publicada ? '' : ' pc-escondida') },
+            const noticias = data || [];
+            lista.replaceChildren(...(noticias.length ? noticias.map(n => el('div', { className: 'pc-noticia' + (n.publicada ? '' : ' pc-escondida') },
                 el('div', {}, el('strong', { textContent: n.titulo }), el('small', { textContent: `${CATEGORIAS[n.categoria] || n.categoria} · ${new Date(n.publicado_em).toLocaleDateString('pt-BR')}${n.publicada ? '' : ' · escondida'}` })),
                 el('div', { className: 'pc-noticia-acoes' },
                     el('button', { type: 'button', textContent: n.publicada ? 'Esconder' : 'Mostrar', onclick: async () => {
@@ -399,7 +400,8 @@
         const { data, error } = await sb.from('site_edicoes').select('id, criado_em, autor_email, conteudo').eq('pagina', '_config').order('id', { ascending: false }).limit(15);
         if (error) { caixa.replaceChildren(el('p', { textContent: 'Não foi possível carregar o histórico.' })); return; }
         const quando = (d) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-        caixa.replaceChildren(data.length ? el('ol', {}, ...data.map((v, i) => el('li', {},
+        const versoes = data || [];
+        caixa.replaceChildren(versoes.length ? el('ol', {}, ...versoes.map((v, i) => el('li', {},
             el('span', { textContent: `${quando(v.criado_em)}${v.autor_email ? ' · ' + v.autor_email : ''}${i === 0 ? ' · no ar' : ''}` }),
             i === 0 ? null : el('button', { type: 'button', textContent: 'Voltar a esta', onclick: async () => {
                 if (!confirm(`Voltar as configurações para a versão de ${quando(v.criado_em)}? Ela será publicada para todos.`)) return;
@@ -411,6 +413,20 @@
                 location.reload();
             } })))) : el('p', { textContent: 'Nenhuma versão publicada ainda.' }));
     });
+
+    // Links do painel que abrem um bloco (ex.: "Importar relatório"), e o
+    // endereco antigo importar.html, que chega como editar.html#importar
+    const abrirBloco = (id) => {
+        const bloco = document.getElementById(id);
+        if (!bloco || bloco.tagName !== 'DETAILS') return;
+        bloco.open = true;
+        bloco.scrollIntoView({ behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth', block: 'start' });
+    };
+    document.querySelectorAll('[data-abrir]').forEach(a => a.addEventListener('click', (e) => {
+        e.preventDefault();
+        abrirBloco(a.dataset.abrir);
+    }));
+    if (location.hash === '#importar') setTimeout(() => abrirBloco('importar'), 300);
 
     montarContatos();
     montarProdutos();
