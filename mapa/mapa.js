@@ -45,6 +45,8 @@
     }
 
     let localAberto = null; // cidade aberta no quadro (para as fotos que chegam depois)
+    let voando = false;     // o mapa esta indo ate uma cidade
+    let esperaVoo = null;   // quem espera esse voo terminar
     function preencherPainel(t) {
         localAberto = null;
         if (map) map.closePopup();
@@ -116,7 +118,8 @@
                 local.fotos = achadas;
                 local._pronto = true;
                 // So redesenha se a pessoa ainda estiver nesta cidade
-                if (localAberto === i) { preencherLocal(local, i); abrirPopupFotos(i); }
+                // Se o mapa ainda esta voando ate la, o cartao abre na chegada
+                if (localAberto === i) { preencherLocal(local, i); if (!voando) abrirPopupFotos(i); }
             });
             localAberto = i;
             return;
@@ -160,7 +163,7 @@
         if (anterior) aplicarEstilo(anterior);
         aplicarEstilo(id);
         camadas[id]?.bringToFront();
-        if (enquadrar && camadas[id]) map.flyToBounds(camadas[id].getBounds(), { padding: [30, 30], maxZoom: 6, duration: 0.6 });
+        if (enquadrar && camadas[id]) map.flyToBounds(camadas[id].getBounds(), { padding: [30, 30], maxZoom: 6, duration: MOVIMENTO_REDUZIDO_MAPA ? 0 : 0.9, easeLinearity: 0.2 });
 
         if (painel) { marcarLocal(-1); preencherPainel(t); }
     }
@@ -189,10 +192,20 @@
     // ---------- Mapa ----------
     // Zoom e arraste liberados. A roda do mouse so da zoom depois de um
     // clique no mapa, para nao "prender" a rolagem da pagina.
+    // Fluidez: os contornos (36 mil pontos) sao desenhados em canvas, que
+    // move e aproxima bem mais leve que SVG; zoom em passos de meio nivel;
+    // arrastar com inercia
     map = L.map(elMapa, {
+        preferCanvas: true,
         zoomControl: true,
         scrollWheelZoom: false,
         zoomSnap: 0.25,
+        zoomDelta: 0.5,
+        wheelPxPerZoomLevel: 90,
+        wheelDebounceTime: 20,
+        inertia: true,
+        inertiaDeceleration: 2500,
+        zoomAnimationThreshold: 8,
         minZoom: 2.5,
         maxZoom: 12,
         maxBounds: [[-62, -100], [5, -20]],
@@ -314,8 +327,24 @@
             elMapa.scrollIntoView({ behavior: MOVIMENTO_REDUZIDO_MAPA ? 'auto' : 'smooth', block: 'start' });
         }
         const abrir = () => fotosProntas(local) ? abrirPopupFotos(i) : marcador.openTooltip();
-        if (grupoPins && grupoPins.zoomToShowLayer) grupoPins.zoomToShowLayer(marcador, abrir);
-        else { map.setView([local.lat, local.lng], 8); abrir(); }
+        // Voo suave ate a cidade; no zoom 8 os pins ja estao soltos (sem
+        // grupo), entao o cartao abre direto sobre o pin
+        const destino = L.latLng(local.lat, local.lng);
+        const zoom = Math.max(map.getZoom(), 8);
+        if (map.getCenter().distanceTo(destino) < 2000 && map.getZoom() >= 8) { abrir(); return; }
+        // Abre o cartao so quando o voo chegar (um movimento anterior que
+        // ainda esteja terminando nao conta)
+        if (esperaVoo) map.off('moveend', esperaVoo);   // descarta a espera de um voo anterior
+        const aoChegar = () => {
+            if (map.getZoom() >= zoom - 0.1 && map.getCenter().distanceTo(destino) < 5000) {
+                map.off('moveend', aoChegar); esperaVoo = null; voando = false; abrir();
+            }
+        };
+        esperaVoo = aoChegar;
+        map.stop();
+        voando = true;
+        map.on('moveend', aoChegar);
+        map.flyTo(destino, zoom, { duration: MOVIMENTO_REDUZIDO_MAPA ? 0 : 1, easeLinearity: 0.2 });
     }
 
     // Abas Cidades / Territorios (pagina Onde Estamos)
@@ -437,11 +466,13 @@
             // Referencia neutra, por baixo e sem interacao
             L.geoJSON(referencia, {
                 interactive: false,
+                smoothFactor: 1.5,
                 style: { color: '#2c4f39', weight: 0.8, opacity: 1, fillColor: '#1a3626', fillOpacity: 1 }
             }).addTo(map);
 
             // Os seis territorios
             L.geoJSON(territorios, {
+                smoothFactor: 1.2,
                 filter: f => !!POR_ID[f.properties.id],
                 style: f => estilo(POR_ID[f.properties.id], 'normal'),
                 onEachFeature: (f, camada) => {
