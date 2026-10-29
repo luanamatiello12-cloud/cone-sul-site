@@ -18,8 +18,8 @@ const CONTATO = {
 // do projeto e a chave publica ("anon"). A chave publica pode ficar no
 // site: o que protege os dados sao as regras do banco (schema.sql).
 const CONTAS = {
-    url: '',
-    chavePublica: '',
+    url: 'https://zwswipzsjiopimgmsdpl.supabase.co',
+    chavePublica: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3c3dpcHpzamlvcGltZ21zZHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMDQ4MTYsImV4cCI6MjEwODg4MDgxNn0.bOKphfAqoGJuG4fHai8-e2VshauD8da6ezoPW7N7NLU',
     // Chave do site do Cloudflare Turnstile (CAPTCHA). Vazio = sem CAPTCHA.
     // Ligar junto com "Captcha protection" no Supabase (servidor/LEIA-ME.md):
     // um sem o outro faz o login falhar.

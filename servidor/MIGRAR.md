@@ -3,6 +3,31 @@
 Tudo já está pronto no código. Este é o roteiro do dia da migração: o que vocês
 fazem, o que vocês me passam e o que eu faço.
 
+## Situação (29/10/2026)
+
+Feito: projeto Supabase **`cone-sul`** (organização "Cone sul", região São Paulo,
+ref `zwswipzsjiopimgmsdpl`), `schema.sql` rodado, as duas funções publicadas,
+login configurado (endereço do site, confirmação de e-mail, senha mínima 8,
+sessão de 15 minutos), `CONTAS` preenchido no `app.js` e a conta
+`conesul.missoes@gmail.com` na tabela `equipe`. As edições do navegador **não**
+foram migradas (decisão da equipe).
+
+Falta:
+- **Domínio**: passo 5 de "O que eu faço", e depois trocar `SITE_URL`,
+  `ORIGENS_PERMITIDAS` e o endereço do login (Authentication > URL Configuration).
+- **CAPTCHA** (Turnstile): não configurado.
+- **E-mail próprio (SMTP)**: sem ele o Supabase só manda e-mail para quem é da
+  organização no painel, no máximo 2 por hora, e não deixa traduzir os
+  e-mails. Ou seja, quem se cadastra pelo "Faça parte" **não recebe** a
+  confirmação. Os logins criados pela importação do Eklesia não dependem disso.
+  Configurar em Authentication > Emails > SMTP Settings (ex.: Gmail com senha de
+  app, Brevo, Resend) e então traduzir os modelos (LEIA-ME, passo 4).
+- **Webhook de pagamento**: publicado, mas desligado (sem `PROVEDOR_PAGAMENTO`)
+  até existir plataforma que avise. O `WEBHOOK_TOKEN` já existe; gere outro
+  ao ligar, para cadastrar na plataforma.
+- O projeto antigo "conesul.missoes@gmail.com's Project" (região EUA) não é
+  usado e pode ser apagado.
+
 ## 1. O que vocês fazem (antes de me chamar)
 
 ### Banco de dados (Supabase)

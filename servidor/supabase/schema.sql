@@ -78,9 +78,11 @@ end $$;
 drop trigger if exists ao_criar_conta on auth.users;
 create trigger ao_criar_conta after insert on auth.users
     for each row execute function public.criar_mantenedor();
+-- Funcao de gatilho: ninguem a chama pela API
+revoke execute on function public.criar_mantenedor() from public, anon, authenticated;
 
 create or replace function public.marcar_atualizacao()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = public as $$
 begin new.atualizado_em := now(); return new; end $$;
 
 drop trigger if exists mantenedores_atualizado on public.mantenedores;
