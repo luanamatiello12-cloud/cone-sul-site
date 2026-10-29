@@ -3683,3 +3683,8 @@ body[data-pagina="inicio"] .hero::after { display: none; }
             #0f2d1b url('img/fundo-inicio.webp?v=1') right -30% bottom / auto 100% no-repeat;
     }
 }
+
+/* Logo do menu (imagem): altura fixa, sem o texto */
+nav .logo { display: inline-flex; align-items: center; line-height: 0; }
+nav .logo img { height: 46px; width: auto; display: block; }
+@media (max-width: 700px) { nav .logo img { height: 40px; } }
