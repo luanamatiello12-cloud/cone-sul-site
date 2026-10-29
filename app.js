@@ -628,6 +628,10 @@ const PORTAL = {
 // se a conta esta na tabela "equipe" antes de mostrar a barra.
 const CHAVE_EDITOR = 'conesul-editor';
 const editorLocal = () => { try { return localStorage.getItem(CHAVE_EDITOR) || ''; } catch { return ''; } };
+// A barra Editar so aparece na pagina aberta pela lista de editar.html
+// (?editar no endereco). Navegando pelo site normalmente, quem edita ve o
+// mesmo que o visitante.
+const ABERTA_PARA_EDITAR = new URLSearchParams(location.search).has('editar');
 
 // Carrega um script do proprio site uma vez so
 const scriptsCarregados = {};
@@ -1484,7 +1488,7 @@ const EDICAO = {
     // A barra de edicao so aparece para quem entrou por editar.html e e da
     // equipe (entrar pela Area do Mantenedor nao basta)
     async verificarEditor() {
-        if (!editorLocal()) return false;
+        if (!editorLocal() || !ABERTA_PARA_EDITAR) return false;
         return !!(await this.verificarEquipe());
     },
 
@@ -2015,7 +2019,7 @@ if (PORTAL.MODO_DEMO) {
     aplicarEstado(lerEdicoes('g'), 'g');
     aplicarEstado(lerEdicoes('p'), 'p');
     // Demonstracao: a barra so aparece para quem entrou por editar.html
-    barraEdicao.hidden = !PAGINA_EDITAVEL || !editorLocal();
+    barraEdicao.hidden = !PAGINA_EDITAVEL || !editorLocal() || !ABERTA_PARA_EDITAR;
 } else {
     // Contas ligadas: a barra so aparece para a equipe, e a pagina espera a
     // versao publicada (no maximo 2,5 s) para nao piscar o texto antigo
@@ -2046,7 +2050,7 @@ if (PORTAL.MODO_DEMO) {
 /* =========================================================
    ALTERACOES NO SITE (editar.html): acesso da equipe, separado
    da Area do Mantenedor. Depois de entrar, a barra Editar aparece
-   em todas as paginas deste navegador.
+   nas paginas abertas pela lista daqui (?editar no endereco).
    ========================================================= */
 if (PAGINA === 'editar') {
     const $ = (id) => document.getElementById(id);
@@ -2067,7 +2071,7 @@ if (PAGINA === 'editar') {
     $('editar-lista').replaceChildren(...PAGINAS.map(p => {
         const li = document.createElement('li');
         const a = document.createElement('a');
-        a.href = p.href;
+        a.href = p.href + '?editar';
         a.append(Object.assign(document.createElement('strong'), { textContent: p.rotulo }),
             Object.assign(document.createElement('span'), { textContent: p.href }));
         li.append(a);
