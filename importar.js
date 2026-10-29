@@ -24,6 +24,7 @@
     let colunas = [];   // titulos do relatorio
     let linhas = [];    // linhas de dados (arrays)
     let registros = []; // resultado agrupado por e-mail
+    let equipe = false; // entrou com a conta da equipe (editar.html)
 
     if (typeof XLSX === 'undefined') {
         aviso('Não foi possível carregar o leitor de Excel (sem conexão?). Recarregue a página.');
@@ -32,10 +33,11 @@
     if (PORTAL.MODO_DEMO) {
         aviso('Modo demonstração: dá para conferir a prévia, mas nada é gravado até as contas serem ligadas (servidor/LEIA-ME.md).');
     } else {
-        PORTAL.iniciar().then(u => {
+        EDICAO.verificarEquipe().then(u => {
+            equipe = !!u;
             if (!u) aviso('Entre com a conta da equipe em <a href="editar.html">Alterações no site</a> antes de importar.', true);
             else if (registros.length) $('btn-importar').disabled = false;
-        });
+        }).catch(() => aviso('Não foi possível conferir o acesso da equipe. Recarregue a página.', true));
     }
 
     function aviso(html, bloquear) {
@@ -154,7 +156,7 @@
                 const n = nivelPorValor(r.valor);
                 return `<tr><td>${esc(r.nome) || '—'}</td><td>${esc(r.email)}</td><td>${reais(r.valor)}</td><td><span class="nivel-tag ${n ? n.id : ''}">${n ? n.nome : 'Sem nível'}</span></td></tr>`;
             }).join('') + '</tbody>';
-        $('btn-importar').disabled = !registros.length || (!PORTAL.MODO_DEMO && !PORTAL.sessao());
+        $('btn-importar').disabled = !registros.length || (!PORTAL.MODO_DEMO && !equipe);
     }
 
     // ---------- Mensagem de acesso pelo WhatsApp ----------
@@ -217,7 +219,7 @@
         $('btn-importar').disabled = true;
         retorno.textContent = 'Importando…';
         try {
-            const sb = await PORTAL.cliente();
+            const sb = await EDICAO.cliente();
             const { data, error } = await sb.functions.invoke('importar-planilha', {
                 body: { registros, desativarAusentes: $('desativar-ausentes').checked }
             });
@@ -247,7 +249,7 @@
         }
         retorno.textContent = 'Gerando…';
         try {
-            const sb = await PORTAL.cliente();
+            const sb = await EDICAO.cliente();
             const { data, error } = await sb.functions.invoke('importar-planilha', { body: { acao: 'nova-senha', email } });
             if (error) throw error;
             retorno.textContent = 'Senha nova gerada. A anterior deixou de valer.';

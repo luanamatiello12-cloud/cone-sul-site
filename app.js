@@ -481,20 +481,25 @@ const reais = (v) => Number(v).toLocaleString('pt-BR', { style: 'currency', curr
 const PORTAL = {
     MODO_DEMO: !(CONTAS.url && CONTAS.chavePublica),
     CHAVE: 'conesul-sessao',
+    // Login da Area do Mantenedor. A equipe tem o seu (EDICAO.CHAVE_LOGIN):
+    // entrar numa area nao abre a outra
+    CHAVE_LOGIN: 'conesul-mantenedor',
 
     // ----- Contas reais (Supabase), carregado so quando configurado -----
     async cliente() {
-        if (!this._cliente) {
-            // Copia local da biblioteca (bibliotecas/supabase, versao 2.45.4):
-            // o login nao depende de codigo servido por terceiros
-            await carregarScript('bibliotecas/supabase/supabase.js?v=2.45.4');
-            this._cliente = window.supabase.createClient(CONTAS.url, CONTAS.chavePublica);
-        }
+        // O link de e-mail da Area do Mantenedor nunca abre em editar.html
+        if (!this._cliente) this._cliente = await clienteSupabase(this.CHAVE_LOGIN, PAGINA !== 'editar');
         return this._cliente;
     },
 
     // Linha da tabela "mantenedores" -> objeto usado nas telas
     async perfil(sb, user) {
+        // Conta da equipe nao entra na Area do Mantenedor (ela usa editar.html)
+        const { data: equipe } = await sb.from('equipe').select('id').eq('id', user.id).maybeSingle();
+        if (equipe) {
+            await sb.auth.signOut({ scope: 'local' });
+            throw new Error('Esta é uma conta da equipe e não entra na Área do Mantenedor. Para alterar o site, use o endereço da equipe.');
+        }
         const { data: m, error } = await sb.from('mantenedores').select('*').eq('id', user.id).maybeSingle();
         if (error) throw new Error('Não foi possível carregar seu cadastro. Tente de novo.');
         const r = m || {};
@@ -590,7 +595,6 @@ const PORTAL = {
     // e espera a resposta: so depois a tela volta ao login
     async sair() {
         try { sessionStorage.removeItem(this.CHAVE); } catch { /* nada a limpar */ }
-        try { localStorage.removeItem(CHAVE_EDITOR); } catch { /* nada a limpar */ }
         if (this.MODO_DEMO) return;
         const sb = this._cliente || (this.temLoginGuardado() ? await this.cliente() : null);
         if (!sb) return;
@@ -617,14 +621,22 @@ const PORTAL = {
         return data;
     },
 
-    // Ha login do Supabase guardado neste navegador?
-    temLoginGuardado() {
-        try {
-            for (let i = 0; i < localStorage.length; i++) if (/^sb-.*-auth-token$/.test(localStorage.key(i))) return true;
-        } catch { /* sem storage */ }
-        return false;
-    }
+    // Ha login de mantenedor guardado neste navegador?
+    temLoginGuardado() { return temLogin(this.CHAVE_LOGIN); }
 };
+
+// Cliente do Supabase com o login guardado em `chave`. A Area do Mantenedor
+// e a equipe usam chaves diferentes: sao duas sessoes que nao se misturam.
+// `lerLinkEmail`: so um dos dois le o login que chega pelo link do e-mail.
+async function clienteSupabase(chave, lerLinkEmail) {
+    // Copia local da biblioteca (bibliotecas/supabase, versao 2.45.4):
+    // o login nao depende de codigo servido por terceiros
+    await carregarScript('bibliotecas/supabase/supabase.js?v=2.45.4');
+    return window.supabase.createClient(CONTAS.url, CONTAS.chavePublica, {
+        auth: { storageKey: chave, detectSessionInUrl: lerLinkEmail }
+    });
+}
+const temLogin = (chave) => { try { return !!localStorage.getItem(chave); } catch { return false; } };
 
 // Entrou pela pagina de alteracoes (editar.html)? Guarda o e-mail de quem
 // edita. Sozinha nao libera nada: com contas ligadas, o banco ainda confere
@@ -1459,6 +1471,39 @@ const EDICAO = {
     publicadoId: { p: null, g: null }, // versoes publicadas que estao no ar
     rascunho: { p: false, g: false },  // ha mudancas nao publicadas neste navegador
     cabecalhos() { return { apikey: CONTAS.chavePublica, Authorization: 'Bearer ' + CONTAS.chavePublica }; },
+    CHAVE_LOGIN: 'conesul-equipe',
+
+    // Login da equipe, separado do da Area do Mantenedor (PORTAL)
+    async cliente() {
+        // O link de "Esqueci minha senha" da equipe volta para editar.html
+        if (!this._cliente) this._cliente = await clienteSupabase(this.CHAVE_LOGIN, PAGINA === 'editar');
+        return this._cliente;
+    },
+
+    async entrar(email, senha, captchaToken) {
+        const sb = await this.cliente();
+        const { error } = await sb.auth.signInWithPassword({ email, password: senha, options: { captchaToken } });
+        if (error) throw new Error('E-mail ou senha incorretos.');
+    },
+
+    async esqueciSenha(email, captchaToken) {
+        if (PORTAL.MODO_DEMO) throw new Error('Em demonstração não há e-mail de troca de senha. Com as contas ligadas, o link chega no e-mail informado.');
+        const sb = await this.cliente();
+        const destino = new URL('editar.html', location.href);
+        destino.hash = 'nova-senha';
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: destino.href, captchaToken });
+        if (error) throw new Error('Não foi possível enviar agora. Tente de novo em alguns minutos.');
+    },
+
+    // Sai so da equipe: a Area do Mantenedor neste navegador continua como esta
+    async sair() {
+        try { localStorage.removeItem(CHAVE_EDITOR); } catch { /* nada a limpar */ }
+        if (PORTAL.MODO_DEMO) return;
+        const sb = this._cliente || (this.temLogin() ? await this.cliente() : null);
+        if (!sb) return;
+        const { error } = await sb.auth.signOut();
+        if (error) await sb.auth.signOut({ scope: 'local' });
+    },
 
     // Versoes publicadas mais recentes desta pagina e do menu/rodape
     // (leitura publica, sem login)
@@ -1475,12 +1520,12 @@ const EDICAO = {
     },
 
     // Ha alguem logado neste navegador? So entao vale carregar o cliente
-    temLogin() { return PORTAL.temLoginGuardado(); },
+    temLogin() { return temLogin(this.CHAVE_LOGIN); },
 
     // A conta logada esta na tabela "equipe"? (quem responde e o banco)
     async verificarEquipe() {
         if (!this.temLogin()) return null;
-        const sb = await PORTAL.cliente();
+        const sb = await this.cliente();
         const { data: { session } } = await sb.auth.getSession();
         if (!session) return null;
         const { data } = await sb.from('equipe').select('id').eq('id', session.user.id).maybeSingle();
@@ -1495,7 +1540,7 @@ const EDICAO = {
     },
 
     async publicar(estado, escopo = 'p') {
-        const sb = await PORTAL.cliente();
+        const sb = await this.cliente();
         const { data: { session } } = await sb.auth.getSession();
         if (!session) throw new Error('Sua sessão expirou. Entre de novo em Alterações no site (editar.html).');
         const { data, error } = await sb.from('site_edicoes')
@@ -1507,7 +1552,7 @@ const EDICAO = {
     },
 
     async historico() {
-        const sb = await PORTAL.cliente();
+        const sb = await this.cliente();
         const { data, error } = await sb.from('site_edicoes').select('id, criado_em, autor_email, conteudo')
             .eq('pagina', PAGINA_ARQUIVO).order('id', { ascending: false }).limit(20);
         if (error) throw new Error('Não foi possível carregar o histórico.');
@@ -1530,7 +1575,7 @@ const EDICAO = {
     // schema.sql)
     async enviarImagem(arquivo) {
         if (!/^image\/(jpeg|png|webp)$/.test(arquivo.type)) throw new Error('Use uma imagem JPG, PNG ou WebP.');
-        const sb = await PORTAL.cliente();
+        const sb = await this.cliente();
         const blob = await this.reduzir(arquivo);
         if (blob.size > 5 * 1024 * 1024) throw new Error('A imagem ficou maior que 5 MB. Use uma foto menor.');
         const nome = arquivo.name.toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').slice(0, 40) || 'imagem';
@@ -2121,10 +2166,10 @@ if (PAGINA === 'editar') {
         const email = $('ed-email').value.trim();
         try {
             if (!PORTAL.MODO_DEMO) {
-                await PORTAL.entrar(email, $('ed-senha').value, null, CAPTCHA.token(formLogin));
+                await EDICAO.entrar(email, $('ed-senha').value, CAPTCHA.token(formLogin));
                 const user = await EDICAO.verificarEquipe();
                 if (!user) {
-                    await PORTAL.sair();
+                    await EDICAO.sair();
                     throw new Error('Esta conta não tem acesso às alterações do site. Fale com quem administra o site.');
                 }
             }
@@ -2154,7 +2199,7 @@ if (PAGINA === 'editar') {
         formEsqueci.classList.add('validar');
         if (!formEsqueci.checkValidity()) { retorno.textContent = 'Informe um e-mail válido.'; return; }
         try {
-            await PORTAL.esqueciSenha($('ed-esqueci-email').value.trim(), CAPTCHA.token(formEsqueci), 'editar.html');
+            await EDICAO.esqueciSenha($('ed-esqueci-email').value.trim(), CAPTCHA.token(formEsqueci));
             retorno.textContent = 'Pronto! Se este e-mail tiver conta, o link para criar uma senha nova chega em alguns minutos.';
         } catch (erro) {
             retorno.textContent = erro.message;
@@ -2176,12 +2221,11 @@ if (PAGINA === 'editar') {
             return;
         }
         try {
-            const sb = await PORTAL.cliente();
+            const sb = await EDICAO.cliente();
             const { data: { session } } = await sb.auth.getSession();
             if (!session) throw new Error('Sua sessão expirou. Entre de novo.');
             const { error } = await sb.auth.updateUser({ password: nova.value });
             if (error) throw new Error(error.message.includes('different') ? 'A nova senha precisa ser diferente da atual.' : 'Não foi possível trocar a senha. Tente de novo.');
-            await sb.from('mantenedores').update({ senha_provisoria: false }).eq('id', session.user.id);
             formSenha.reset();
             formSenha.classList.remove('validar');
             $('editor-senha-titulo').textContent = 'Trocar senha.';
@@ -2194,7 +2238,7 @@ if (PAGINA === 'editar') {
     $('btn-editor-sair').addEventListener('click', async (e) => {
         const botao = e.currentTarget;
         botao.disabled = true;
-        try { await PORTAL.sair(); } catch { /* o acesso local ja foi apagado */ }
+        try { await EDICAO.sair(); } catch { /* o acesso local ja foi apagado */ }
         botao.disabled = false;
         mostrar('');
     });

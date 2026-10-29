@@ -285,7 +285,7 @@
             corpo.replaceChildren(el('p', { className: 'pc-dica', textContent: 'As notícias ficam no banco de dados: este formulário funciona quando as contas estiverem ligadas. Aí dá para publicar, esconder e apagar notícias por aqui.' }));
             return;
         }
-        const sb = await PORTAL.cliente();
+        const sb = await EDICAO.cliente();
         const lista = el('div', { className: 'pc-noticias-lista' }, el('p', { className: 'pc-dica', textContent: 'Carregando…' }));
         const carregar = async () => {
             const { data, error } = await sb.from('noticias').select('id, categoria, titulo, resumo, imagem, link, publicada, publicado_em').order('publicado_em', { ascending: false }).limit(100);
@@ -364,7 +364,7 @@
                 statusSalvar.textContent = 'Salvo neste navegador. Para publicar, use “Baixar edições” numa página e envie o arquivo.';
             } else {
                 if (!confirm('Publicar estas configurações para todos os visitantes?')) { botao.disabled = false; return; }
-                const sb = await PORTAL.cliente();
+                const sb = await EDICAO.cliente();
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session) throw new Error('Sua sessão expirou. Entre de novo.');
                 const { error } = await sb.from('site_edicoes').insert({ pagina: '_config', conteudo: c, autor: session.user.id, autor_email: session.user.email });
@@ -395,7 +395,7 @@
         if (!caixa.hidden) { caixa.hidden = true; return; }
         caixa.hidden = false;
         caixa.replaceChildren(el('p', { textContent: 'Carregando…' }));
-        const sb = await PORTAL.cliente();
+        const sb = await EDICAO.cliente();
         const { data, error } = await sb.from('site_edicoes').select('id, criado_em, autor_email, conteudo').eq('pagina', '_config').order('id', { ascending: false }).limit(15);
         if (error) { caixa.replaceChildren(el('p', { textContent: 'Não foi possível carregar o histórico.' })); return; }
         const quando = (d) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });

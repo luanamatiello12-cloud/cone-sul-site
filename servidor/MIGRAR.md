@@ -60,14 +60,16 @@ O ambiente onde eu trabalho só acessa endereços liberados. No menu do ambiente
    Depois ligo o HTTPS no GitHub Pages (pode levar algumas horas para valer).
 6. Passo as edições que estão só no navegador de vocês (botão "Baixar edições")
    para o banco, como primeira versão publicada.
-7. Coloco a equipe na tabela `equipe` (cada pessoa precisa ter criado a conta pelo
-   site antes, em "Faça parte").
+7. Crio as contas da equipe (separadas das de mantenedor, sem passar pelo
+   "Faça parte") e passo a cada pessoa o endereço `editar.html` e uma senha
+   provisória, que ela troca no primeiro acesso.
 8. Teste de ponta a ponta: login, níveis, importação com um relatório de teste,
    envio de acesso pelo WhatsApp, troca de senha, edição e publicação, histórico.
 
 ## 4. Depois da migração
 - As alterações no site ficam em **`editar.html`** (endereço só da equipe, fora do
-  menu e separado da Área do Mantenedor). Quem entra ali e está na tabela `equipe` vê a
+  menu e separado da Área do Mantenedor: login próprio, e conta da equipe não entra no
+  portal). Quem entra ali e está na tabela `equipe` vê a
   barra **Editar** em todas as páginas; os visitantes nunca veem.
 - **Publicar** muda a página para todos; **Histórico** volta a uma versão anterior.
 - Atualizar a Política de Privacidade e os Termos de Uso (o site passa a guardar

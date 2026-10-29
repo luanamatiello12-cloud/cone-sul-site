@@ -105,8 +105,12 @@ supabase secrets set MERCADOPAGO_ACCESS_TOKEN=... # ou Mercado Pago
 As chaves ficam só nos *secrets* do Supabase, **nunca** no código do site.
 
 ### 3. Equipe
-Quem vai importar o relatório cria a conta pelo site (Faça parte) e é incluído na tabela
-`equipe` (comando no fim do `schema.sql`).
+A equipe tem acesso **próprio e separado** da Área do Mantenedor: entra só por
+`editar.html`, com uma sessão que não se mistura com a de mantenedor, e uma conta da
+equipe é recusada no portal. A conta **não** é criada pelo "Faça parte": é criada no
+Supabase (**Authentication > Users > Add user > Create new user**, com senha provisória
+e *Auto Confirm User*) e incluída na tabela `equipe` (comando junto da tabela, no
+`schema.sql`). Quem também é mantenedor usa outro e-mail para isso.
 
 ### 4. Plataforma de pagamento (quando houver)
 - Criar a contribuição mensal (assinatura) de cada plano e colar os links em

@@ -105,16 +105,34 @@ grant select on public.mantenedores to authenticated;
 grant update (nome, telefone, nascimento, naturalidade, moradia, cristao, congrega, igreja, conferido, senha_provisoria)
     on public.mantenedores to authenticated;
 
--- ---------- Equipe (pagina importar.html) ----------
--- Contas que podem importar o relatorio do Eklesia. Para incluir alguem:
--- a pessoa cria a conta pelo site e, no SQL Editor:
+-- ---------- Equipe (editar.html e importar.html) ----------
+-- Contas que alteram o site e importam o relatorio do Eklesia. Sao contas
+-- separadas das de mantenedor: nao passam pelo "Faca parte", nao tem
+-- cadastro em "mantenedores" e nao entram na Area do Mantenedor. Quem e
+-- das duas coisas usa um e-mail para cada. Para incluir alguem:
+-- 1. Authentication > Users > Add user > Create new user: e-mail, uma senha
+--    provisoria e "Auto Confirm User" marcado;
+-- 2. no SQL Editor:
 --   insert into public.equipe (id, nome)
 --   select id, 'Nome da pessoa' from auth.users where email = 'pessoa@exemplo.com';
+-- A pessoa entra em editar.html e troca a senha em "Sua senha".
 create table if not exists public.equipe (
     id    uuid primary key references auth.users (id) on delete cascade,
     nome  text
 );
 alter table public.equipe enable row level security;   -- so o servidor le
+
+-- Toda conta nova ganha linha em "mantenedores" (gatilho ao_criar_conta);
+-- ao entrar na equipe, essa linha sai
+create or replace function public.equipe_sem_cadastro()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+    delete from public.mantenedores where id = new.id;
+    return new;
+end $$;
+drop trigger if exists equipe_sem_cadastro on public.equipe;
+create trigger equipe_sem_cadastro after insert on public.equipe
+    for each row execute function public.equipe_sem_cadastro();
 
 -- ---------- Edicao do site (botao Editar > Publicar) ----------
 -- Cada "Publicar" grava uma versao nova da pagina; a mais recente e a que
