@@ -3648,3 +3648,14 @@ body.modo-edicao img[data-img] { cursor: pointer; }
         url('img/mosaico-missao.jpg?v=2') center / cover no-repeat,
         var(--verde-900);
 }
+
+/* Arcos do topo somem aos poucos antes da borda de baixo (sem a linha reta
+   de corte onde o topo encontra a secao seguinte) */
+.hero::before {
+    -webkit-mask-image: radial-gradient(circle at 88% 115%, #000 0, #000 35%, transparent 70%),
+                        linear-gradient(to bottom, #000 0, #000 30%, transparent 82%);
+    -webkit-mask-composite: source-in;
+            mask-image: radial-gradient(circle at 88% 115%, #000 0, #000 35%, transparent 70%),
+                        linear-gradient(to bottom, #000 0, #000 30%, transparent 82%);
+            mask-composite: intersect;
+}
