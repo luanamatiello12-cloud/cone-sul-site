@@ -6,7 +6,8 @@
    - territorios.geojson: os seis territorios em destaque
        PR, SC, RS: uniao dos municipios da malha do IBGE
        PY, AR, CL: Natural Earth 1:10m
-   - fundo: mapa CARTO Voyager (dados OpenStreetMap), carregado da rede.
+   - fundo: imagem de satelite Esri World Imagery, carregada da rede e
+     escurecida no CSS.
      (referencia.geojson, os demais paises em tom neutro, nao e mais usado:
      fica guardado para o caso de voltar ao mapa sem fundo)
 
@@ -135,19 +136,17 @@
     const fotosProntas = local => (local.fotos && local.fotos.length) || local._pronto;
 
     // ---------- Estilos das camadas ----------
-    // Contorno claro e fino, que engrossa ao passar o mouse e ao escolher;
-    // cantos arredondados para a linha ficar suave
-    // Sobre o mapa de fundo: os territorios so contornados em verde; ao
-    // passar o mouse ganham um veu leve; o escolhido fica destacado
+    // Sobre o satelite escuro: os territorios com contorno dourado; ao
+    // passar o mouse ganham um veu dourado leve; o escolhido, um pouco mais
+    const DOURADO = '#e9c46a';
     const estilo = (t, modo) => ({
-        color: '#1d4a33',
-        weight: modo === 'selecionado' ? 3 : modo === 'hover' ? 2.2 : 1.6,
-        opacity: modo === 'selecionado' ? 1 : 0.8,
-        dashArray: modo === 'normal' ? '6 4' : null,
+        color: DOURADO,
+        weight: modo === 'selecionado' ? 2.6 : modo === 'hover' ? 2 : 1.3,
+        opacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.95 : 0.75,
         lineJoin: 'round',
         lineCap: 'round',
-        fillColor: '#2f6b48',
-        fillOpacity: modo === 'selecionado' ? 0.16 : modo === 'hover' ? 0.08 : 0
+        fillColor: DOURADO,
+        fillOpacity: modo === 'selecionado' ? 0.18 : modo === 'hover' ? 0.1 : 0.02
     });
 
     function aplicarEstilo(id) {
@@ -229,18 +228,56 @@
     const REGIAO = L.latLngBounds([[-55.9, -75.8], [-19.2, -47.9]]);
     map.fitBounds(REGIAO, { padding: [16, 16], animate: false });
 
-    // Mapa de verdade por baixo (ruas, cidades, rios), como o Google Maps:
-    // CARTO Voyager, com dados do OpenStreetMap, carregado pelo navegador de
-    // quem visita. Os territorios vem por cima, so contornados.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
+    // Fundo: imagem de satelite (Esri World Imagery), carregada pelo
+    // navegador de quem visita e escurecida no CSS (.leaflet-tile-pane) para
+    // os tons do site. Por cima: contornos dourados, rotas tracejadas da
+    // sede ate os paises e os nomes em branco
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-        detectRetina: false,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+        attribution: 'Imagens &copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics'
     }).addTo(map);
-    map.attributionControl.addAttribution('Limites: IBGE');
+    map.attributionControl.addAttribution('Limites: IBGE, Natural Earth');
 
-    // Os nomes de paises, estados e cidades ja vem no mapa de fundo
+    // Rotas da sede (Chapeco) ate os paises de implantacao: curvas
+    // tracejadas, com um ponto em cada ponta (decorativas, sem clique)
+    const SEDE = [-27.1004, -52.6152];
+    const ROTAS = [
+        { ate: [-23.9, -57.2], curva: 0.25 },          // Paraguai
+        { ate: [-34.6, -63.8], curva: -0.18 },        // Argentina
+        { ate: [-31.0, -70.9], curva: 0.22 }          // Chile
+    ];
+    // Curva entre dois pontos: o meio e empurrado para o lado
+    function curva(de, ate, forca) {
+        const [la1, lo1] = de, [la2, lo2] = ate;
+        const meio = [(la1 + la2) / 2 + (lo2 - lo1) * forca, (lo1 + lo2) / 2 - (la2 - la1) * forca];
+        const pontos = [];
+        for (let k = 0; k <= 40; k++) {
+            const t = k / 40, u = 1 - t;
+            pontos.push([u * u * la1 + 2 * u * t * meio[0] + t * t * la2, u * u * lo1 + 2 * u * t * meio[1] + t * t * lo2]);
+        }
+        return pontos;
+    }
+    const camadaRotas = L.layerGroup().addTo(map);
+    ROTAS.forEach(r => {
+        L.polyline(curva(SEDE, r.ate, r.curva), { color: DOURADO, weight: 2, opacity: 0.85, dashArray: '7 7', lineCap: 'round', interactive: false }).addTo(camadaRotas);
+        L.circleMarker(r.ate, { radius: 5, color: '#0e2218', weight: 1.5, fillColor: DOURADO, fillOpacity: 1, interactive: false }).addTo(camadaRotas);
+    });
+    L.circleMarker(SEDE, { radius: 7, color: '#0e2218', weight: 2, fillColor: DOURADO, fillOpacity: 1, interactive: false }).addTo(camadaRotas);
+
+    // Nomes em branco (o satelite nao traz nomes)
+    const ROTULOS = [
+        { txt: 'Paraguai', em: [-22.6, -58.6] },
+        { txt: 'Argentina', em: [-37.6, -65.6] },
+        { txt: 'Chile', em: [-27.6, -70.0] },
+        { txt: 'Brasil', em: [-24.6, -51.4] },
+        { txt: 'Oceano Atlântico', em: [-41, -51], cls: 'oceano' },
+        { txt: 'Oceano Pacífico', em: [-40, -79.2], cls: 'oceano' }
+    ];
+    ROTULOS.forEach(r => L.marker(r.em, {
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({ className: 'rotulo-sat ' + (r.cls || ''), html: `<span>${r.txt}</span>`, iconSize: null })
+    }).addTo(map));
 
     // Reajusta o tamanho quando o container muda (responsivo)
     if ('ResizeObserver' in window) new ResizeObserver(() => map.invalidateSize()).observe(elMapa);
