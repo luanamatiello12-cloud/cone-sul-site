@@ -6,8 +6,10 @@
    - territorios.geojson: os seis territorios em destaque
        PR, SC, RS: uniao dos municipios da malha do IBGE
        PY, AR, CL: Natural Earth 1:10m
-   - referencia.geojson: demais paises da America do Sul e demais
-     estados do Brasil (Natural Earth 1:10m), em tom neutro
+   - fundo: imagem de satelite Esri World Imagery, carregada da rede e
+     escurecida no CSS.
+     (referencia.geojson, os demais paises em tom neutro, nao e mais usado:
+     fica guardado para o caso de voltar ao mapa sem fundo)
 
    Pins (opcional): se a pagina carregar mapa/locais.js, cada cidade
    vira um pin; pins proximos se agrupam (Leaflet.markercluster, em
@@ -134,19 +136,17 @@
     const fotosProntas = local => (local.fotos && local.fotos.length) || local._pronto;
 
     // ---------- Estilos das camadas ----------
-    // Contorno claro e fino, que engrossa ao passar o mouse e ao escolher;
-    // cantos arredondados para a linha ficar suave
-    // Todos os territorios no mesmo tom (sem uma cor para cada): creme
-    // discreto; ao passar o mouse clareia; o escolhido fica no verde-claro
-    // de destaque do site
+    // Sobre o satelite escuro: os territorios com contorno dourado; ao
+    // passar o mouse ganham um veu dourado leve; o escolhido, um pouco mais
+    const DOURADO = '#e9c46a';
     const estilo = (t, modo) => ({
-        color: modo === 'selecionado' ? '#c9d780' : '#fef5e2',
-        weight: modo === 'selecionado' ? 2 : modo === 'hover' ? 1.4 : 0.9,
-        opacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.75 : 0.45,
+        color: DOURADO,
+        weight: modo === 'selecionado' ? 2.6 : modo === 'hover' ? 2 : 1.3,
+        opacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.95 : 0.75,
         lineJoin: 'round',
         lineCap: 'round',
-        fillColor: modo === 'selecionado' ? '#c9d780' : '#fef5e2',
-        fillOpacity: modo === 'selecionado' ? 0.28 : modo === 'hover' ? 0.16 : 0.09
+        fillColor: DOURADO,
+        fillOpacity: modo === 'selecionado' ? 0.18 : modo === 'hover' ? 0.1 : 0.02
     });
 
     function aplicarEstilo(id) {
@@ -228,26 +228,55 @@
     const REGIAO = L.latLngBounds([[-55.9, -75.8], [-19.2, -47.9]]);
     map.fitBounds(REGIAO, { padding: [16, 16], animate: false });
 
-    // Sem mapa de ruas por baixo: o mar e o fundo verde do proprio mapa
-    // (CSS) e as terras vem dos GeoJSON, nas cores da identidade.
+    // Fundo: imagem de satelite (Esri World Imagery), carregada pelo
+    // navegador de quem visita e escurecida no CSS (.leaflet-tile-pane) para
+    // os tons do site. Por cima: contornos dourados, rotas tracejadas da
+    // sede ate os paises e os nomes em branco
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Imagens &copy; <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>, Maxar, Earthstar Geographics'
+    }).addTo(map);
     map.attributionControl.addAttribution('Limites: IBGE, Natural Earth');
 
-    // Rotulos fixos (paises vizinhos, oceanos e os territorios)
-    const ROTULOS = [
-        { txt: 'Argentina', em: [-37.6, -65.6], cls: 'pais' },
-        { txt: 'Paraguai', em: [-22.9, -59.4], cls: 'pais' },
-        { txt: 'Chile', em: [-31.5, -76.6], cls: 'pais lado' },
-        { txt: 'Uruguai', em: [-33.2, -55.6], cls: 'vizinho' },
-        { txt: 'Brasil', em: [-20.8, -52.5], cls: 'vizinho' },
-        { txt: 'Bolívia', em: [-20.4, -63.6], cls: 'vizinho' },
-        { txt: 'Oceano<br>Pacífico', em: [-49.5, -76.4], cls: 'oceano lado' },
-        { txt: 'Oceano Atlântico', em: [-41, -51], cls: 'oceano' }
+    // Rotas da sede (Chapeco) ate os paises de implantacao: curvas
+    // tracejadas, com um ponto em cada ponta (decorativas, sem clique)
+    const SEDE = [-27.1004, -52.6152];
+    const ROTAS = [
+        { ate: [-23.9, -57.2], curva: 0.25 },          // Paraguai
+        { ate: [-34.6, -63.8], curva: -0.18 },        // Argentina
+        { ate: [-31.0, -70.9], curva: 0.22 }          // Chile
     ];
+    // Curva entre dois pontos: o meio e empurrado para o lado
+    function curva(de, ate, forca) {
+        const [la1, lo1] = de, [la2, lo2] = ate;
+        const meio = [(la1 + la2) / 2 + (lo2 - lo1) * forca, (lo1 + lo2) / 2 - (la2 - la1) * forca];
+        const pontos = [];
+        for (let k = 0; k <= 40; k++) {
+            const t = k / 40, u = 1 - t;
+            pontos.push([u * u * la1 + 2 * u * t * meio[0] + t * t * la2, u * u * lo1 + 2 * u * t * meio[1] + t * t * lo2]);
+        }
+        return pontos;
+    }
+    const camadaRotas = L.layerGroup().addTo(map);
+    ROTAS.forEach(r => {
+        L.polyline(curva(SEDE, r.ate, r.curva), { color: DOURADO, weight: 2, opacity: 0.85, dashArray: '7 7', lineCap: 'round', interactive: false }).addTo(camadaRotas);
+        L.circleMarker(r.ate, { radius: 5, color: '#0e2218', weight: 1.5, fillColor: DOURADO, fillOpacity: 1, interactive: false }).addTo(camadaRotas);
+    });
+    L.circleMarker(SEDE, { radius: 7, color: '#0e2218', weight: 2, fillColor: DOURADO, fillOpacity: 1, interactive: false }).addTo(camadaRotas);
 
+    // Nomes em branco (o satelite nao traz nomes)
+    const ROTULOS = [
+        { txt: 'Paraguai', em: [-22.6, -58.6] },
+        { txt: 'Argentina', em: [-37.6, -65.6] },
+        { txt: 'Chile', em: [-27.6, -70.0] },
+        { txt: 'Brasil', em: [-24.6, -51.4] },
+        { txt: 'Oceano Atlântico', em: [-41, -51], cls: 'oceano' },
+        { txt: 'Oceano Pacífico', em: [-40, -79.2], cls: 'oceano' }
+    ];
     ROTULOS.forEach(r => L.marker(r.em, {
         interactive: false,
         keyboard: false,
-        icon: L.divIcon({ className: 'rotulo-mapa ' + r.cls, html: `<span>${r.txt}</span>`, iconSize: null })
+        icon: L.divIcon({ className: 'rotulo-sat ' + (r.cls || ''), html: `<span>${r.txt}</span>`, iconSize: null })
     }).addTo(map));
 
     // Reajusta o tamanho quando o container muda (responsivo)
@@ -510,14 +539,9 @@
         return r.json();
     });
 
-    Promise.all([carregar('mapa/referencia.geojson'), carregar('mapa/territorios.geojson')])
-        .then(([referencia, territorios]) => {
-            // Referencia neutra, por baixo e sem interacao
-            L.geoJSON(referencia, {
-                interactive: false,
-                smoothFactor: 1.5,
-                style: { color: '#fef5e2', weight: 0.6, opacity: 0.14, lineJoin: 'round', fill: false }
-            }).addTo(map);
+    carregar('mapa/territorios.geojson')
+        .then((territorios) => {
+            // (os paises vizinhos ja aparecem no mapa de fundo)
 
             // Os seis territorios
             L.geoJSON(territorios, {

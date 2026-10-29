@@ -3566,3 +3566,64 @@ body.modo-edicao img[data-img] { cursor: pointer; }
 /* Mapa sem cores por territorio: nomes claros sobre o fundo escuro */
 .rotulo-mapa.pais span { color: var(--creme); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
 .rotulo-mapa.pais.lado span { color: var(--creme); }
+
+/* ===== Mapa com fundo de mapa de verdade (CARTO / OpenStreetMap) =====
+   Volta a moldura (o fundo e claro) e sai o esfumacado das bordas */
+.mapa-leaflet,
+.mapa-leaflet.leaflet-container {
+    background: #f2efe9 !important;
+    border: 1px solid rgba(201, 215, 128, 0.35);
+    border-radius: 10px;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4);
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+}
+.mapa-leaflet .leaflet-control-zoom { margin: 12px 0 0 12px !important; }
+.mapa-leaflet .leaflet-control-attribution { margin: 0 !important; background: rgba(255, 255, 255, 0.8); color: #555; }
+.mapa-leaflet .leaflet-control-attribution a { color: #2f6b48; }
+
+/* ===== Mapa em satelite escuro, com contornos e rotas douradas =====
+   Sem moldura; bordas somem no fundo da secao */
+.mapa-leaflet,
+.mapa-leaflet.leaflet-container {
+    background: #0b1d14 !important;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%),
+                        linear-gradient(to bottom, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%) !important;
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%),
+                linear-gradient(to bottom, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%) !important;
+    mask-composite: intersect;
+}
+/* Satelite escurecido e puxado para o verde e o dourado */
+.mapa-leaflet .leaflet-tile-pane { filter: brightness(0.62) contrast(1.15) saturate(0.7) sepia(0.28) hue-rotate(28deg); }
+.mapa-leaflet .leaflet-control-zoom { margin: 52px 0 0 52px !important; }
+.mapa-leaflet .leaflet-control-attribution { margin: 0 52px 46px 0 !important; background: rgba(11, 29, 20, 0.6); color: rgba(254, 245, 226, 0.6); }
+.mapa-leaflet .leaflet-control-attribution a { color: var(--areia); }
+.rotulo-sat { pointer-events: none; }
+.rotulo-sat span {
+    display: block;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0, 0, 0, 0.5);
+}
+.rotulo-sat.oceano span { font-size: 0.68rem; font-weight: 500; font-style: italic; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(254, 245, 226, 0.55); }
+@media (max-width: 640px) {
+    .mapa-leaflet,
+    .mapa-leaflet.leaflet-container {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%),
+                            linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%) !important;
+        mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%),
+                    linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%) !important;
+    }
+    .mapa-leaflet .leaflet-control-zoom { margin: 20px 0 0 20px !important; }
+    .mapa-leaflet .leaflet-control-attribution { margin: 0 18px 16px 0 !important; }
+    .rotulo-sat.oceano { display: none; }
+}
