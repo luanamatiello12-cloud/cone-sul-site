@@ -4,10 +4,10 @@
    o menu seja editado em um lugar so.
    ========================================================= */
 
-// ---------- Contato (trocar quando houver dados reais) ----------
+// ---------- Contato (WhatsApp e site da igreja: trocar quando houver) ----------
 const CONTATO = {
-    email: 'contato@exemplo.com.br',
-    instagram: '#',
+    email: 'conesul.missoes@gmail.com',
+    instagram: 'https://www.instagram.com/conesul.missoes/',
     whatsapp: '#',
     igreja: '#'
 };
@@ -129,6 +129,9 @@ function atualizarContatosNaTela() {
     document.querySelectorAll('[data-contato]').forEach(a => {
         const k = a.dataset.contato;
         a.href = k === 'email' ? 'mailto:' + CONTATO.email : CONTATO[k];
+        // Redes e sites abrem em outra aba (so quando ja tem endereco)
+        if (k !== 'email' && CONTATO[k] !== '#') { a.target = '_blank'; a.rel = 'noopener'; }
+        else a.removeAttribute('target');
     });
 }
 
@@ -266,6 +269,7 @@ function montarRodape() {
 
 document.body.insertAdjacentHTML('afterbegin', SPRITE_BANDEIRAS + montarCabecalho());
 document.body.insertAdjacentHTML('beforeend', montarRodape());
+atualizarContatosNaTela();
 
 // Menu recolhido no celular
 const nav = document.querySelector('nav');
@@ -465,15 +469,15 @@ document.querySelectorAll('.filtro-categorias button').forEach(botao => {
 const NIVEIS = [
     {
         id: 'expansor', nome: 'Expansor', minimo: 1000, faixa: 'A partir de R$ 1.000 por mês',
-        beneficios: ['Devocional on-line e devocional mensal', 'Links dos workshops on-line', 'Workshops presenciais', 'Acompanhamento pastoral', 'Divulgação da sua empresa']
+        beneficios: ['Devocionais on-line e mensais', 'Acesso presencial e on-line aos workshops', 'Divulgação da sua empresa', 'Acompanhamento pastoral']
     },
     {
         id: 'construtor', nome: 'Construtor', minimo: 500, faixa: 'De R$ 500 a R$ 1.000 por mês',
-        beneficios: ['Devocional on-line e devocional mensal', 'Links dos workshops on-line (transmissão, sem participação presencial)']
+        beneficios: ['Devocionais on-line e mensais', 'Links dos workshops']
     },
     {
         id: 'semeador', nome: 'Semeador', minimo: 0.01, faixa: 'De R$ 100 a R$ 500 por mês',
-        beneficios: ['Devocional on-line e devocional mensal']
+        beneficios: ['Devocionais on-line e mensais']
     }
 ];
 // Sem contribuicao ativa (cadastro feito pelo "Faca parte", por exemplo): sem nivel
@@ -601,15 +605,6 @@ const PORTAL = {
         const { error } = await sb.auth.signOut();
         // Sem resposta do servidor: ao menos apaga o login deste navegador
         if (error) await sb.auth.signOut({ scope: 'local' });
-    },
-
-    // Conteudo exclusivo (tabela conteudo_restrito): o banco so entrega a
-    // quem tem um dos niveis da linha; para os demais volta null
-    async conteudo(chave) {
-        const sb = await this.cliente();
-        const { data, error } = await sb.from('conteudo_restrito').select('conteudo').eq('chave', chave).maybeSingle();
-        if (error) throw error;
-        return data ? data.conteudo : null;
     },
 
     // Publicacoes da pagina de noticias (so para quem entrou)
@@ -822,42 +817,9 @@ if (PAGINA === 'portal') {
     window.addEventListener('hashchange', irParaCadastro);
 
     const telaLogin = document.getElementById('tela-login');
-    const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-expansores', 'tela-portal-summit', 'tela-portal-calendario', 'tela-portal', 'tela-portal-senha'].map(id => document.getElementById(id));
+    const telasPortal = ['tela-portal-topo', 'tela-portal-nivel', 'tela-portal-summit', 'tela-portal', 'tela-portal-senha'].map(id => document.getElementById(id));
     // Telas que dependem do nivel: so aparecem para quem tem esse nivel
-    const SO_NIVEL = { 'tela-portal-expansores': ['expansor'], 'tela-portal-summit': ['expansor'] };
-
-    // Beneficios dos Expansores: vem do banco, que so entrega a lista a quem
-    // tem o nivel Expansor (o HTML e publico e nao traz a lista). A secao so
-    // aparece com a lista carregada (na demonstracao, sem banco, fica escondida)
-    const secaoBeneficios = document.getElementById('tela-portal-expansores');
-    const listaBeneficios = document.getElementById('beneficios-expansores');
-    const avisoBeneficios = document.getElementById('beneficios-expansores-aviso');
-    let beneficiosCarregados = false;
-    async function carregarBeneficios() {
-        if (beneficiosCarregados) return;
-        const avisar = (texto) => { avisoBeneficios.hidden = !texto; avisoBeneficios.textContent = texto || ''; };
-        if (PORTAL.MODO_DEMO) return;
-        try {
-            const itens = await PORTAL.conteudo('beneficios-expansores');
-            if (!Array.isArray(itens)) throw new Error('sem acesso');
-            listaBeneficios.replaceChildren(...itens.map((b, i) => {
-                const li = novoElemento('li', 'beneficio');
-                li.append(novoElemento('span', 'beneficio-num', String(i + 1).padStart(2, '0')), novoElemento('h4', '', b.titulo));
-                (b.paragrafos || []).forEach(t => li.append(novoElemento('p', '', t)));
-                return li;
-            }));
-            beneficiosCarregados = true;
-            avisar('');
-            secaoBeneficios.hidden = false;
-        } catch {
-            avisar('Não foi possível carregar os benefícios agora. Recarregue a página.');
-            secaoBeneficios.hidden = false;
-        }
-    }
-    function esquecerBeneficios() {
-        beneficiosCarregados = false;
-        listaBeneficios.replaceChildren();
-    }
+    const SO_NIVEL = { 'tela-portal-summit': ['expansor'] };
 
     // Seu nivel, beneficios e resumo da contribuicao
     function mostrarNivel(usuario) {
@@ -882,9 +844,6 @@ if (PAGINA === 'portal') {
             const exige = SO_NIVEL[t.id];
             if (exige) t.hidden = !nivel || !exige.includes(nivel.id);
         });
-        secaoBeneficios.hidden = !beneficiosCarregados;
-        if (nivel && nivel.id === 'expansor') carregarBeneficios();
-        else esquecerBeneficios();
     }
 
     // Poe ou tira "Noticias" do menu conforme o login, sem recarregar
@@ -932,7 +891,6 @@ if (PAGINA === 'portal') {
         if (usuario) carregarFaixa();
         telaLogin.hidden = !!usuario;
         telasPortal.forEach(t => { t.hidden = !usuario; });
-        if (!usuario) esquecerBeneficios();
         if (usuario) {
             document.getElementById('usuario-email').textContent = usuario.nome || usuario.email;
             mostrarNivel(usuario);
@@ -1173,7 +1131,7 @@ const NAO_EDITAVEL = [
     '#barra-edicao', '#ctrl-bloco', '#ctrl-link', '.painel-historico', 'script', 'style', 'noscript', 'svg',
     'select', 'option', 'textarea', 'input', 'iframe', 'button', '.so-edicao',
     '#produtos', '.leaflet-container', '#mapa-leaflet', '.card-info', '#locais-lista', '#lista-territorios',
-    '#noticias-lista', '#noticias-aviso', '#faixa-noticias', '#faixa-noticias-aviso', '#beneficios-expansores', '#beneficios-expansores-aviso',
+    '#noticias-lista', '#noticias-aviso', '#faixa-noticias', '#faixa-noticias-aviso',
     '#nivel-titulo', '#nivel-resumo', '#nivel-beneficios', '#nivel-acoes', '#contribuicao-resumo',
     '#usuario-email', '#usuario-nivel', '#plano-nome', '#plano-faixa', '#plano-ja-email', '#cadastro-lead',
     '#senha-titulo', '#editor-email', '#editor-senha-titulo', '.form-retorno', '[role="status"]', '.importar-aviso',

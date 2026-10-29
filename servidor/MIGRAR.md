@@ -43,8 +43,7 @@ O ambiente onde eu trabalho só acessa endereços liberados. No menu do ambiente
 
 ## 3. O que eu faço
 1. Rodo o `supabase/schema.sql` (cadastros, níveis, equipe, edição do site,
-   armazenamento de imagens, notícias, conteúdo exclusivo, registro de atividades)
-   e o `supabase/conteudo-inicial.sql` (benefícios dos Expansores).
+   armazenamento de imagens, notícias, conteúdo exclusivo, registro de atividades).
 2. Publico as funções `importar-planilha` e `webhook-pagamento` e configuro os
    segredos delas (endereço do site, token do webhook).
 3. Configuro o login: endereço do site e de retorno, e-mails em português
