@@ -428,10 +428,14 @@ document.querySelectorAll('.filtro-categorias button').forEach(botao => {
         document.querySelectorAll('.filtro-categorias button').forEach(b => b.classList.remove('ativo'));
         botao.classList.add('ativo');
         const cat = botao.dataset.cat;
-        const grade = document.querySelector('.noticias-grid');
-        const aplicar = () => document.querySelectorAll('.noticia-card').forEach(card => {
-            card.style.display = (cat === 'todas' || card.dataset.cat === cat) ? '' : 'none';
-        });
+        const grade = document.getElementById('noticias-lista');
+        const aplicar = () => {
+            document.querySelectorAll('#noticias-lista .noticia-card').forEach(card => {
+                card.style.display = (cat === 'todas' || card.dataset.cat === cat) ? '' : 'none';
+            });
+            // A faixa volta ao comeco e as setas se ajustam ao que sobrou
+            if (grade) { grade.scrollLeft = 0; grade.dispatchEvent(new Event('scroll')); }
+        };
 
         if (MOVIMENTO_REDUZIDO || !grade) return aplicar();
         // Some, troca os cards e volta, em vez de pular de uma vez
@@ -730,6 +734,25 @@ function cartaoNoticia(n) {
     artigo.append(foto, corpo);
     return artigo;
 }
+// Faixa de noticias que desliza para o lado: setas (botoes [data-faixa]
+// com -1 ou 1) andam um cartao por vez e se apagam no comeco e no fim
+function ativarFaixa(faixa, botoes) {
+    const atualizar = () => {
+        const fim = faixa.scrollWidth - faixa.clientWidth - 2;
+        botoes.forEach(b => { b.disabled = b.dataset.faixa === '-1' ? faixa.scrollLeft <= 0 : faixa.scrollLeft >= fim; });
+    };
+    botoes.forEach(b => b.addEventListener('click', () => {
+        const cartao = [...faixa.children].find(c => c.offsetWidth);
+        const passo = (cartao?.offsetWidth || 300) + 24;
+        faixa.scrollBy({ left: Number(b.dataset.faixa) * passo, behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth' });
+    }));
+    faixa.addEventListener('scroll', atualizar, { passive: true });
+    // Recalcula quando a faixa aparece (pode comecar escondida) ou muda de tamanho
+    if ('ResizeObserver' in window) new ResizeObserver(atualizar).observe(faixa);
+    else window.addEventListener('resize', atualizar);
+    return atualizar;
+}
+
 // Demonstracao (sem banco): cards de exemplo, so para ver o layout
 const noticiasExemplo = () => Object.keys(CATEGORIAS_NOTICIAS).map(categoria => ({
     categoria, titulo: '[Título da publicação]', resumo: '[Resumo de duas ou três linhas da publicação.]'
@@ -738,11 +761,13 @@ const noticiasExemplo = () => Object.keys(CATEGORIAS_NOTICIAS).map(categoria => 
 if (PAGINA === 'noticias') {
     const lista = document.getElementById('noticias-lista');
     const aviso = document.getElementById('noticias-aviso');
+    const atualizarSetasNoticias = ativarFaixa(lista, [...document.querySelectorAll('[data-faixa]')]);
     const card = cartaoNoticia;
     const mostrarAviso = (texto) => { aviso.hidden = !texto; aviso.textContent = texto || ''; };
 
     if (PORTAL.MODO_DEMO) {
         lista.replaceChildren(...noticiasExemplo().map(card));
+        atualizarSetasNoticias();
         mostrarAviso('Modelo de layout. Com as contas ligadas, as publicações vêm do banco de dados e só aparecem para quem entrou na Área do Mantenedor.');
     } else {
         PORTAL.iniciar()
@@ -753,6 +778,7 @@ if (PAGINA === 'noticias') {
             .then(itens => {
                 if (!itens) return;
                 lista.replaceChildren(...itens.map(card));
+                atualizarSetasNoticias();
                 mostrarAviso(itens.length ? '' : 'Ainda não há publicações. Volte em breve.');
             })
             .catch(() => mostrarAviso('Não foi possível carregar as publicações agora. Recarregue a página.'));
@@ -872,22 +898,7 @@ if (PAGINA === 'portal') {
         }
         atualizarSetas();
     }
-    function atualizarSetas() {
-        const fim = faixa.scrollWidth - faixa.clientWidth - 2;
-        document.querySelectorAll('[data-faixa]').forEach(b => {
-            b.disabled = b.dataset.faixa === '-1' ? faixa.scrollLeft <= 0 : faixa.scrollLeft >= fim;
-        });
-    }
-    if (faixa) {
-        document.querySelectorAll('[data-faixa]').forEach(b => b.addEventListener('click', () => {
-            const passo = (faixa.firstElementChild?.offsetWidth || 300) + 24;
-            faixa.scrollBy({ left: Number(b.dataset.faixa) * passo, behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth' });
-        }));
-        faixa.addEventListener('scroll', atualizarSetas, { passive: true });
-        // Recalcula quando a faixa aparece (a tela comeca escondida) ou muda de tamanho
-        if ('ResizeObserver' in window) new ResizeObserver(atualizarSetas).observe(faixa);
-        else window.addEventListener('resize', atualizarSetas);
-    }
+    const atualizarSetas = faixa ? ativarFaixa(faixa, [...document.querySelectorAll('[data-faixa]')]) : () => {};
 
     const mostrar = (usuario, animar = false) => {
         atualizarMenu(!!usuario);
