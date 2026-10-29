@@ -3528,3 +3528,38 @@ body.modo-edicao img[data-img] { cursor: pointer; }
     border-left: 3px solid var(--areia);
 }
 .leaflet-tooltip.mapa-dica::before { display: none; }
+
+/* Mapa sem moldura e sem fundo: os territorios ficam soltos sobre o fundo
+   da secao; os vizinhos so com um contorno leve */
+.mapa-leaflet,
+.mapa-leaflet.leaflet-container {
+    background: transparent !important;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+.mapa-leaflet .leaflet-control-attribution { background: transparent; }
+.mapa-leaflet .leaflet-bar { box-shadow: none !important; border: 1px solid rgba(201, 215, 128, 0.35) !important; }
+.rotulo-mapa.vizinho span { color: rgba(254, 245, 226, 0.35); }
+/* Bordas esfumacadas: ao aproximar, o mapa se mistura com o fundo em vez
+   de terminar numa linha reta. Zoom e creditos ficam fora da faixa que some */
+.mapa-leaflet {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%),
+                        linear-gradient(to bottom, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%),
+                linear-gradient(to bottom, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
+    mask-composite: intersect;
+}
+.mapa-leaflet .leaflet-control-zoom { margin: 44px 0 0 44px !important; }
+.mapa-leaflet .leaflet-control-attribution { margin: 0 44px 40px 0 !important; }
+@media (max-width: 640px) {
+    .mapa-leaflet {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%),
+                            linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%),
+                    linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+    }
+    .mapa-leaflet .leaflet-control-zoom { margin: 20px 0 0 20px !important; }
+    .mapa-leaflet .leaflet-control-attribution { margin: 0 18px 16px 0 !important; }
+}
