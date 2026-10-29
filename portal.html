@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Mantenedor | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=72">
+    <link rel="stylesheet" href="styles.css?v=73">
 </head>
 <body data-pagina="portal">
 
@@ -137,12 +137,20 @@
                 <p>Este é o seu espaço para acompanhar o desenvolvimento do CONE SUL, conhecer os projetos em andamento e acessar informações exclusivas para mantenedores.</p>
             </div>
 
-            <div class="cards-grid" style="margin-top: 2.5rem;">
-                <div class="card-acao">
-                    <h3>Notícias do campo</h3>
-                    <p>Acompanhe os acontecimentos e as novidades da missão.</p>
-                    <a href="noticias.html" class="btn btn-secondary">Abrir</a>
+            <!-- NOTICIAS: faixa com as ultimas publicacoes, que desliza para o lado
+                 (vem do banco; app.js, carregarFaixa) -->
+            <div class="faixa-noticias-topo">
+                <h3 class="sub-titulo">Notícias do campo</h3>
+                <div class="faixa-controles">
+                    <button type="button" class="faixa-seta" data-faixa="-1" aria-label="Notícias anteriores">‹</button>
+                    <button type="button" class="faixa-seta" data-faixa="1" aria-label="Próximas notícias">›</button>
+                    <a href="noticias.html" class="btn btn-secondary">Ver todas</a>
                 </div>
+            </div>
+            <div class="noticias-faixa" id="faixa-noticias"></div>
+            <p class="conteudo-restrito-aviso" id="faixa-noticias-aviso" hidden></p>
+
+            <div class="cards-grid" style="margin-top: 3rem;">
                 <div class="card-acao">
                     <h3>Projetos missionários</h3>
                     <p>Conheça os projetos em desenvolvimento e os próximos passos planejados.</p>
@@ -193,6 +201,6 @@
         </div>
     </section>
 
-    <script src="app.js?v=55"></script>
+    <script src="app.js?v=56"></script>
 </body>
 </html>

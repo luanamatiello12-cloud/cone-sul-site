@@ -3436,3 +3436,22 @@ body.modo-edicao img[data-img] { cursor: pointer; }
     color: var(--verde-900);
     font-size: 0.66rem;
 }
+
+/* Area do Mantenedor: faixa de noticias que desliza para o lado */
+.faixa-noticias-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 2.5rem; }
+.faixa-noticias-topo .sub-titulo { margin: 0; }
+.faixa-controles { display: flex; align-items: center; gap: 0.5rem; }
+.faixa-seta {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 1px solid var(--verde-600); background: transparent; color: var(--verde-800);
+    font-size: 1.4rem; line-height: 1; cursor: pointer; transition: background 0.2s ease, opacity 0.2s ease;
+}
+.faixa-seta:hover:not(:disabled) { background: var(--verde-800); color: var(--areia-clara); }
+.faixa-seta:disabled { opacity: 0.3; cursor: default; }
+.noticias-faixa {
+    display: flex; gap: 1.5rem; margin-top: 1.5rem; padding-bottom: 0.8rem;
+    overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    scrollbar-width: thin; scrollbar-color: var(--verde-600) transparent;
+}
+.noticias-faixa .noticia-card { flex: 0 0 min(320px, 82%); scroll-snap-align: start; }
+@media (max-width: 640px) { .faixa-seta { display: none; } }
