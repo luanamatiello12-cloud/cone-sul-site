@@ -4,10 +4,10 @@
    o menu seja editado em um lugar so.
    ========================================================= */
 
-// ---------- Contato (trocar quando houver dados reais) ----------
+// ---------- Contato (WhatsApp e site da igreja: trocar quando houver) ----------
 const CONTATO = {
-    email: 'contato@exemplo.com.br',
-    instagram: '#',
+    email: 'conesul.missoes@gmail.com',
+    instagram: 'https://www.instagram.com/conesul.missoes/',
     whatsapp: '#',
     igreja: '#'
 };
@@ -129,6 +129,9 @@ function atualizarContatosNaTela() {
     document.querySelectorAll('[data-contato]').forEach(a => {
         const k = a.dataset.contato;
         a.href = k === 'email' ? 'mailto:' + CONTATO.email : CONTATO[k];
+        // Redes e sites abrem em outra aba (so quando ja tem endereco)
+        if (k !== 'email' && CONTATO[k] !== '#') { a.target = '_blank'; a.rel = 'noopener'; }
+        else a.removeAttribute('target');
     });
 }
 
@@ -266,6 +269,7 @@ function montarRodape() {
 
 document.body.insertAdjacentHTML('afterbegin', SPRITE_BANDEIRAS + montarCabecalho());
 document.body.insertAdjacentHTML('beforeend', montarRodape());
+atualizarContatosNaTela();
 
 // Menu recolhido no celular
 const nav = document.querySelector('nav');
