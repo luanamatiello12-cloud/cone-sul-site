@@ -513,7 +513,7 @@
             L.geoJSON(referencia, {
                 interactive: false,
                 smoothFactor: 1.5,
-                style: { color: '#3f6a4f', weight: 0.7, opacity: 0.7, lineJoin: 'round', fillColor: '#1c3a2a', fillOpacity: 1 }
+                style: { color: '#fef5e2', weight: 0.6, opacity: 0.14, lineJoin: 'round', fill: false }
             }).addTo(map);
 
             // Os seis territorios
