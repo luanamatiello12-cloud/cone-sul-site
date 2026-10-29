@@ -950,31 +950,51 @@ if (PAGINA === 'fazer-parte') {
 
 /* =========================================================
    MODO EDICAO
-   Edita textos, oculta/mostra/duplica blocos e troca imagens.
+   - Textos: qualquer texto visivel (titulos, paragrafos, botoes, numeros,
+     menu e rodape). Negrito e italico (Ctrl+B / Ctrl+I) ficam; o resto da
+     formatacao e limpo ao salvar.
+   - Links: clicar num link ou botao mostra para onde ele leva, para trocar.
+   - Blocos: ocultar, apagar, subir, descer, duplicar e adicionar secoes
+     novas de texto, imagem ou video (YouTube) abaixo de uma secao.
+   - Imagens: clicar numa imagem troca o arquivo.
 
-   - Demonstracao (sem CONTAS): o botao aparece para qualquer visitante e
-     as mudancas ficam SO NO NAVEGADOR de quem editou; "Baixar edicoes"
-     gera o arquivo para publicar.
-   - Contas ligadas (CONTAS preenchido): o botao so aparece para quem esta
-     na tabela "equipe". "Publicar" grava no banco (site_edicoes) e a
-     mudanca vale para todos os visitantes; "Historico" volta a uma versao
-     anterior. Enquanto nao publica, o que foi editado fica como rascunho
-     neste navegador. Imagens novas vao para o armazenamento "site".
-   Estado de uma pagina: { textos, clones, ocultos, imagens }.
+   Quem edita: so quem entrou por editar.html (com contas ligadas, e esta
+   na tabela "equipe").
+   - Demonstracao (sem CONTAS): as mudancas ficam SO NO NAVEGADOR de quem
+     editou; "Baixar edicoes" gera o arquivo para publicar.
+   - Contas ligadas: rascunho neste navegador ate "Publicar", que grava no
+     banco (site_edicoes) e vale para todos; "Historico" volta a uma versao.
+
+   Menu e rodape sao os mesmos em todas as paginas: o que muda neles fica
+   num estado proprio ("_geral"), aplicado no site inteiro.
+   Estado de uma pagina (versao 2):
+     { versao, textos: {chave: html}, links: {chave: href}, clones, novos,
+       ordem, ocultos, apagados, imagens }
    ========================================================= */
 let editMode = false;
 
-const EDITAVEIS = [
-    '.hero h1', '.hero-lead', '.hero-complemento', 'section h2', '.sec-intro', '.sub-titulo', '.sub-intro',
-    '.texto-bloco p', '.destaque', '.mvp-item h4', '.mvp-item p', '.territorio p',
-    '.etapa h3', '.etapa p', '.barreira h3', '.barreira > p',
-    '.card-acao h3', '.card-acao p', '.beneficio h4', '.beneficio p',
-    '.campanha-card h3', '.campanha-lema', '.campanha-desc', '.campanha-lista li', '.campanha-beneficios li',
-    '.agenda-info h4', '.agenda-info p', '.meses-lista li', '.lista-destaques li', '.logo'
+// Areas que scripts preenchem ou trocam sozinhos (mapa, loja, noticias,
+// dados do login...): editar ali nao adiantaria
+const NAO_EDITAVEL = [
+    '#barra-edicao', '#ctrl-bloco', '#ctrl-link', '.painel-historico', 'script', 'style', 'noscript', 'svg',
+    'select', 'option', 'textarea', 'input', 'iframe', 'button', '.so-edicao',
+    '#produtos', '.leaflet-container', '#mapa-leaflet', '.card-info', '#locais-lista', '#lista-territorios',
+    '#noticias-lista', '#noticias-aviso', '#beneficios-expansores', '#beneficios-expansores-aviso',
+    '#nivel-titulo', '#nivel-resumo', '#nivel-beneficios', '#nivel-acoes', '#contribuicao-resumo',
+    '#usuario-email', '#usuario-nivel', '#plano-nome', '#plano-faixa', '#plano-ja-email', '#cadastro-lead',
+    '#senha-titulo', '#editor-email', '#editor-senha-titulo', '.form-retorno', '[role="status"]', '.importar-aviso',
+    '.bandeira-sprite'
 ].join(', ');
+// Formatacao que pode ficar dentro de um texto editado: negrito, italico,
+// quebra de linha, o destaque colorido dos titulos e a setinha dos botoes
+const TAGS_TEXTO = new Set(['B', 'STRONG', 'I', 'EM', 'BR']);
+const spanPermitido = (el) => el.tagName === 'SPAN'
+    && [...el.attributes].every(a => (a.name === 'class' && a.value === 'realce') || (a.name === 'aria-hidden' && a.value === 'true'))
+    && el.attributes.length > 0;
+const formatacao = (el) => TAGS_TEXTO.has(el.tagName) || spanPermitido(el);
 
-// Blocos que o modo edicao deixa ocultar, mostrar e duplicar.
-// SECOES: so ocultar/mostrar. ITENS: tambem duplicar (e remover a copia).
+// Blocos que o modo edicao deixa mover, ocultar e apagar.
+// SECOES: tambem recebem secoes novas abaixo. ITENS: tambem duplicar.
 const SECOES = 'section';
 const ITENS = [
     '.card-acao', '.beneficio', '.mvp-item', '.etapa', '.barreira', '.campanha-card', '.pilar',
@@ -983,20 +1003,64 @@ const ITENS = [
 ].join(', ');
 
 const PAGINA_ARQUIVO = location.pathname.split('/').pop() || 'index.html';
-const CHAVE_EDICOES = 'conesul-edicoes::' + PAGINA_ARQUIVO;
-const elementosEditaveis = () => [...document.querySelectorAll(EDITAVEIS)];
-const blocos = () => [...document.querySelectorAll(`${SECOES}, ${ITENS}`)].filter(el => !el.closest('header, footer'));
-// Imagens fixas da pagina (as das listas montadas por script, como mapa e
-// loja, ficam de fora: essas mudam pelos dados de cada lista)
-const imagensEditaveis = () => [...document.querySelectorAll('section img[data-img]')];
+const GERAL = '_geral';
+const chaveArmazenada = (escopo) => 'conesul-edicoes::' + (escopo === 'g' ? GERAL : PAGINA_ARQUIVO);
+const CHAVE_EDICOES = chaveArmazenada('p');
+const blocos = () => [...document.querySelectorAll(`${SECOES}, ${ITENS}`)].filter(el => !el.closest('header, footer, ' + NAO_EDITAVEL));
+const acharBloco = chave => blocos().find(el => el.dataset.bloco === chave);
+const escopoDe = (el) => el.closest('header, footer') ? 'g' : 'p';
 
-function lerEdicoes() {
-    try { return JSON.parse(localStorage.getItem(CHAVE_EDICOES)) || {}; } catch { return {}; }
+function lerEdicoes(escopo = 'p') {
+    try { return JSON.parse(localStorage.getItem(chaveArmazenada(escopo))) || {}; } catch { return {}; }
 }
 
-// Cada bloco publicado ganha uma chave estavel: o comeco do seu texto
-// mais a ordem entre blocos de texto igual. Assim acrescentar ou
-// reordenar blocos na pagina nao faz uma edicao cair no lugar errado.
+// ---------- Limpeza do que vem salvo (o banco e publico para leitura) ----------
+// Texto: so negrito, italico e quebra de linha; todo o resto vira texto
+function limparHtml(html) {
+    const modelo = document.createElement('template');
+    modelo.innerHTML = String(html ?? '');
+    const limpar = (no) => {
+        [...no.childNodes].forEach(filho => {
+            if (filho.nodeType === Node.TEXT_NODE) return;
+            if (filho.nodeType !== Node.ELEMENT_NODE || /^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT|IFRAME|OBJECT|SVG|MATH)$/i.test(filho.tagName)) { filho.remove(); return; }
+            limpar(filho);
+            if (spanPermitido(filho)) return;
+            if (TAGS_TEXTO.has(filho.tagName)) {
+                [...filho.attributes].forEach(a => filho.removeAttribute(a.name));
+            } else {
+                // Tag nao permitida (div do Enter, span colado...): fica so o conteudo
+                if (/^(DIV|P|LI)$/.test(filho.tagName) && filho.previousSibling) filho.before(document.createElement('br'));
+                filho.replaceWith(...filho.childNodes);
+            }
+        });
+    };
+    limpar(modelo.content);
+    return modelo.innerHTML.replace(/(<br>)+$/, '');
+}
+// Link: endereco do site, http(s), e-mail, telefone ou ancora. Nunca "javascript:"
+function linkSeguro(href) {
+    const v = String(href ?? '').trim();
+    if (!v) return '';
+    // Caminho dentro do site (contato.html, docs/x.pdf, #campanha...); "//" levaria para fora
+    if (!v.startsWith('//') && /^(#[\w-]*|[\w./-]+(\?[^\s"'<>]*)?(#[\w-]*)?)$/.test(v)) return v;
+    try {
+        const u = new URL(v);
+        return /^(https?|mailto|tel):$/.test(u.protocol) ? u.href : '';
+    } catch { return ''; }
+}
+// Imagem: endereco http(s) ou imagem embutida (demonstracao)
+const imagemSegura = (src) => /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/=]+$/i.test(src) ? src : enderecoSeguro(src);
+// Video do YouTube: o codigo de 11 caracteres, a partir de qualquer link
+function codigoYoutube(url) {
+    const v = String(url ?? '').trim();
+    if (/^[\w-]{11}$/.test(v)) return v;
+    const m = v.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/);
+    return m ? m[1] : '';
+}
+
+// ---------- Chaves estaveis ----------
+// Cada bloco: o comeco do seu texto mais a ordem entre blocos de texto
+// igual. Assim mudar a pagina nao faz uma edicao cair no lugar errado.
 const contagem = {};
 blocos().forEach(el => {
     const tipo = el.matches(ITENS) ? 'i' : 's';
@@ -1004,97 +1068,251 @@ blocos().forEach(el => {
     contagem[assinatura] = (contagem[assinatura] || 0) + 1;
     el.dataset.bloco = assinatura + '|' + contagem[assinatura];
 });
-const acharBloco = chave => blocos().find(el => el.dataset.bloco === chave);
 
-// Imagens: chave = arquivo original + ordem entre imagens do mesmo arquivo
+// Textos editaveis: elementos com texto proprio, so com formatacao simples
+// dentro, e que nao estao dentro de outro texto editavel
+function textosEm(raiz) {
+    const achados = [];
+    const visitar = (el) => {
+        if (el.matches(NAO_EDITAVEL)) return;
+        const textoProprio = [...el.childNodes].some(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+        if (textoProprio && [...el.querySelectorAll('*')].every(formatacao)) { achados.push(el); return; }
+        [...el.children].forEach(visitar);
+    };
+    [...raiz.children].forEach(visitar);
+    return achados;
+}
+const originais = new WeakMap();   // texto (html limpo) original de cada elemento
+function marcarTextos(raiz, prefixo) {
+    const vistos = {};
+    textosEm(raiz).forEach((el, i) => {
+        let chave;
+        if (prefixo) chave = prefixo + '>' + i;
+        else {
+            // Menu e rodape contam a parte: sao iguais em todas as paginas
+            const assinatura = el.textContent.replace(/\s+/g, ' ').trim().slice(0, 60);
+            const conta = escopoDe(el) + assinatura;
+            vistos[conta] = (vistos[conta] || 0) + 1;
+            chave = 't|' + assinatura + '|' + vistos[conta];
+        }
+        el.dataset.txt = chave;
+        if (!originais.has(el)) originais.set(el, limparHtml(el.innerHTML));
+    });
+}
+// Links: endereco original mais a ordem entre links iguais
+function marcarLinks(raiz, prefixo) {
+    const vistos = {};
+    [...raiz.querySelectorAll('a[href]')].forEach((a, i) => {
+        if (a.closest(NAO_EDITAVEL) || a.matches('[data-pagamento]')) return;
+        let chave;
+        if (prefixo) chave = prefixo + '>L' + i;
+        else {
+            const href = a.getAttribute('href');
+            const conta = escopoDe(a) + href;
+            vistos[conta] = (vistos[conta] || 0) + 1;
+            chave = 'l|' + href + '|' + vistos[conta];
+        }
+        a.dataset.link = chave;
+        if (!a.dataset.hrefOriginal) a.dataset.hrefOriginal = a.getAttribute('href');
+    });
+}
+// Imagens fixas: arquivo original + ordem entre imagens do mesmo arquivo
 const contagemImg = {};
 document.querySelectorAll('section img').forEach(img => {
-    if (img.closest('header, footer, .leaflet-container, #produtos')) return;
+    if (img.closest('header, footer, ' + NAO_EDITAVEL)) return;
     const arquivo = img.getAttribute('src') || '';
     contagemImg[arquivo] = (contagemImg[arquivo] || 0) + 1;
     img.dataset.img = arquivo + '|' + contagemImg[arquivo];
 });
+marcarTextos(document.body);
+marcarLinks(document.body);
 
-// Texto original de cada elemento editavel, para salvar so o que mudou
-const originais = new WeakMap();
-elementosEditaveis().forEach(el => originais.set(el, el.innerText));
+const elementosEditaveis = () => [...document.querySelectorAll('[data-txt]')];
+const imagensEditaveis = () => [...document.querySelectorAll('img[data-img]')];
 
-let clones = [];
+let clones = [];       // [{ id, de }]: copias de itens
+let novos = [];        // [{ id, depois, tipo, fundo, video }]: secoes novas
+let ordem = [];        // [{ bloco, antes | depois }]: blocos movidos, na ordem em que foram movidos
 let ocultos = new Set();
+let apagados = new Set();
 let imagens = {};
+let textosSalvos = { p: {}, g: {} };   // edicoes de texto que nao acharam lugar (preservadas)
 
 function duplicarBloco(origem, id) {
     const copia = origem.cloneNode(true);
     [copia, ...copia.querySelectorAll('*')].forEach(el => {
         el.classList.remove('revelar', 'visivel', 'bloco-alvo');
         el.removeAttribute('id');
+        el.removeAttribute('contenteditable');
         el.style.removeProperty('--atraso');
+        el.style.removeProperty('outline');
+        el.style.removeProperty('outline-offset');
+        delete el.dataset.txt;
+        delete el.dataset.link;
     });
     copia.dataset.bloco = 'c:' + id;
     copia.classList.remove('bloco-oculto');
     origem.after(copia);
-    // A copia herda o texto original de quem copiou (nao o editado)
-    const deOrigem = [...origem.querySelectorAll(EDITAVEIS)];
-    [...copia.querySelectorAll(EDITAVEIS)].forEach((el, i) => {
+    // A copia comeca com o texto original de quem copiou (nao o editado)
+    const deOrigem = textosEm(origem);
+    textosEm(copia).forEach((el, i) => {
         const orig = deOrigem[i];
-        if (orig && originais.has(orig)) originais.set(el, originais.get(orig));
-        else originais.set(el, el.innerText);
-        if (orig) el.innerText = originais.get(orig) ?? el.innerText;
+        if (orig && originais.has(orig)) el.innerHTML = originais.get(orig);
+        originais.set(el, limparHtml(el.innerHTML));
     });
+    marcarTextos(copia, 'c:' + id);
+    marcarLinks(copia, 'c:' + id);
     return copia;
 }
 
-// Aplica um estado salvo: 1) copias; 2) textos (so onde o original ainda
-// confere); 3) ocultos; 4) imagens trocadas
-function aplicarEstado(estado) {
-    estado = estado || {};
-    clones = (Array.isArray(estado.clones) ? estado.clones : []).filter(c => {
-        const origem = acharBloco(c.de);
-        if (!origem) return false;
-        duplicarBloco(origem, c.id);
-        return true;
-    });
-    if (estado.textos) {
-        const lista = elementosEditaveis();
-        lista.forEach((el, i) => {
-            const ed = estado.textos[i];
-            if (ed === undefined) return;
-            if (typeof ed === 'object' && ed.de === originais.get(el)) el.innerText = ed.para;
-            else if (typeof ed === 'string' && estado.total === lista.length) el.innerText = ed;
-        });
+// Secao nova (texto, imagem ou video) logo abaixo de outra secao
+const IMAGEM_VAZIA = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675"><rect width="100%" height="100%" fill="#e9e4d4"/>'
+    + '<text x="50%" y="50%" font-family="sans-serif" font-size="34" fill="#8a8670" text-anchor="middle">Clique para escolher a imagem</text></svg>');
+function criarSecaoNova(n) {
+    const ref = acharBloco(n.depois);
+    if (!ref) return null;
+    const sec = document.createElement('section');
+    sec.className = (n.fundo === 'escura' ? 'sec-escura' : 'sec-clara') + ' secao-nova secao-' + n.tipo;
+    sec.dataset.bloco = 'n:' + n.id;
+    const wrap = document.createElement('div');
+    wrap.className = 'wrap';
+    const titulo = Object.assign(document.createElement('h2'), { textContent: 'Novo título' });
+    if (n.tipo === 'texto') {
+        const texto = Object.assign(document.createElement('div'), { className: 'texto-bloco' });
+        texto.append(Object.assign(document.createElement('p'), { textContent: 'Escreva aqui o texto desta seção.' }));
+        wrap.append(titulo, texto);
+    } else if (n.tipo === 'imagem') {
+        const fig = document.createElement('figure');
+        fig.className = 'secao-nova-figura';
+        const img = Object.assign(document.createElement('img'), { src: IMAGEM_VAZIA, alt: '' });
+        img.dataset.img = 'n:' + n.id + '|img';
+        fig.append(img, Object.assign(document.createElement('figcaption'), { textContent: 'Legenda da imagem' }));
+        wrap.append(titulo, fig);
+    } else {
+        const caixa = document.createElement('div');
+        caixa.className = 'secao-nova-video';
+        const codigo = codigoYoutube(n.video);
+        if (codigo) {
+            const quadro = document.createElement('iframe');
+            quadro.src = `https://www.youtube-nocookie.com/embed/${codigo}`;
+            quadro.title = 'Vídeo';
+            quadro.loading = 'lazy';
+            quadro.allow = 'accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+            quadro.referrerPolicy = 'strict-origin-when-cross-origin';
+            caixa.append(quadro);
+        } else caixa.append(Object.assign(document.createElement('p'), { className: 'secao-nova-sem-video', textContent: 'Vídeo ainda não escolhido.' }));
+        const trocar = Object.assign(document.createElement('button'), { type: 'button', className: 'so-edicao', textContent: 'Trocar vídeo' });
+        trocar.dataset.trocarVideo = n.id;
+        wrap.append(titulo, caixa, trocar);
     }
-    ocultos = new Set(Array.isArray(estado.ocultos) ? estado.ocultos : []);
-    ocultos.forEach(chave => { const el = acharBloco(chave); if (el) el.classList.add('bloco-oculto'); });
-    imagens = estado.imagens && typeof estado.imagens === 'object' ? { ...estado.imagens } : {};
-    imagensEditaveis().forEach(img => { if (imagens[img.dataset.img]) img.src = imagens[img.dataset.img]; });
+    sec.append(wrap);
+    ref.after(sec);
+    marcarTextos(sec, 'n:' + n.id);
+    return sec;
 }
 
-// Estado atual da pagina (o que mudou em relacao ao original)
-function estadoAtual() {
-    const textos = {};
-    const lista = elementosEditaveis();
-    lista.forEach((el, i) => {
-        const de = originais.get(el);
-        if (de !== undefined && el.innerText !== de) textos[i] = { de, para: el.innerText };
-    });
-    ocultos = new Set([...ocultos].filter(acharBloco));   // descarta ocultos que ja nao existem
-    return { total: lista.length, textos, clones, ocultos: [...ocultos], imagens };
+// Move um bloco para antes ou depois de outro do mesmo grupo
+function moverBloco(op) {
+    const el = acharBloco(op.bloco);
+    const ref = acharBloco(op.antes || op.depois);
+    if (!el || !ref || el === ref || el.parentElement !== ref.parentElement) return false;
+    if (op.antes) ref.before(el); else ref.after(el);
+    return true;
 }
-const estadoVazio = (e) => !Object.keys(e.textos || {}).length && !(e.clones || []).length && !(e.ocultos || []).length && !Object.keys(e.imagens || {}).length;
+const irmaosBloco = (el) => [...el.parentElement.children].filter(f => f.dataset.bloco && blocos().includes(f));
+
+// Aplica um estado salvo: 1) copias e secoes novas; 2) ordem; 3) textos;
+// 4) links; 5) ocultos e apagados; 6) imagens
+function aplicarEstado(estado, escopo = 'p') {
+    estado = estado && typeof estado === 'object' ? estado : {};
+    if (escopo === 'p') {
+        clones = (Array.isArray(estado.clones) ? estado.clones : []).filter(c => {
+            const origem = acharBloco(c.de);
+            if (!origem || !/^[\w]+$/.test(c.id)) return false;
+            duplicarBloco(origem, c.id);
+            return true;
+        });
+        novos = (Array.isArray(estado.novos) ? estado.novos : []).filter(n =>
+            /^[\w]+$/.test(n.id) && ['texto', 'imagem', 'video'].includes(n.tipo) && criarSecaoNova(n));
+        ordem = (Array.isArray(estado.ordem) ? estado.ordem : []).filter(moverBloco);
+    }
+    // Textos. Formato antigo: { indice: { de, para } } com texto puro
+    const daqui = elementosEditaveis().filter(el => escopoDe(el) === escopo);
+    const textos = estado.textos && typeof estado.textos === 'object' ? estado.textos : {};
+    const restantes = {};
+    Object.entries(textos).forEach(([chave, valor]) => {
+        if (valor && typeof valor === 'object' && 'de' in valor) {
+            const el = daqui.find(e => !e.dataset.aplicado && e.innerText === valor.de);
+            if (el) { el.innerText = String(valor.para ?? ''); el.dataset.aplicado = '1'; }
+            return;
+        }
+        const el = daqui.find(e => e.dataset.txt === chave);
+        if (el) el.innerHTML = limparHtml(valor);
+        else restantes[chave] = valor;
+    });
+    daqui.forEach(el => delete el.dataset.aplicado);
+    textosSalvos[escopo] = restantes;
+    // Links
+    const links = estado.links && typeof estado.links === 'object' ? estado.links : {};
+    document.querySelectorAll('a[data-link]').forEach(a => {
+        if (escopoDe(a) !== escopo || !(a.dataset.link in links)) return;
+        const href = linkSeguro(links[a.dataset.link]);
+        if (href) a.setAttribute('href', href);
+    });
+    if (escopo !== 'p') return;
+    ocultos = new Set(Array.isArray(estado.ocultos) ? estado.ocultos : []);
+    ocultos.forEach(chave => { const el = acharBloco(chave); if (el) el.classList.add('bloco-oculto'); });
+    apagados = new Set(Array.isArray(estado.apagados) ? estado.apagados : []);
+    apagados.forEach(chave => { const el = acharBloco(chave); if (el) el.remove(); });
+    imagens = {};
+    const salvas = estado.imagens && typeof estado.imagens === 'object' ? estado.imagens : {};
+    imagensEditaveis().forEach(img => {
+        const src = salvas[img.dataset.img] && imagemSegura(salvas[img.dataset.img]);
+        if (src) { img.src = src; imagens[img.dataset.img] = src; }
+    });
+}
+
+// Estado atual (o que mudou em relacao ao original), de um escopo
+function estadoAtual(escopo = 'p') {
+    const textos = { ...textosSalvos[escopo] };
+    elementosEditaveis().forEach(el => {
+        if (escopoDe(el) !== escopo) return;
+        const atual = limparHtml(el.innerHTML);
+        if (atual !== originais.get(el)) textos[el.dataset.txt] = atual;
+        else delete textos[el.dataset.txt];
+    });
+    const links = {};
+    document.querySelectorAll('a[data-link]').forEach(a => {
+        if (escopoDe(a) === escopo && a.getAttribute('href') !== a.dataset.hrefOriginal) links[a.dataset.link] = a.getAttribute('href');
+    });
+    if (escopo !== 'p') return { versao: 2, textos, links };
+    ocultos = new Set([...ocultos].filter(acharBloco));   // descarta ocultos que ja nao existem
+    return { versao: 2, textos, links, clones, novos, ordem, ocultos: [...ocultos], apagados: [...apagados], imagens };
+}
+const estadoVazio = (e) => !Object.keys(e.textos || {}).length && !Object.keys(e.links || {}).length
+    && !(e.clones || []).length && !(e.novos || []).length && !(e.ordem || []).length
+    && !(e.ocultos || []).length && !(e.apagados || []).length && !Object.keys(e.imagens || {}).length;
 
 // ---------- Publicacao (contas ligadas) ----------
 const EDICAO = {
-    editor: false,          // conta logada esta na tabela "equipe"
-    publicadoId: null,      // versao publicada que esta no ar
-    rascunho: false,        // ha mudancas nao publicadas neste navegador
+    editor: false,                    // conta logada esta na tabela "equipe"
+    publicadoId: { p: null, g: null }, // versoes publicadas que estao no ar
+    rascunho: { p: false, g: false },  // ha mudancas nao publicadas neste navegador
     cabecalhos() { return { apikey: CONTAS.chavePublica, Authorization: 'Bearer ' + CONTAS.chavePublica }; },
 
-    // Versao publicada mais recente desta pagina (leitura publica, sem login)
+    // Versoes publicadas mais recentes desta pagina e do menu/rodape
+    // (leitura publica, sem login)
     async publicado() {
-        const url = `${CONTAS.url}/rest/v1/site_edicoes?pagina=eq.${encodeURIComponent(PAGINA_ARQUIVO)}&select=id,conteudo,criado_em&order=id.desc&limit=1`;
+        const lista = `(${[PAGINA_ARQUIVO, GERAL].map(p => `"${p}"`).join(',')})`;
+        const url = `${CONTAS.url}/rest/v1/site_edicoes?pagina=in.${encodeURIComponent(lista)}&select=id,pagina,conteudo,criado_em&order=id.desc&limit=40`;
         const r = await fetch(url, { headers: this.cabecalhos() });
         if (!r.ok) throw new Error('site_edicoes: HTTP ' + r.status);
-        return (await r.json())[0] || null;
+        const linhas = await r.json();
+        return {
+            p: linhas.find(l => l.pagina === PAGINA_ARQUIVO) || null,
+            g: linhas.find(l => l.pagina === GERAL) || null
+        };
     },
 
     // Ha alguem logado neste navegador? So entao vale carregar o cliente
@@ -1117,15 +1335,15 @@ const EDICAO = {
         return !!(await this.verificarEquipe());
     },
 
-    async publicar(estado) {
+    async publicar(estado, escopo = 'p') {
         const sb = await PORTAL.cliente();
         const { data: { session } } = await sb.auth.getSession();
         if (!session) throw new Error('Sua sessão expirou. Entre de novo em Alterações no site (editar.html).');
         const { data, error } = await sb.from('site_edicoes')
-            .insert({ pagina: PAGINA_ARQUIVO, conteudo: estado, autor: session.user.id, autor_email: session.user.email })
+            .insert({ pagina: escopo === 'g' ? GERAL : PAGINA_ARQUIVO, conteudo: estado, autor: session.user.id, autor_email: session.user.email })
             .select('id').single();
         if (error) throw new Error('Não foi possível publicar: ' + error.message);
-        this.publicadoId = data.id;
+        this.publicadoId[escopo] = data.id;
         return data.id;
     },
 
@@ -1137,12 +1355,12 @@ const EDICAO = {
         return data;
     },
 
-    // Fotos de celular sao grandes: reduz para no maximo 2000px antes de enviar
-    async reduzir(arquivo) {
+    // Fotos de celular sao grandes: reduz para no maximo `lado` px
+    async reduzir(arquivo, lado = 2000) {
         if (!/^image\/(jpeg|png|webp)$/.test(arquivo.type)) return arquivo;
         const bmp = await createImageBitmap(arquivo);
-        const escala = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
-        if (escala === 1 && arquivo.size < 1.5e6) return arquivo;
+        const escala = Math.min(1, lado / Math.max(bmp.width, bmp.height));
+        if (escala === 1 && arquivo.size < 1.5e6 && lado >= 2000) return arquivo;
         const c = document.createElement('canvas');
         c.width = Math.round(bmp.width * escala); c.height = Math.round(bmp.height * escala);
         c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
@@ -1161,33 +1379,63 @@ const EDICAO = {
         const { error } = await sb.storage.from('site').upload(caminho, blob, { contentType: blob.type || 'image/jpeg', upsert: false });
         if (error) throw new Error('Não foi possível enviar a imagem: ' + error.message);
         return sb.storage.from('site').getPublicUrl(caminho).data.publicUrl;
+    },
+
+    // Demonstracao: a imagem vai junto das edicoes, embutida e menor
+    async embutirImagem(arquivo) {
+        if (!/^image\/(jpeg|png|webp)$/.test(arquivo.type)) throw new Error('Use uma imagem JPG, PNG ou WebP.');
+        const blob = await this.reduzir(arquivo, 1400);
+        return new Promise((ok, falha) => {
+            const leitor = new FileReader();
+            leitor.onload = () => ok(leitor.result);
+            leitor.onerror = () => falha(new Error('Não foi possível ler a imagem.'));
+            leitor.readAsDataURL(blob);
+        });
     }
 };
 
 // Guarda o que foi editado (no navegador). Com contas ligadas, isso e o
 // rascunho de quem edita; o site so muda para todos ao Publicar.
 function salvarEdicoes() {
-    const estado = estadoAtual();
-    const houve = !estadoVazio(estado);
+    let houve = false;
     try {
-        if (PORTAL.MODO_DEMO) {
-            if (houve) localStorage.setItem(CHAVE_EDICOES, JSON.stringify({ ...estado, quando: new Date().toISOString() }));
-            else localStorage.removeItem(CHAVE_EDICOES);
-        } else {
-            localStorage.setItem(CHAVE_EDICOES, JSON.stringify({ ...estado, base: EDICAO.publicadoId, quando: new Date().toISOString() }));
-            EDICAO.rascunho = true;
-            atualizarBarra();
-        }
-    } catch { alert('Não foi possível salvar neste navegador.'); return false; }
+        ['p', 'g'].forEach(escopo => {
+            const estado = estadoAtual(escopo);
+            const mudou = !estadoVazio(estado);
+            houve = houve || mudou;
+            const chave = chaveArmazenada(escopo);
+            if (PORTAL.MODO_DEMO) {
+                if (mudou) localStorage.setItem(chave, JSON.stringify({ ...estado, quando: new Date().toISOString() }));
+                else localStorage.removeItem(chave);
+                return;
+            }
+            const antes = lerEdicoes(escopo);
+            const publicado = EDICAO.publicadoConteudo?.[escopo];
+            // So vira rascunho se mudou algo em relacao ao que esta no ar
+            const igualAoNoAr = JSON.stringify(estado) === JSON.stringify(normalizar(publicado, escopo));
+            if (igualAoNoAr && !antes.quando) return;
+            localStorage.setItem(chave, JSON.stringify({ ...estado, base: EDICAO.publicadoId[escopo], quando: new Date().toISOString() }));
+            EDICAO.rascunho[escopo] = !igualAoNoAr;
+        });
+        if (!PORTAL.MODO_DEMO) atualizarBarra();
+    } catch (erro) {
+        alert(/quota/i.test(erro?.name + erro?.message)
+            ? 'O navegador ficou sem espaço para guardar as edições (provavelmente por causa das imagens). Baixe as edições e envie antes de continuar.'
+            : 'Não foi possível salvar neste navegador.');
+        return false;
+    }
     return houve;
+}
+// Estado publicado no mesmo formato de estadoAtual, para comparar
+function normalizar(estado, escopo) {
+    if (!estado) return { versao: 2, textos: {}, links: {}, ...(escopo === 'p' ? { clones: [], novos: [], ordem: [], ocultos: [], apagados: [], imagens: {} } : {}) };
+    const base = { versao: 2, textos: estado.textos || {}, links: estado.links || {} };
+    if (escopo !== 'p') return base;
+    return { ...base, clones: estado.clones || [], novos: estado.novos || [], ordem: estado.ordem || [], ocultos: estado.ocultos || [], apagados: estado.apagados || [], imagens: estado.imagens || {} };
 }
 
 function aplicarEdicaoNosTextos() {
-    elementosEditaveis().forEach(el => {
-        el.contentEditable = editMode;
-        el.style.outline = editMode ? '1px dashed rgba(201, 215, 128, 0.9)' : '';
-        el.style.outlineOffset = editMode ? '6px' : '';
-    });
+    elementosEditaveis().forEach(el => { el.contentEditable = editMode ? 'true' : 'false'; if (!editMode) el.removeAttribute('contenteditable'); });
     imagensEditaveis().forEach(img => { img.title = editMode ? 'Clique para trocar a imagem' : ''; });
 }
 
@@ -1201,22 +1449,47 @@ function toggleEditMode() {
     atualizarBarra();
     if (editMode) { btn.textContent = 'Concluir'; return; }
     esconderControle();
+    esconderControleLink();
     const houve = salvarEdicoes();
     btn.textContent = houve ? (PORTAL.MODO_DEMO ? 'Salvo ✓' : 'Rascunho salvo ✓') : 'Editar';
     setTimeout(() => { if (!editMode) btn.textContent = 'Editar'; }, 2000);
 }
 
+// Durante a edicao: Enter quebra a linha (titulos e botoes nao quebram),
+// colar traz so o texto, e nenhum link ou botao da pagina dispara
+document.addEventListener('keydown', (e) => {
+    if (!editMode || e.key !== 'Enter') return;
+    const el = e.target.closest?.('[data-txt]');
+    if (!el) return;
+    e.preventDefault();
+    if (!el.matches('h1, h2, h3, h4, h5, h6, a, .btn, span, small, strong, label')) document.execCommand('insertLineBreak');
+});
+document.addEventListener('paste', (e) => {
+    if (!editMode || !e.target.closest?.('[data-txt]')) return;
+    e.preventDefault();
+    document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+});
+document.addEventListener('submit', (e) => { if (editMode) e.preventDefault(); }, true);
+
 /* Controle de bloco: aparece sobre o bloco em que o mouse (ou o dedo)
    esta, durante a edicao. Ocultar some com o bloco para os visitantes;
-   na edicao ele fica apagado, para poder voltar. */
+   na edicao ele fica apagado, para poder voltar. Apagar tira de vez. */
 const controle = document.createElement('div');
 controle.id = 'ctrl-bloco';
 controle.hidden = true;
 controle.innerHTML = `
     <span class="ctrl-tipo"></span>
+    <button type="button" data-acao="subir" title="Sobe este bloco uma posição">↑</button>
+    <button type="button" data-acao="descer" title="Desce este bloco uma posição">↓</button>
     <button type="button" data-acao="ocultar"></button>
     <button type="button" data-acao="duplicar" title="Cria uma cópia logo abaixo, para editar">Duplicar</button>
-    <button type="button" data-acao="remover" title="Apaga esta cópia">Remover</button>`;
+    <button type="button" data-acao="apagar" title="Tira este bloco da página">Apagar</button>
+    <span class="ctrl-novo">
+        <span>Nova seção abaixo:</span>
+        <button type="button" data-acao="novo-texto" title="Seção com título e texto">Texto</button>
+        <button type="button" data-acao="novo-imagem" title="Seção com título, imagem e legenda">Imagem</button>
+        <button type="button" data-acao="novo-video" title="Seção com título e um vídeo do YouTube">Vídeo</button>
+    </span>`;
 document.body.appendChild(controle);
 let alvoBloco = null;
 
@@ -1233,26 +1506,58 @@ function mostrarControle(el) {
         el.classList.add('bloco-alvo');
     }
     const item = el.matches(ITENS);
-    const copia = el.dataset.bloco.startsWith('c:');
+    const chave = el.dataset.bloco;
+    const extra = chave.startsWith('c:') ? ' (cópia)' : chave.startsWith('n:') ? ' (nova)' : '';
     const oculto = el.classList.contains('bloco-oculto');
-    controle.querySelector('.ctrl-tipo').textContent = (item ? 'Item' : 'Seção') + (copia ? ' (cópia)' : '') + (oculto ? ' · oculto' : '');
+    controle.querySelector('.ctrl-tipo').textContent = (item ? 'Item' : 'Seção') + extra + (oculto ? ' · oculto' : '');
     const btnOcultar = controle.querySelector('[data-acao="ocultar"]');
     btnOcultar.textContent = oculto ? 'Mostrar' : 'Ocultar';
-    btnOcultar.title = oculto ? 'Volta a mostrar este bloco' : 'Esconde este bloco da página';
+    btnOcultar.title = oculto ? 'Volta a mostrar este bloco' : 'Esconde este bloco dos visitantes (dá para mostrar de novo)';
+    const irmaos = irmaosBloco(el);
+    controle.querySelector('[data-acao="subir"]').disabled = irmaos[0] === el;
+    controle.querySelector('[data-acao="descer"]').disabled = irmaos[irmaos.length - 1] === el;
     controle.querySelector('[data-acao="duplicar"]').hidden = !item;
-    controle.querySelector('[data-acao="remover"]').hidden = !copia;
+    controle.querySelector('.ctrl-novo').hidden = item;
     controle.hidden = false;
+    // Secao: no canto de cima, por dentro. Item (pode ser pequeno, como um
+    // botao): logo acima dele, para nao cobrir o que se quer clicar
     const r = el.getBoundingClientRect();
     const largura = controle.offsetWidth;
-    controle.style.top = `${Math.max(r.top, 0) + window.scrollY + 4}px`;
+    const altura = controle.offsetHeight;
+    const topo = item && r.top - altura - 6 > 70 ? r.top - altura - 6 : Math.max(r.top, 0) + 4;
+    controle.style.top = `${topo + window.scrollY}px`;
     controle.style.left = `${Math.max(8, Math.min(r.right - largura - 4, document.documentElement.clientWidth - largura - 8)) + window.scrollX}px`;
 }
 
 document.addEventListener('mouseover', (e) => {
-    if (!editMode || controle.contains(e.target) || e.target.closest('#barra-edicao, .painel-historico')) return;
+    if (!editMode || controle.contains(e.target) || e.target.closest('#barra-edicao, .painel-historico, #ctrl-link')) return;
     const el = e.target.closest(ITENS) || e.target.closest(SECOES);
     if (el && el.dataset.bloco && !el.closest('header, footer')) mostrarControle(el);
 });
+
+const novoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+// Tira um bloco de vez (e as copias feitas a partir dele)
+function apagarBloco(el) {
+    const chave = el.dataset.bloco;
+    const removidas = new Set([chave]);
+    el.querySelectorAll('[data-bloco^="c:"], [data-bloco^="n:"]').forEach(f => removidas.add(f.dataset.bloco));
+    let mudou = true;
+    while (mudou) {
+        mudou = false;
+        clones.forEach(c => { if (removidas.has(c.de) && !removidas.has('c:' + c.id)) { removidas.add('c:' + c.id); mudou = true; } });
+        novos.forEach(n => { if (removidas.has(n.depois) && !removidas.has('n:' + n.id)) { removidas.add('n:' + n.id); mudou = true; } });
+    }
+    removidas.forEach(k => {
+        const b = acharBloco(k);
+        if (b) b.remove();
+        ocultos.delete(k);
+        if (!k.startsWith('c:') && !k.startsWith('n:')) apagados.add(k);
+    });
+    clones = clones.filter(c => !removidas.has('c:' + c.id));
+    novos = novos.filter(n => !removidas.has('n:' + n.id));
+    ordem = ordem.filter(o => !removidas.has(o.bloco) && !removidas.has(o.antes || o.depois));
+}
 
 controle.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
@@ -1263,28 +1568,118 @@ controle.addEventListener('click', (e) => {
         const oculto = el.classList.toggle('bloco-oculto');
         if (oculto) ocultos.add(el.dataset.bloco); else ocultos.delete(el.dataset.bloco);
         mostrarControle(el);
+    } else if (acao === 'subir' || acao === 'descer') {
+        const irmaos = irmaosBloco(el);
+        const i = irmaos.indexOf(el);
+        const op = acao === 'subir'
+            ? (i > 1 ? { bloco: el.dataset.bloco, depois: irmaos[i - 2].dataset.bloco } : { bloco: el.dataset.bloco, antes: irmaos[i - 1].dataset.bloco })
+            : { bloco: el.dataset.bloco, depois: irmaos[i + 1].dataset.bloco };
+        if (moverBloco(op)) ordem.push(op);
+        mostrarControle(el);
+        el.scrollIntoView({ block: 'nearest', behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth' });
     } else if (acao === 'duplicar') {
-        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        const id = novoId();
         clones.push({ id, de: el.dataset.bloco });
         const copia = duplicarBloco(el, id);
         aplicarEdicaoNosTextos();
         mostrarControle(copia);
-    } else if (acao === 'remover') {
-        if (!confirm('Remover esta cópia?')) return;
-        // Remove tambem as copias feitas a partir desta
-        const removidas = new Set([el.dataset.bloco]);
-        el.querySelectorAll('[data-bloco^="c:"]').forEach(f => removidas.add(f.dataset.bloco));
-        let mudou = true;
-        while (mudou) {
-            mudou = false;
-            clones.forEach(c => { if (removidas.has(c.de) && !removidas.has('c:' + c.id)) { removidas.add('c:' + c.id); mudou = true; } });
-        }
-        removidas.forEach(k => { const b = acharBloco(k); if (b) b.remove(); ocultos.delete(k); });
-        clones = clones.filter(c => !removidas.has('c:' + c.id));
+    } else if (acao === 'apagar') {
+        const nova = /^[cn]:/.test(el.dataset.bloco);
+        if (!confirm(nova ? 'Apagar este bloco?' : 'Apagar este bloco da página? Para trazer de volta, use Desfazer ou o Histórico.')) return;
+        apagarBloco(el);
         esconderControle();
+    } else if (acao.startsWith('novo-')) {
+        const tipo = acao.slice(5);
+        const n = { id: novoId(), depois: el.dataset.bloco, tipo, fundo: el.classList.contains('sec-escura') ? 'clara' : 'escura' };
+        if (tipo === 'video') {
+            const codigo = codigoYoutube(prompt('Cole o link do vídeo no YouTube:') || '');
+            if (!codigo) { alert('Não reconheci um link do YouTube. Copie o endereço do vídeo (ex.: https://www.youtube.com/watch?v=...).'); return; }
+            n.video = codigo;
+        }
+        const sec = criarSecaoNova(n);
+        if (!sec) return;
+        novos.push(n);
+        aplicarEdicaoNosTextos();
+        sec.scrollIntoView({ block: 'center', behavior: MOVIMENTO_REDUZIDO ? 'auto' : 'smooth' });
+        if (tipo === 'imagem') escolherImagemPara(sec.querySelector('img[data-img]'));
     }
     salvarEdicoes();
 });
+
+// Trocar o video de uma secao nova
+document.addEventListener('click', (e) => {
+    const btn = editMode && e.target.closest('[data-trocar-video]');
+    if (!btn) return;
+    const n = novos.find(x => x.id === btn.dataset.trocarVideo);
+    const codigo = n && codigoYoutube(prompt('Cole o link do vídeo no YouTube:', n.video ? `https://www.youtube.com/watch?v=${n.video}` : '') || '');
+    if (!codigo) return;
+    n.video = codigo;
+    const sec = acharBloco('n:' + n.id);
+    const textos = textosEm(sec).map(t => t.innerHTML);
+    sec.remove();
+    const nova = criarSecaoNova(n);
+    textosEm(nova).forEach((t, i) => { if (textos[i] !== undefined) t.innerHTML = textos[i]; });
+    aplicarEdicaoNosTextos();
+    salvarEdicoes();
+});
+
+/* Controle de link: no modo edicao, clicar num link ou botao mostra o
+   endereco para onde ele leva, para trocar */
+const controleLink = document.createElement('form');
+controleLink.id = 'ctrl-link';
+controleLink.hidden = true;
+controleLink.innerHTML = `
+    <label for="ctrl-link-href">Este botão/link leva para:</label>
+    <input type="text" id="ctrl-link-href" spellcheck="false" autocomplete="off">
+    <small>Página do site (ex.: contato.html), endereço completo (https://…), e-mail (mailto:…) ou WhatsApp (https://wa.me/55…)</small>
+    <div>
+        <button type="submit">Salvar link</button>
+        <button type="button" data-acao="original">Voltar ao original</button>
+        <button type="button" data-acao="fechar">Fechar</button>
+    </div>`;
+document.body.appendChild(controleLink);
+let alvoLink = null;
+function esconderControleLink() { controleLink.hidden = true; alvoLink = null; }
+function mostrarControleLink(a) {
+    alvoLink = a;
+    controleLink.querySelector('input').value = a.getAttribute('href');
+    controleLink.hidden = false;
+    const r = a.getBoundingClientRect();
+    const largura = controleLink.offsetWidth;
+    controleLink.style.top = `${r.bottom + window.scrollY + 8}px`;
+    controleLink.style.left = `${Math.max(8, Math.min(r.left, document.documentElement.clientWidth - largura - 8)) + window.scrollX}px`;
+}
+controleLink.addEventListener('submit', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!alvoLink) return;
+    const href = linkSeguro(controleLink.querySelector('input').value);
+    if (!href) { alert('Endereço inválido. Use uma página do site, um endereço https://…, mailto: ou tel:.'); return; }
+    alvoLink.setAttribute('href', href);
+    esconderControleLink();
+    salvarEdicoes();
+});
+controleLink.addEventListener('click', (e) => {
+    const acao = e.target.closest('button')?.dataset.acao;
+    if (acao === 'fechar') esconderControleLink();
+    if (acao === 'original' && alvoLink) {
+        alvoLink.setAttribute('href', alvoLink.dataset.hrefOriginal);
+        esconderControleLink();
+        salvarEdicoes();
+    }
+});
+document.addEventListener('click', (e) => {
+    if (!editMode || e.target.closest('#barra-edicao, #ctrl-bloco, #ctrl-link, .painel-historico')) return;
+    const a = e.target.closest('a[href]');
+    if (a) {
+        e.preventDefault();
+        if (a.matches('[data-pagamento]')) { alert('Este botão leva ao link de pagamento do plano, que é alterado no Painel (editar.html).'); return; }
+        if (a.dataset.link) mostrarControleLink(a);
+        return;
+    }
+    // Botoes da pagina (enviar formulario, abrir dialogo...) nao disparam
+    if (e.target.closest('button') && !e.target.closest('[data-trocar-video]')) e.preventDefault();
+}, true);
 
 // Trocar imagem: no modo edicao, clicar numa imagem abre a escolha do arquivo
 const escolherImagem = document.createElement('input');
@@ -1293,29 +1688,27 @@ escolherImagem.accept = 'image/jpeg,image/png,image/webp';
 escolherImagem.hidden = true;
 document.body.appendChild(escolherImagem);
 let imagemAlvo = null;
+function escolherImagemPara(img) {
+    imagemAlvo = img;
+    escolherImagem.value = '';
+    escolherImagem.click();
+}
 document.addEventListener('click', (e) => {
     if (!editMode) return;
     const img = e.target.closest('img[data-img]');
     if (!img || img.closest('#barra-edicao')) return;
     e.preventDefault();
     e.stopPropagation();
-    imagemAlvo = img;
-    escolherImagem.value = '';
-    escolherImagem.click();
+    escolherImagemPara(img);
 }, true);
 escolherImagem.addEventListener('change', async () => {
     const arquivo = escolherImagem.files[0];
     if (!arquivo || !imagemAlvo) return;
     if (arquivo.size > 15e6) { alert('Imagem grande demais (máximo 15 MB).'); return; }
-    if (PORTAL.MODO_DEMO) {
-        imagemAlvo.src = URL.createObjectURL(arquivo);
-        alert('Demonstração: a imagem aparece só agora, neste navegador. Com as contas ligadas, ela é enviada e publicada para todos.');
-        return;
-    }
     const alvo = imagemAlvo;
     alvo.style.opacity = '0.4';
     try {
-        const url = await EDICAO.enviarImagem(arquivo);
+        const url = PORTAL.MODO_DEMO ? await EDICAO.embutirImagem(arquivo) : await EDICAO.enviarImagem(arquivo);
         alvo.src = url;
         imagens[alvo.dataset.img] = url;
         salvarEdicoes();
@@ -1345,24 +1738,28 @@ function baixarEdicoes() {
 
 function desfazerEdicoes() {
     const msg = PORTAL.MODO_DEMO
-        ? 'Descartar as edições salvas desta página (textos, blocos ocultos e cópias) e voltar ao que está publicado?'
-        : 'Descartar o rascunho desta página e voltar à versão publicada?';
+        ? 'Descartar as edições salvas desta página (e do menu e rodapé) e voltar ao que está publicado?'
+        : 'Descartar o rascunho desta página (e do menu e rodapé) e voltar à versão publicada?';
     if (!confirm(msg)) return;
-    try { localStorage.removeItem(CHAVE_EDICOES); } catch { /* nada */ }
+    try { localStorage.removeItem(chaveArmazenada('p')); localStorage.removeItem(chaveArmazenada('g')); } catch { /* nada */ }
     location.reload();
 }
 
 async function publicarPagina() {
     if (editMode) toggleEditMode();
-    const estado = estadoAtual();
     if (!confirm('Publicar as mudanças desta página para todos os visitantes?')) return;
     const btn = document.getElementById('btn-publicar');
     btn.disabled = true;
     btn.textContent = 'Publicando…';
     try {
-        await EDICAO.publicar(estado);
-        try { localStorage.removeItem(CHAVE_EDICOES); } catch { /* nada */ }
-        EDICAO.rascunho = false;
+        for (const escopo of ['g', 'p']) {
+            if (escopo === 'g' && !EDICAO.rascunho.g) continue;
+            const estado = estadoAtual(escopo);
+            await EDICAO.publicar(estado, escopo);
+            EDICAO.publicadoConteudo[escopo] = estado;
+            try { localStorage.removeItem(chaveArmazenada(escopo)); } catch { /* nada */ }
+            EDICAO.rascunho[escopo] = false;
+        }
         btn.textContent = 'Publicado ✓';
         setTimeout(() => { btn.textContent = 'Publicar'; atualizarBarra(); }, 2500);
     } catch (erro) {
@@ -1416,16 +1813,17 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+const DICA_EDICAO = 'Clique num texto para mudar, num link ou botão para trocar o destino, numa imagem para trocar; passe o mouse sobre um bloco para mover, ocultar, apagar ou adicionar';
 const barraEdicao = document.createElement('div');
 barraEdicao.id = 'barra-edicao';
 barraEdicao.innerHTML = PORTAL.MODO_DEMO ? `
     <div id="barra-edicao-extra" hidden>
-        <span class="dica-edicao">Passe o mouse sobre um bloco para ocultar ou duplicar; clique numa imagem para trocar</span>
+        <span class="dica-edicao">${DICA_EDICAO}</span>
         <button type="button" id="btn-baixar-edicoes" title="Gera um arquivo com tudo que você editou, para enviar a quem publica o site">Baixar edições</button>
         <button type="button" id="btn-desfazer-edicoes" title="Descarta as edições salvas desta página">Desfazer</button>
     </div>
     <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
-    <button type="button" id="btn-editar" title="Editar os textos e os blocos. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>` : `
+    <button type="button" id="btn-editar" title="Editar a página. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>` : `
     <div id="barra-edicao-extra">
         <span class="dica-edicao" id="estado-edicao"></span>
         <button type="button" id="btn-historico" title="Versões publicadas desta página">Histórico</button>
@@ -1433,7 +1831,7 @@ barraEdicao.innerHTML = PORTAL.MODO_DEMO ? `
         <button type="button" id="btn-publicar" title="Publica as mudanças desta página para todos os visitantes">Publicar</button>
     </div>
     <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
-    <button type="button" id="btn-editar" title="Editar textos, blocos e imagens. Só vale para todos depois de Publicar.">Editar</button>`;
+    <button type="button" id="btn-editar" title="Editar a página. Só vale para todos depois de Publicar.">Editar</button>`;
 document.body.appendChild(barraEdicao);
 document.getElementById('btn-editar').onclick = toggleEditMode;
 document.getElementById('btn-desfazer-edicoes').onclick = desfazerEdicoes;
@@ -1445,19 +1843,21 @@ else {
 
 function atualizarBarra() {
     if (PORTAL.MODO_DEMO) return;
+    const rascunho = EDICAO.rascunho.p || EDICAO.rascunho.g;
     const aviso = document.getElementById('estado-edicao');
-    aviso.textContent = editMode
-        ? 'Editando: passe o mouse sobre um bloco para ocultar ou duplicar; clique numa imagem para trocar'
-        : EDICAO.rascunho ? 'Há mudanças não publicadas nesta página' : 'Tudo publicado';
-    document.getElementById('btn-desfazer-edicoes').hidden = !EDICAO.rascunho;
-    document.getElementById('btn-publicar').disabled = !EDICAO.rascunho && !editMode;
+    aviso.textContent = editMode ? 'Editando: ' + DICA_EDICAO.charAt(0).toLowerCase() + DICA_EDICAO.slice(1)
+        : rascunho ? 'Há mudanças não publicadas nesta página' : 'Tudo publicado';
+    document.getElementById('btn-desfazer-edicoes').hidden = !rascunho;
+    document.getElementById('btn-publicar').disabled = !rascunho && !editMode;
 }
 
 // ---------- Carregar as edicoes ----------
 // A propria pagina de alteracoes nao e editavel
 const PAGINA_EDITAVEL = PAGINA !== 'editar';
+EDICAO.publicadoConteudo = { p: null, g: null };
 if (PORTAL.MODO_DEMO) {
-    aplicarEstado(lerEdicoes());
+    aplicarEstado(lerEdicoes('g'), 'g');
+    aplicarEstado(lerEdicoes('p'), 'p');
     // Demonstracao: a barra so aparece para quem entrou por editar.html
     barraEdicao.hidden = !PAGINA_EDITAVEL || !editorLocal();
 } else {
@@ -1468,15 +1868,19 @@ if (PORTAL.MODO_DEMO) {
     const liberar = () => document.documentElement.classList.remove('esperando-edicoes');
     const limite = setTimeout(liberar, 2500);
     (async () => {
-        let publicado = null;
+        let publicado = { p: null, g: null };
         try { publicado = await EDICAO.publicado(); } catch (erro) { console.warn('Edições publicadas indisponíveis:', erro); }
-        EDICAO.publicadoId = publicado ? publicado.id : null;
         try { EDICAO.editor = await EDICAO.verificarEditor(); } catch { EDICAO.editor = false; }
-        const rascunho = EDICAO.editor ? lerEdicoes() : {};
-        // Rascunho so vale se foi feito sobre a versao que esta no ar
-        const usarRascunho = EDICAO.editor && rascunho.quando && (rascunho.base ?? null) === EDICAO.publicadoId;
-        EDICAO.rascunho = !!usarRascunho;
-        aplicarEstado(usarRascunho ? rascunho : publicado && publicado.conteudo);
+        ['g', 'p'].forEach(escopo => {
+            const linha = publicado[escopo];
+            EDICAO.publicadoId[escopo] = linha ? linha.id : null;
+            EDICAO.publicadoConteudo[escopo] = linha ? linha.conteudo : null;
+            const rascunho = EDICAO.editor ? lerEdicoes(escopo) : {};
+            // Rascunho so vale se foi feito sobre a versao que esta no ar
+            const usarRascunho = EDICAO.editor && rascunho.quando && (rascunho.base ?? null) === EDICAO.publicadoId[escopo];
+            EDICAO.rascunho[escopo] = !!usarRascunho;
+            aplicarEstado(usarRascunho ? rascunho : linha && linha.conteudo, escopo);
+        });
         clearTimeout(limite);
         liberar();
         if (EDICAO.editor && PAGINA_EDITAVEL) { barraEdicao.hidden = false; atualizarBarra(); }
