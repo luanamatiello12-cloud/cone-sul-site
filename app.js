@@ -465,15 +465,15 @@ document.querySelectorAll('.filtro-categorias button').forEach(botao => {
 const NIVEIS = [
     {
         id: 'expansor', nome: 'Expansor', minimo: 1000, faixa: 'A partir de R$ 1.000 por mês',
-        beneficios: ['Devocional on-line e devocional mensal', 'Links dos workshops on-line', 'Workshops presenciais', 'Acompanhamento pastoral', 'Divulgação da sua empresa']
+        beneficios: ['Devocionais on-line e mensais', 'Acesso presencial e on-line aos workshops', 'Divulgação da sua empresa', 'Acompanhamento pastoral']
     },
     {
         id: 'construtor', nome: 'Construtor', minimo: 500, faixa: 'De R$ 500 a R$ 1.000 por mês',
-        beneficios: ['Devocional on-line e devocional mensal', 'Links dos workshops on-line (transmissão, sem participação presencial)']
+        beneficios: ['Devocionais on-line e mensais', 'Links dos workshops']
     },
     {
         id: 'semeador', nome: 'Semeador', minimo: 0.01, faixa: 'De R$ 100 a R$ 500 por mês',
-        beneficios: ['Devocional on-line e devocional mensal']
+        beneficios: ['Devocionais on-line e mensais']
     }
 ];
 // Sem contribuicao ativa (cadastro feito pelo "Faca parte", por exemplo): sem nivel
