@@ -35,7 +35,7 @@ const LINKS_PAGAMENTO = {
     unico: 'https://renovaremcristo.org/oferta'
 };
 
-// ---------- Configuracoes do site (Painel em editar.html) ----------
+// ---------- Configuracoes do site (Painel em admin.html) ----------
 // Contatos, links de pagamento, camisetas e cidades do mapa podem ser
 // mudados pela equipe no painel, sem mexer no codigo. Com contas ligadas
 // ficam no banco (site_edicoes, pagina "_config"), lidos por todos; na
@@ -625,12 +625,12 @@ const PORTAL = {
     }
 };
 
-// Entrou pela pagina de alteracoes (editar.html)? Guarda o e-mail de quem
+// Entrou pela pagina de alteracoes (admin.html)? Guarda o e-mail de quem
 // edita. Sozinha nao libera nada: com contas ligadas, o banco ainda confere
 // se a conta esta na tabela "equipe" antes de mostrar a barra.
 const CHAVE_EDITOR = 'conesul-editor';
 const editorLocal = () => { try { return localStorage.getItem(CHAVE_EDITOR) || ''; } catch { return ''; } };
-// A barra Editar so aparece na pagina aberta pela lista de editar.html
+// A barra Editar so aparece na pagina aberta pela lista de admin.html
 // (?editar no endereco). Navegando pelo site normalmente, quem edita ve o
 // mesmo que o visitante.
 const ABERTA_PARA_EDITAR = new URLSearchParams(location.search).has('editar');
@@ -1125,7 +1125,7 @@ if (PAGINA === 'fazer-parte') {
      novas de texto, imagem ou video (YouTube) abaixo de uma secao.
    - Imagens: clicar numa imagem troca o arquivo.
 
-   Quem edita: so quem entrou por editar.html (com contas ligadas, e esta
+   Quem edita: so quem entrou por admin.html (com contas ligadas, e esta
    na tabela "equipe").
    - Demonstracao (sem CONTAS): as mudancas ficam SO NO NAVEGADOR de quem
      editou; "Baixar edicoes" gera o arquivo para publicar.
@@ -1498,7 +1498,7 @@ const EDICAO = {
         return data ? session.user : null;
     },
 
-    // A barra de edicao so aparece para quem entrou por editar.html e e da
+    // A barra de edicao so aparece para quem entrou por admin.html e e da
     // equipe (entrar pela Area do Mantenedor nao basta)
     async verificarEditor() {
         if (!editorLocal() || !ABERTA_PARA_EDITAR) return false;
@@ -1508,7 +1508,7 @@ const EDICAO = {
     async publicar(estado, escopo = 'p') {
         const sb = await PORTAL.cliente();
         const { data: { session } } = await sb.auth.getSession();
-        if (!session) throw new Error('Sua sessão expirou. Entre de novo em Alterações no site (editar.html).');
+        if (!session) throw new Error('Sua sessão expirou. Entre de novo em Alterações no site (admin.html).');
         const { data, error } = await sb.from('site_edicoes')
             .insert({ pagina: escopo === 'g' ? GERAL : PAGINA_ARQUIVO, conteudo: estado, autor: session.user.id, autor_email: session.user.email })
             .select('id').single();
@@ -1843,8 +1843,8 @@ document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
     if (a) {
         e.preventDefault();
-        if (a.matches('[data-pagamento]')) { alert('Este botão leva ao cadastro e depois ao link de pagamento, que é alterado no Painel (editar.html > Contatos e pagamentos).'); return; }
-        if (a.matches('[data-contato]')) { alert('Os contatos do rodapé são alterados no Painel (editar.html > Contatos e pagamentos).'); return; }
+        if (a.matches('[data-pagamento]')) { alert('Este botão leva ao cadastro e depois ao link de pagamento, que é alterado no Painel (admin.html > Contatos e pagamentos).'); return; }
+        if (a.matches('[data-contato]')) { alert('Os contatos do rodapé são alterados no Painel (admin.html > Contatos e pagamentos).'); return; }
         if (a.dataset.link) mostrarControleLink(a);
         return;
     }
@@ -1993,7 +1993,7 @@ barraEdicao.innerHTML = PORTAL.MODO_DEMO ? `
         <button type="button" id="btn-desfazer-edicoes" title="Descarta as edições salvas desta página">Desfazer</button>
     </div>
     <div class="barra-linha">
-        <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
+        <a href="admin.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
         <button type="button" id="btn-baixar-edicoes" class="barra-baixar" title="Gera um arquivo com tudo que você editou (todas as páginas, fotos e Painel), para enviar a quem publica o site">Baixar edições</button>
     </div>
     <button type="button" id="btn-editar" title="Editar a página. Ao concluir, as mudanças ficam salvas neste navegador.">Editar</button>` : `
@@ -2003,7 +2003,7 @@ barraEdicao.innerHTML = PORTAL.MODO_DEMO ? `
         <button type="button" id="btn-desfazer-edicoes" title="Descarta o rascunho e volta à versão publicada">Descartar rascunho</button>
         <button type="button" id="btn-publicar" title="Publica as mudanças desta página para todos os visitantes">Publicar</button>
     </div>
-    <a href="editar.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
+    <a href="admin.html" class="barra-painel" title="Voltar ao painel de alterações">Painel</a>
     <button type="button" id="btn-editar" title="Editar a página. Só vale para todos depois de Publicar.">Editar</button>`;
 document.body.appendChild(barraEdicao);
 document.getElementById('btn-editar').onclick = toggleEditMode;
@@ -2031,7 +2031,7 @@ EDICAO.publicadoConteudo = { p: null, g: null };
 if (PORTAL.MODO_DEMO) {
     aplicarEstado(lerEdicoes('g'), 'g');
     aplicarEstado(lerEdicoes('p'), 'p');
-    // Demonstracao: a barra so aparece para quem entrou por editar.html
+    // Demonstracao: a barra so aparece para quem entrou por admin.html
     barraEdicao.hidden = !PAGINA_EDITAVEL || !editorLocal() || !ABERTA_PARA_EDITAR;
 } else {
     // Contas ligadas: a barra so aparece para a equipe, e a pagina espera a
@@ -2061,7 +2061,7 @@ if (PORTAL.MODO_DEMO) {
 }
 
 /* =========================================================
-   ALTERACOES NO SITE (editar.html): acesso da equipe, separado
+   ALTERACOES NO SITE (admin.html): acesso da equipe, separado
    da Area do Mantenedor. Depois de entrar, a barra Editar aparece
    nas paginas abertas pela lista daqui (?editar no endereco).
    ========================================================= */
@@ -2168,7 +2168,7 @@ if (PAGINA === 'editar') {
         formEsqueci.classList.add('validar');
         if (!formEsqueci.checkValidity()) { retorno.textContent = 'Informe um e-mail válido.'; return; }
         try {
-            await PORTAL.esqueciSenha($('ed-esqueci-email').value.trim(), CAPTCHA.token(formEsqueci), 'editar.html');
+            await PORTAL.esqueciSenha($('ed-esqueci-email').value.trim(), CAPTCHA.token(formEsqueci), 'admin.html');
             retorno.textContent = 'Pronto! Se este e-mail tiver conta, o link para criar uma senha nova chega em alguns minutos.';
         } catch (erro) {
             retorno.textContent = erro.message;

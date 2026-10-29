@@ -37,10 +37,10 @@ contribuição aprovada com o mesmo e-mail.
 ## Relatório do Eklesia (importação)
 
 Enquanto a plataforma de pagamento não avisa sozinha, a equipe importa o relatório do
-Eklesia no **Painel** (`editar.html`, bloco "Importar relatório do Eklesia"):
+Eklesia no **Painel** (`admin.html`, bloco "Importar relatório do Eklesia"):
 
 1. Baixar o relatório de contribuições do Eklesia em Excel.
-2. Entrar em `editar.html` com uma conta da **equipe** (ver abaixo), abrir o bloco
+2. Entrar em `admin.html` com uma conta da **equipe** (ver abaixo), abrir o bloco
    **Importar relatório do Eklesia** no Painel e escolher o
    arquivo. A página adivinha as colunas pelo título (e-mail, valor, nome, CPF,
    celular, nascimento, cidade, igreja); dá para trocar qualquer uma.
@@ -130,7 +130,7 @@ fica no banco:
   por bloco, com os níveis que podem ler (`niveis`). Ainda não há nenhum: quando houver,
   a página que mostra o conteúdo é ajustada junto.
 
-### Painel (editar.html)
+### Painel (admin.html)
 Além de editar textos nas páginas, a equipe muda pelo painel, sem código:
 - **Contatos do rodapé e o link de pagamento** (um só para todos os planos);
 - **Camisetas**: nome, preço, descrição, tamanhos, estoque, medidas, fotos e link;

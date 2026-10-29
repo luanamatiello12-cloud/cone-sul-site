@@ -1,5 +1,5 @@
 /* =========================================================
-   IMPORTAR RELATORIO (Painel em editar.html) — bastidor da equipe
+   IMPORTAR RELATORIO (Painel em admin.html) — bastidor da equipe
    Le o Excel do Eklesia no proprio navegador (SheetJS), deixa escolher
    as colunas, agrupa por e-mail, mostra o nivel de cada um e envia ao
    servidor (funcao importar-planilha). Em modo demonstracao so mostra
