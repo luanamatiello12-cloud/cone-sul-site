@@ -108,13 +108,10 @@
                 campo('Instagram', entrada(cfg.contato, 'instagram', 'url', 'https://instagram.com/…')),
                 campo('WhatsApp', entrada(cfg.contato, 'whatsapp', 'url', 'https://wa.me/5549…'), 'https://wa.me/ + 55 + DDD + número, só números'),
                 campo('Site da igreja', entrada(cfg.contato, 'igreja', 'url', 'https://…'))),
-            el('h4', { textContent: 'Links de pagamento dos planos' }),
-            el('p', { className: 'pc-dica', textContent: 'Endereço da página de pagamento de cada plano (Mercado Pago, Asaas…). Vazio = o botão leva ao cadastro e avisa que o pagamento ainda não está disponível.' }),
+            el('h4', { textContent: 'Link de pagamento' }),
+            el('p', { className: 'pc-dica', textContent: 'Um link só, para todos os planos: a pessoa escolhe o valor na página de pagamento, e o nível dela no login sai do valor contribuído. Vazio = o botão leva ao cadastro e avisa que o pagamento ainda não está disponível.' }),
             el('div', { className: 'pc-grade' },
-                ...NIVEIS.map(n => {
-                    const chave = Object.keys(PLANOS).find(k => PLANOS[k] === n.id);
-                    return campo(`Plano ${n.nome} (${n.faixa})`, entrada(cfg.pagamentos, chave, 'url', 'https://…'));
-                })));
+                campo('Link de pagamento (todos os planos)', entrada(cfg.pagamentos, 'unico', 'url', 'https://…'))));
     }
 
     // ---------- 2. Camisetas ----------

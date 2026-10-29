@@ -8,7 +8,7 @@
 const CONTATO = {
     email: 'conesul.missoes@gmail.com',
     instagram: 'https://www.instagram.com/conesul.missoes/',
-    whatsapp: '#',
+    whatsapp: 'https://wa.me/5549991802176',
     igreja: '#'
 };
 
@@ -26,15 +26,13 @@ const CONTAS = {
     captcha: ''
 };
 
-// ---------- Links de pagamento da campanha (seja-mantenedor.html) ----------
-// Cole aqui o link do portal de pagamento de cada faixa. Enquanto estiver
-// vazio, o botao aparece mas nao leva a lugar nenhum. Com as contas ligadas
-// (servidor/LEIA-ME.md), o pagamento aprovado cria o cadastro e define o
-// nivel pelo valor pago.
+// ---------- Link de pagamento da campanha (seja-mantenedor.html) ----------
+// Um link so para todos os planos: a pessoa escolhe o valor na pagina de
+// pagamento, e o nivel no login sai do valor contribuido (relatorio do
+// Eklesia ou webhook), nunca do plano clicado no site. Enquanto estiver
+// vazio, o cadastro avisa que o pagamento ainda nao esta disponivel.
 const LINKS_PAGAMENTO = {
-    semeadores: '',
-    construtores: '',
-    expansores: ''
+    unico: 'https://renovaremcristo.org/oferta'
 };
 
 // ---------- Configuracoes do site (Painel em editar.html) ----------
@@ -1018,12 +1016,12 @@ if (PAGINA === 'fazer-parte') {
     // Veio de um plano? Mostra qual e, ao concluir, segue para o pagamento
     const chavePlano = new URLSearchParams(location.search).get('plano');
     const nivelPlano = NIVEIS.find(n => n.id === PLANOS[chavePlano]);
-    const linkPlano = nivelPlano ? LINKS_PAGAMENTO[chavePlano] : '';
+    const linkPlano = nivelPlano ? LINKS_PAGAMENTO.unico : '';
     if (nivelPlano) {
         document.getElementById('plano-escolhido').hidden = false;
         document.getElementById('plano-nome').textContent = `Plano ${nivelPlano.nome}`;
         document.getElementById('plano-faixa').textContent = `· ${nivelPlano.faixa}`;
-        document.getElementById('cadastro-lead').textContent = 'Primeiro, seu cadastro. Em seguida você vai para a página de pagamento da contribuição.';
+        document.getElementById('cadastro-lead').textContent = 'Primeiro, seu cadastro. Em seguida você vai para a página de pagamento, onde escolhe o valor da contribuição.';
         const ja = PORTAL.sessao();
         if (ja) {
             formCadastro.hidden = true;
@@ -1088,7 +1086,7 @@ if (PAGINA === 'fazer-parte') {
             PORTAL.salvar(usuario);
             if (nivelPlano && linkPlano) { location.href = linkPlano; return; }
             if (nivelPlano) {
-                retorno.textContent = 'Cadastro concluído! O link de pagamento deste plano ainda não está disponível. Avisaremos em breve.';
+                retorno.textContent = 'Cadastro concluído! O link de pagamento ainda não está disponível. Avisaremos em breve.';
                 setTimeout(() => { location.href = 'portal.html'; }, 3500);
                 return;
             }
@@ -1828,7 +1826,7 @@ document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
     if (a) {
         e.preventDefault();
-        if (a.matches('[data-pagamento]')) { alert('Este botão leva ao link de pagamento do plano, que é alterado no Painel (editar.html > Contatos e pagamentos).'); return; }
+        if (a.matches('[data-pagamento]')) { alert('Este botão leva ao cadastro e depois ao link de pagamento, que é alterado no Painel (editar.html > Contatos e pagamentos).'); return; }
         if (a.matches('[data-contato]')) { alert('Os contatos do rodapé são alterados no Painel (editar.html > Contatos e pagamentos).'); return; }
         if (a.dataset.link) mostrarControleLink(a);
         return;
