@@ -3563,3 +3563,6 @@ body.modo-edicao img[data-img] { cursor: pointer; }
     .mapa-leaflet .leaflet-control-zoom { margin: 20px 0 0 20px !important; }
     .mapa-leaflet .leaflet-control-attribution { margin: 0 18px 16px 0 !important; }
 }
+/* Mapa sem cores por territorio: nomes claros sobre o fundo escuro */
+.rotulo-mapa.pais span { color: var(--creme); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
+.rotulo-mapa.pais.lado span { color: var(--creme); }
