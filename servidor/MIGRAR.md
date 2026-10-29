@@ -3,6 +3,29 @@
 Tudo já está pronto no código. Este é o roteiro do dia da migração: o que vocês
 fazem, o que vocês me passam e o que eu faço.
 
+## Situação (29/10/2026)
+
+Feito: projeto Supabase **`cone-sul`** (organização "Cone sul", região São Paulo,
+ref `zwswipzsjiopimgmsdpl`), `schema.sql` rodado, as duas funções publicadas,
+login configurado (endereço do site, confirmação de e-mail, senha mínima 8,
+sessão de 15 minutos, e-mails em português pelo Gmail), `CONTAS` preenchido no `app.js` e a conta
+`conesul.missoes@gmail.com` na tabela `equipe`. As edições do navegador **não**
+foram migradas (decisão da equipe).
+
+Falta:
+- **Domínio**: passo 5 de "O que eu faço", e depois trocar `SITE_URL`,
+  `ORIGENS_PERMITIDAS` e o endereço do login (Authentication > URL Configuration).
+- **CAPTCHA** (Turnstile): não configurado.
+- **E-mail**: os e-mails saem pelo Gmail `conesul.missoes@gmail.com` (senha de
+  app em Authentication > Emails > SMTP Settings), em português, até 30 por
+  hora. O Gmail manda até ~500 por dia; com o domínio próprio, vale trocar por
+  um serviço de envio (ex.: Brevo) com remetente `contato@<domínio>`.
+- **Webhook de pagamento**: publicado, mas desligado (sem `PROVEDOR_PAGAMENTO`)
+  até existir plataforma que avise. O `WEBHOOK_TOKEN` já existe; gere outro
+  ao ligar, para cadastrar na plataforma.
+- O projeto antigo "conesul.missoes@gmail.com's Project" (região EUA) não é
+  usado e pode ser apagado.
+
 ## 1. O que vocês fazem (antes de me chamar)
 
 ### Banco de dados (Supabase)
@@ -65,8 +88,9 @@ O ambiente onde eu trabalho só acessa endereços liberados. No menu do ambiente
    envio de acesso pelo WhatsApp, troca de senha, edição e publicação, histórico.
 
 ## 4. Depois da migração
-- As alterações no site ficam em **`editar.html`** (endereço só da equipe, fora do
-  menu e separado da Área do Mantenedor). Quem entra ali e está na tabela `equipe` vê a
+- As alterações no site ficam em **`/admin`** (`admin.html`; o antigo `editar.html`
+  redireciona para lá): endereço só da equipe, fora do
+  menu e separado da Área do Mantenedor. Quem entra ali e está na tabela `equipe` vê a
   barra **Editar** em todas as páginas; os visitantes nunca veem.
 - **Publicar** muda a página para todos; **Histórico** volta a uma versão anterior.
 - Atualizar a Política de Privacidade e os Termos de Uso (o site passa a guardar

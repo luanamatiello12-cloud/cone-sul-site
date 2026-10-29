@@ -1,7 +1,7 @@
 /* Monta os cards da pagina de camisetas a partir de loja/produtos.js.
    Visual de vitrine: foto em fundo claro, nome e preco embaixo. O card
    inteiro leva ao link de pagamento (quando houver). */
-// As camisetas do Painel (editar.html), quando houver, substituem as de
+// As camisetas do Painel (admin.html), quando houver, substituem as de
 // loja/produtos.js; com contas ligadas, espera elas chegarem do banco
 (typeof CONFIG_PRONTA !== 'undefined' ? CONFIG_PRONTA : Promise.resolve()).then(function () {
     const grade = document.getElementById('produtos');

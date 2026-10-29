@@ -1,5 +1,5 @@
 /* =========================================================
-   PAINEL (editar.html): formularios para o que nao e texto de pagina
+   PAINEL (admin.html): formularios para o que nao e texto de pagina
    - Contatos do rodape e links de pagamento dos planos
    - Camisetas (preco, estoque, medidas, fotos, link)
    - Cidades do mapa (fotos com legenda, mostrar/esconder, cidade nova)
@@ -412,7 +412,7 @@
     });
 
     // Links do painel que abrem um bloco (ex.: "Importar relatório"), e o
-    // endereco antigo importar.html, que chega como editar.html#importar
+    // endereco antigo importar.html, que chega como admin.html#importar
     const abrirBloco = (id) => {
         const bloco = document.getElementById(id);
         if (!bloco || bloco.tagName !== 'DETAILS') return;
