@@ -5,4 +5,5 @@
 exclude:
   - servidor
   - mapa/README.md
+  - docs/calendario-2027.pdf   # agenda detalhada: ainda nao divulgada
   - _config.yml
