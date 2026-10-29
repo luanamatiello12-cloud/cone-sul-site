@@ -3198,3 +3198,17 @@ body.modo-edicao section img[data-img]:hover { filter: brightness(0.85); }
 .painel-historico li { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
 .painel-historico em { color: var(--areia); font-style: normal; font-weight: 700; }
 .painel-historico button { padding: 0.35rem 0.7rem !important; font-size: 0.66rem !important; background: transparent !important; color: var(--areia) !important; border: 1px solid rgba(201, 215, 128, 0.5) !important; box-shadow: none !important; }
+/* Tabela de medidas das camisetas */
+.produto-medidas { margin-top: 0.8rem; font-size: 0.85rem; color: #2a2e2a; }
+.produto-medidas summary { cursor: pointer; font-weight: 700; color: var(--verde-800); text-decoration: underline; text-underline-offset: 3px; }
+.produto-medidas table { width: 100%; margin-top: 0.6rem; border-collapse: collapse; background: #fff; border-radius: 4px; overflow: hidden; }
+.produto-medidas th, .produto-medidas td { padding: 0.4rem 0.5rem; text-align: center; border-bottom: 1px solid #efece3; }
+.produto-medidas thead th { background: var(--verde-800); color: var(--creme); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.produto-medidas tbody th { text-align: left; font-weight: 800; }
+.produto-medidas .medida-breve { color: #8a8d86; font-style: italic; }
+.produto-medidas table { table-layout: fixed; font-size: 0.8rem; }
+.produto-medidas thead th { font-size: 0.6rem; letter-spacing: 0.04em; padding: 0.45rem 0.2rem; }
+.produto-medidas th:first-child { width: 2.8rem; }
+.produto-medidas thead th { text-transform: none; letter-spacing: 0; font-size: 0.72rem; font-weight: 700; }
+.produto-medidas th:first-child { width: 2.2rem; }
+.produto-medidas thead th { font-size: 0.68rem; padding-left: 0.1rem; padding-right: 0.1rem; }

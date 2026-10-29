@@ -7,6 +7,8 @@
    - estoque (opcional): quantidade de cada tamanho, ex. { P: 10, M: 5 }.
      Mostrado no card ("10 unid."); tamanho com 0 aparece como esgotado.
      Atualizar a mao conforme as vendas.
+   - medidas (opcional): tabela em centimetros. colunas = nomes das medidas;
+     linhas = medidas de cada tamanho (null = ainda sem medida).
    - fotos: arquivos em img/loja/, ex. ['img/loja/cone-sul-verde-01.jpg']
      (a primeira e a capa; vazio = espaco reservado)
    - link: link de pagamento (Mercado Pago, PagSeguro...). Vazio = o
@@ -20,6 +22,10 @@ const PRODUTOS = [
         preco: '',
         tamanhos: ['P', 'M', 'G', 'GG', 'XGG'],
         estoque: { P: 10, M: 10, G: 5, GG: 2, XGG: 3 },
+        medidas: {
+            colunas: ['Ombro', 'Largura', 'Comprimento'],
+            linhas: { P: [40, 48, 68], M: [42, 51, 70], G: [44, 54, 72], GG: [46, 57, 74], XGG: null }
+        },
         fotos: [],
         link: ''
     }
