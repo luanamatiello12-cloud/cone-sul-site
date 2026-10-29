@@ -134,12 +134,16 @@
     const fotosProntas = local => (local.fotos && local.fotos.length) || local._pronto;
 
     // ---------- Estilos das camadas ----------
+    // Contorno claro e fino, que engrossa ao passar o mouse e ao escolher;
+    // cantos arredondados para a linha ficar suave
     const estilo = (t, modo) => ({
-        color: modo === 'selecionado' ? '#fef5e2' : '#0e2218',
-        weight: modo === 'selecionado' ? 3 : modo === 'hover' ? 2 : 1,
-        opacity: 1,
+        color: '#fef5e2',
+        weight: modo === 'selecionado' ? 2.6 : modo === 'hover' ? 1.8 : 1,
+        opacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.9 : 0.55,
+        lineJoin: 'round',
+        lineCap: 'round',
         fillColor: t.cor,
-        fillOpacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.95 : 0.82
+        fillOpacity: modo === 'selecionado' ? 1 : modo === 'hover' ? 0.94 : 0.8
     });
 
     function aplicarEstilo(id) {
@@ -250,14 +254,18 @@
 
     // ---------- Pins das cidades (mapa/locais.js) ----------
     const pins = [];
-    const ICONE_PIN = L.divIcon({
-        className: 'pin-local',
-        html: '<svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 31s10-11.2 10-19A10 10 0 0 0 2 12c0 7.8 10 19 10 19Z"/><circle cx="12" cy="12" r="4"/></svg>',
-        iconSize: [24, 32],
-        iconAnchor: [12, 31],
-        tooltipAnchor: [0, -28],
-        popupAnchor: [0, -28]
+    // Pin maior, com sombra; o da cidade escolhida fica dourado e pulsa
+    const pinSvg = '<svg viewBox="0 0 30 40" aria-hidden="true"><path d="M15 39s13-14 13-24A13 13 0 0 0 2 15c0 10 13 24 13 24Z"/><circle cx="15" cy="15" r="5"/></svg>';
+    const iconePin = (ativo) => L.divIcon({
+        className: 'pin-local' + (ativo ? ' pin-ativo' : ''),
+        html: (ativo ? '<span class="pin-pulso"></span>' : '') + pinSvg,
+        iconSize: [30, 40],
+        iconAnchor: [15, 39],
+        tooltipAnchor: [0, -34],
+        popupAnchor: [0, -36]
     });
+    const ICONE_PIN = iconePin(false);
+    const ICONE_PIN_ATIVO = iconePin(true);
 
     function adicionarLocais() {
         if (typeof LOCAIS === 'undefined' || !LOCAIS.length) return;
@@ -292,8 +300,12 @@
         if (lista) montarLista(lista, grupo);
     }
 
+    let pinAtivo = null;
     function marcarLocal(i) {
         document.querySelectorAll('.local-btn').forEach(b => b.classList.toggle('ativo', +b.dataset.i === i));
+        if (pinAtivo) { pinAtivo.setIcon(ICONE_PIN); pinAtivo.setZIndexOffset(0); }
+        pinAtivo = pins[i] ? pins[i].marcador : null;
+        if (pinAtivo) { pinAtivo.setIcon(ICONE_PIN_ATIVO); pinAtivo.setZIndexOffset(1000); }
     }
 
     // Lista de cidades agrupada por estado/pais; clicar leva ate o pin
@@ -308,8 +320,19 @@
         lista.innerHTML = grupos.map(g => `
             <div class="locais-grupo">
                 <h4>${escapar(g.nome)} <small>${g.itens.length} ${g.itens.length === 1 ? 'cidade' : 'cidades'}</small></h4>
-                <ul>${g.itens.map(({ local, i }) => `<li><button type="button" class="local-btn" data-i="${i}">${escapar(local.nome)}</button></li>`).join('')}</ul>
+                <ul>${g.itens.map(({ local, i }) => `<li><button type="button" class="local-btn" data-i="${i}"><span class="local-mini" aria-hidden="true"></span>${escapar(local.nome)}</button></li>`).join('')}</ul>
             </div>`).join('');
+
+        // Fotinho de cada cidade: a miniatura da pasta (mini.jpg, leve) ou,
+        // sem ela, a primeira foto escolhida no Painel
+        lista.querySelectorAll('.local-btn').forEach(btn => {
+            const local = LOCAIS[+btn.dataset.i];
+            const mini = btn.querySelector('.local-mini');
+            const usar = (src) => { mini.style.backgroundImage = `url("${src.replace(/["\\]/g, '')}")`; btn.classList.add('com-foto'); };
+            if (local.fotos && local.fotos.length) { usar(local.fotos[0].src); return; }
+            const src = pastaDoLocal(local) + 'mini.jpg';
+            existe(src).then(ok => { if (ok) usar(src); });
+        });
 
         lista.addEventListener('click', (e) => {
             const btn = e.target.closest('.local-btn');
@@ -470,7 +493,7 @@
             L.geoJSON(referencia, {
                 interactive: false,
                 smoothFactor: 1.5,
-                style: { color: '#2c4f39', weight: 0.8, opacity: 1, fillColor: '#1a3626', fillOpacity: 1 }
+                style: { color: '#3f6a4f', weight: 0.7, opacity: 0.7, lineJoin: 'round', fillColor: '#1c3a2a', fillOpacity: 1 }
             }).addTo(map);
 
             // Os seis territorios
