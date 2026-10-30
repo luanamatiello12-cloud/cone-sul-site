@@ -2019,6 +2019,7 @@ footer::before {
 
 .portal-acesso .campo label,
 .portal-acesso .campo.escolha legend { color: var(--limao-escuro); }
+.portal-acesso .esqueci-texto { color: #2a2e2a; }
 
 .portal-acesso .campo input,
 .portal-acesso .campo select,
