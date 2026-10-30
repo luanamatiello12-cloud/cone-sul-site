@@ -571,6 +571,7 @@ const PORTAL = {
             const { error } = await sb.auth.updateUser({ password: nova });
             if (error) throw new Error(error.message.includes('different') ? 'A nova senha precisa ser diferente da atual.' : 'Não foi possível trocar a senha. Tente de novo.');
             await sb.from('mantenedores').update({ senha_provisoria: false }).eq('id', atual.id);
+            senhaCriada();
         }
         const novo = { ...atual, senhaProvisoria: false };
         this.salvar(novo);
@@ -633,6 +634,21 @@ const PORTAL = {
         return false;
     }
 };
+
+// Link de "Esqueci minha senha": o login que ele traz so serve para criar a
+// senha nova, na propria pagina do link. Saiu dela (ou recarregou) sem
+// salvar a senha? Esse login e apagado deste navegador antes de qualquer
+// pagina usa-lo. Salvar a senha tira a marca (senhaCriada).
+const CHAVE_SENHA_PENDENTE = 'conesul-senha-pendente';
+const senhaCriada = () => { try { localStorage.removeItem(CHAVE_SENHA_PENDENTE); } catch { /* sem storage */ } };
+if (!PORTAL.MODO_DEMO) try {
+    if (/type=recovery/.test(location.hash)) localStorage.setItem(CHAVE_SENHA_PENDENTE, '1');
+    else if (localStorage.getItem(CHAVE_SENHA_PENDENTE)) {
+        senhaCriada();
+        Object.keys(localStorage).filter(k => /^sb-.*-auth-token$/.test(k)).forEach(k => localStorage.removeItem(k));
+        try { sessionStorage.removeItem(PORTAL.CHAVE); } catch { /* nada a limpar */ }
+    }
+} catch { /* sem storage */ }
 
 // Entrou pela pagina de alteracoes (admin.html)? Guarda o e-mail de quem
 // edita. Sozinha nao libera nada: com contas ligadas, o banco ainda confere
@@ -2208,6 +2224,7 @@ if (PAGINA === 'editar') {
             const { error } = await sb.auth.updateUser({ password: nova.value });
             if (error) throw new Error(error.message.includes('different') ? 'A nova senha precisa ser diferente da atual.' : 'Não foi possível trocar a senha. Tente de novo.');
             await sb.from('mantenedores').update({ senha_provisoria: false }).eq('id', session.user.id);
+            senhaCriada();
             formSenha.reset();
             formSenha.classList.remove('validar');
             $('editor-senha-titulo').textContent = 'Trocar senha.';
