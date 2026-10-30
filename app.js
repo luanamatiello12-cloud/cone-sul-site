@@ -1235,7 +1235,9 @@ const ITENS = [
     '.campanha-lista li', '.campanha-beneficios li', '.lista-destaques li', '.meses-lista li', '.cta-buttons .btn'
 ].join(', ');
 
-const PAGINA_ARQUIVO = location.pathname.split('/').pop() || 'index.html';
+// O GitHub Pages abre a pagina tambem sem o .html (dominio/seja-mantenedor):
+// as edicoes ficam sempre no nome do arquivo
+const PAGINA_ARQUIVO = (location.pathname.split('/').pop() || 'index').replace(/(\.html)?$/, '.html');
 const GERAL = '_geral';
 const chaveArmazenada = (escopo) => 'conesul-edicoes::' + (escopo === 'g' ? GERAL : PAGINA_ARQUIVO);
 const CHAVE_EDICOES = chaveArmazenada('p');
