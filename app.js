@@ -559,7 +559,9 @@ const PORTAL = {
             options: { data: perfil, emailRedirectTo: new URL('portal.html', location.href).href, captchaToken }
         });
         if (error) throw new Error(error.message.includes('registered') ? 'Este e-mail já tem cadastro. Entre na Área do Mantenedor.' : 'Não foi possível concluir o cadastro.');
-        if (!data.session) throw new Error('Quase lá: enviamos um e-mail para confirmar seu cadastro. Abra o link para entrar.');
+        // Confirmacao de e-mail ligada: a conta so abre depois do link do
+        // e-mail. O cadastro ja esta feito; quem chama segue para o pagamento.
+        if (!data.session) return null;
         return this.perfil(sb, data.user);
     },
 
@@ -859,7 +861,7 @@ if (PAGINA === 'portal') {
         document.getElementById('nivel-titulo').textContent = nivel ? `Você é ${nivel.nome}.` : 'Escolha como contribuir.';
         document.getElementById('nivel-resumo').textContent = nivel
             ? 'Veja seus benefícios:'
-            : 'Seu cadastro está feito. Os benefícios chegam com a contribuição mensal: o nível depende do valor.';
+            : 'Seu cadastro está feito. O nível é definido pelo valor da contribuição mensal: quando o pagamento for confirmado, nossa equipe entra em contato pelo WhatsApp.';
         document.getElementById('nivel-beneficios').innerHTML = nivel
             ? nivel.beneficios.map(b => `<li>${b.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])}</li>`).join('')
             : '';
@@ -1039,33 +1041,43 @@ if (PAGINA === 'portal') {
 
 /* =========================================================
    FACA PARTE (fazer-parte.html): cadastro de mantenedor.
-   Ao concluir, abre a sessao e leva a Area do Mantenedor.
+   Ao concluir, segue para o link de pagamento (com ou sem plano).
    ========================================================= */
 if (PAGINA === 'fazer-parte') {
     const formCadastro = document.getElementById('form-cadastro');
 
-    // Veio de um plano? Mostra qual e, ao concluir, segue para o pagamento
+    // Veio de um plano? Mostra qual. Com ou sem plano, ao concluir segue
+    // para o pagamento
     const chavePlano = new URLSearchParams(location.search).get('plano');
     const nivelPlano = NIVEIS.find(n => n.id === PLANOS[chavePlano]);
-    const linkPlano = nivelPlano ? LINKS_PAGAMENTO.unico : '';
     if (nivelPlano) {
         document.getElementById('plano-escolhido').hidden = false;
         document.getElementById('plano-nome').textContent = `Plano ${nivelPlano.nome}`;
         document.getElementById('plano-faixa').textContent = `· ${nivelPlano.faixa}`;
-        document.getElementById('cadastro-lead').textContent = 'Primeiro, seu cadastro. Em seguida você vai para a página de pagamento, onde escolhe o valor da contribuição.';
-        const ja = PORTAL.sessao();
-        if (ja) {
-            formCadastro.hidden = true;
-            document.querySelector('.acesso-alternativo').hidden = true;
-            document.getElementById('plano-ja-cadastrado').hidden = false;
-            document.getElementById('plano-ja-email').textContent = ja.email;
-            const ir = document.getElementById('plano-ir-pagamento');
-            if (linkPlano) ir.href = linkPlano;
-            else { ir.setAttribute('aria-disabled', 'true'); document.getElementById('plano-sem-link').hidden = false; }
-        }
+    }
+    // Quem ja tem cadastro (e entrou) vai direto ao pagamento
+    const ja = PORTAL.sessao();
+    if (ja) {
+        formCadastro.hidden = true;
+        document.querySelector('.acesso-alternativo').hidden = true;
+        document.getElementById('plano-ja-cadastrado').hidden = false;
+        document.getElementById('plano-ja-email').textContent = ja.email;
+        const ir = document.getElementById('plano-ir-pagamento');
+        if (LINKS_PAGAMENTO.unico) ir.href = LINKS_PAGAMENTO.unico;
+        else { ir.setAttribute('aria-disabled', 'true'); document.getElementById('plano-sem-link').hidden = false; }
     }
     const cpf = document.getElementById('c-cpf');
+    const telefone = document.getElementById('c-telefone');
     CAPTCHA.preparar(formCadastro);
+
+    // Celular com DDD: (49) 99999-9999 enquanto digita
+    telefone.addEventListener('input', () => {
+        const d = telefone.value.replace(/\D/g, '').slice(0, 11);
+        const resto = d.slice(2);
+        telefone.value = d.length <= 2 ? d
+            : `(${d.slice(0, 2)}) ` + (resto.length > 4 ? `${resto.slice(0, -4)}-${resto.slice(-4)}` : resto);
+        telefone.setCustomValidity('');
+    });
 
     // Mascara 000.000.000-00 enquanto digita
     cpf.addEventListener('input', () => {
@@ -1087,6 +1099,7 @@ if (PAGINA === 'fazer-parte') {
         const retorno = document.getElementById('cadastro-retorno');
         formCadastro.classList.add('validar');
         cpf.setCustomValidity(cpf.value && !cpfValido(cpf.value) ? 'CPF inválido.' : '');
+        telefone.setCustomValidity(telefone.value && !/^\d{10,11}$/.test(telefone.value.replace(/\D/g, '')) ? 'Celular inválido.' : '');
         // Respondeu sobre fe e igreja? Entao precisa da autorizacao propria
         const consentimentoFe = document.getElementById('c-consentimento-fe');
         consentimentoFe.required = !!formCadastro.querySelector('input[name="cristao"]:checked, input[name="congrega"]:checked')
@@ -1096,6 +1109,8 @@ if (PAGINA === 'fazer-parte') {
             const invalido = formCadastro.querySelector(':invalid');
             retorno.textContent = invalido === cpf && cpf.value
                 ? 'Confira o CPF: os números não formam um CPF válido.'
+                : invalido === telefone && telefone.value
+                    ? 'Confira o celular: informe o DDD e o número, ex.: (49) 99999-9999.'
                 : invalido?.id === 'c-senha' && invalido.value
                     ? 'A senha precisa ter pelo menos 8 caracteres.'
                     : invalido === consentimentoFe
@@ -1122,17 +1137,15 @@ if (PAGINA === 'fazer-parte') {
                 cristao: escolha('cristao'),
                 congrega: escolha('congrega'),
                 igreja: fe ? valor('c-igreja') : '',
+                telefone: telefone.value.replace(/\D/g, ''),
                 email: valor('c-email'),
                 senha: document.getElementById('c-senha').value
             }, CAPTCHA.token(formCadastro));
-            PORTAL.salvar(usuario);
-            if (nivelPlano && linkPlano) { location.href = linkPlano; return; }
-            if (nivelPlano) {
-                retorno.textContent = 'Cadastro concluído! O link de pagamento ainda não está disponível. Avisaremos em breve.';
-                setTimeout(() => { location.href = 'portal.html'; }, 3500);
-                return;
-            }
-            location.href = 'portal.html';
+            // Sem sessao = falta confirmar o e-mail (o cadastro ja esta feito)
+            if (usuario) PORTAL.salvar(usuario);
+            // Lido agora: o Painel pode ter trocado o link depois de a pagina abrir
+            if (LINKS_PAGAMENTO.unico) { location.href = LINKS_PAGAMENTO.unico; return; }
+            retorno.textContent = 'Cadastro concluído! O link de pagamento ainda não está disponível. Avisaremos em breve.';
         } catch (erro) {
             retorno.textContent = erro.message;
             CAPTCHA.reiniciar(formCadastro);

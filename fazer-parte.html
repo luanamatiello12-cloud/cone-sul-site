@@ -8,24 +8,34 @@
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=1">
     <title>Faça Parte | CONE SUL</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="styles.css?v=92">
+    <link rel="stylesheet" href="styles.css?v=93">
 </head>
 <body data-pagina="fazer-parte">
 
-    <!-- CADASTRO: vem antes do pagamento. Com ?plano=<semeadores|construtores|expansores>
-         (botoes dos planos), ao concluir segue para o link de pagamento do plano;
-         sem plano, entra na Area do Mantenedor (portal.html) -->
+    <!-- CADASTRO: vem antes do pagamento. Com ou sem ?plano=<semeadores|construtores|expansores>
+         (botoes dos planos), ao concluir segue para o link de pagamento -->
     <section class="hero hero-pagina">
         <div class="wrap">
             <span class="hero-kicker">Faça parte — Cadastro de mantenedor</span>
             <h1>Faça parte da missão.</h1>
-            <p class="hero-lead" id="cadastro-lead">Preencha seu cadastro para acessar a Área do Mantenedor.</p>
+            <p class="hero-lead" id="cadastro-lead">Primeiro, seu cadastro. Em seguida você vai para a página de pagamento, onde escolhe o valor da contribuição.</p>
 
             <!-- Plano escolhido (preenchido por app.js quando vem ?plano=) -->
             <div class="plano-escolhido" id="plano-escolhido" hidden>
                 <div class="plano-passos"><span class="ativo">1. Cadastro</span><span>2. Pagamento</span></div>
                 <p><strong id="plano-nome"></strong> <span id="plano-faixa"></span></p>
-                <small>Na página de pagamento, escolha o valor da faixa do seu plano e use o mesmo e-mail deste cadastro: é pelo e-mail e pelo valor que seu acesso é liberado no nível certo.</small>
+                <small>Na página de pagamento, escolha o valor da faixa do seu plano.</small>
+            </div>
+
+            <!-- Como o nivel e definido e o contato da equipe -->
+            <div class="cadastro-aviso">
+                <p><strong>Como funciona</strong></p>
+                <ul>
+                    <li>O seu nível de mantenedor (Semeador, Construtor ou Expansor) é definido pelo <strong>valor da sua contribuição mensal</strong>, não pelo plano escolhido aqui.</li>
+                    <li>Na página de pagamento, use o <strong>mesmo e-mail</strong> deste cadastro.</li>
+                    <li>Quando o pagamento for confirmado, nossa equipe entra em contato pelo <strong>WhatsApp</strong>.</li>
+                    <li>Você também recebe um e-mail para confirmar o cadastro.</li>
+                </ul>
             </div>
 
             <!-- Quem ja tem cadastro e escolhe um plano vai direto ao pagamento -->
@@ -87,6 +97,10 @@
                     </div>
 
                     <div class="campo">
+                        <label for="c-telefone">Celular (WhatsApp)</label>
+                        <input type="tel" id="c-telefone" inputmode="numeric" autocomplete="tel-national" placeholder="(49) 99999-9999" maxlength="15" required>
+                    </div>
+                    <div class="campo">
                         <label for="c-email">E-mail</label>
                         <input type="email" id="c-email" autocomplete="email" required>
                     </div>
@@ -111,6 +125,6 @@
         </div>
     </section>
 
-    <script src="app.js?v=80"></script>
+    <script src="app.js?v=81"></script>
 </body>
 </html>
