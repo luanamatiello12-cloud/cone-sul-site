@@ -362,8 +362,9 @@ if (!MOVIMENTO_REDUZIDO) {
 
 /* =========================================================
    FORMULARIOS (contato e atualizacoes)
-   Nao ha servidor: o envio abre o programa de e-mail com os
-   dados preenchidos. Quando houver backend, trocar por fetch/POST.
+   Nao ha servidor: o envio abre a conversa no WhatsApp da equipe
+   (CONTATO.whatsapp) com a mensagem pronta. Sem WhatsApp configurado,
+   abre o programa de e-mail.
    ========================================================= */
 document.querySelectorAll('form[data-assunto]').forEach(form => {
     form.addEventListener('submit', (e) => {
@@ -381,6 +382,16 @@ document.querySelectorAll('form[data-assunto]').forEach(form => {
             .filter(c => c.type !== 'checkbox')
             .map(c => `${c.dataset.rotulo || c.name}: ${c.value.trim() || '-'}`);
 
+        // Numero do link do WhatsApp do rodape (https://wa.me/55...)
+        const numero = (/wa\.me\/(\d{10,15})/.exec(CONTATO.whatsapp) || [])[1];
+        if (numero) {
+            const url = `https://wa.me/${numero}?text=` + encodeURIComponent(`*${form.dataset.assunto}*\n\n` + linhas.join('\n'));
+            // Aba nova; bloqueada (alguns celulares), abre nesta mesma
+            const aba = window.open(url, '_blank');
+            if (aba) aba.opener = null; else window.location.href = url;
+            retorno.textContent = 'Abrimos o WhatsApp com a mensagem pronta. Confira e toque em enviar para concluir.';
+            return;
+        }
         window.location.href = 'mailto:' + CONTATO.email
             + '?subject=' + encodeURIComponent(form.dataset.assunto)
             + '&body=' + encodeURIComponent(linhas.join('\n'));
