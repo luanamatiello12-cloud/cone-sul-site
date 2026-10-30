@@ -91,21 +91,23 @@ create trigger mantenedores_atualizado before update on public.mantenedores
     for each row execute function public.marcar_atualizacao();
 
 -- ---------- Seguranca ----------
+-- Nas regras, (select auth.uid()) em vez de auth.uid(): o banco calcula
+-- uma vez por consulta, nao uma vez por linha (recomendacao do Supabase)
 alter table public.mantenedores enable row level security;
 alter table public.eventos_pagamento enable row level security;   -- so o servidor acessa
 
 drop policy if exists "ve o proprio cadastro" on public.mantenedores;
 create policy "ve o proprio cadastro" on public.mantenedores
-    for select to authenticated using (auth.uid() = id);
+    for select to authenticated using ((select auth.uid()) = id);
 
 -- A equipe ve todos os cadastros (lista no Painel, so leitura)
 drop policy if exists "equipe ve os cadastros" on public.mantenedores;
 create policy "equipe ve os cadastros" on public.mantenedores
-    for select to authenticated using (exists (select 1 from public.equipe e where e.id = auth.uid()));
+    for select to authenticated using (exists (select 1 from public.equipe e where e.id = (select auth.uid())));
 
 drop policy if exists "edita o proprio cadastro" on public.mantenedores;
 create policy "edita o proprio cadastro" on public.mantenedores
-    for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+    for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
 
 -- Pelo site, so os dados pessoais podem mudar (nunca valor, status ou nivel)
 revoke insert, update, delete on public.mantenedores from anon, authenticated;
@@ -146,7 +148,7 @@ create policy "todos leem o site" on public.site_edicoes
 drop policy if exists "equipe publica" on public.site_edicoes;
 create policy "equipe publica" on public.site_edicoes
     for insert to authenticated
-    with check (autor = auth.uid() and exists (select 1 from public.equipe e where e.id = auth.uid()));
+    with check (autor = (select auth.uid()) and exists (select 1 from public.equipe e where e.id = (select auth.uid())));
 
 grant select on public.site_edicoes to anon, authenticated;
 grant insert on public.site_edicoes to authenticated;
@@ -155,7 +157,7 @@ grant insert on public.site_edicoes to authenticated;
 -- para mostrar o botao Editar so para a equipe)
 drop policy if exists "ve a si mesmo" on public.equipe;
 create policy "ve a si mesmo" on public.equipe
-    for select to authenticated using (id = auth.uid());
+    for select to authenticated using (id = (select auth.uid()));
 grant select on public.equipe to authenticated;
 
 -- Imagens trocadas pelo editor: armazenamento publico "site"
@@ -169,7 +171,7 @@ on conflict (id) do update
 drop policy if exists "equipe envia imagens" on storage.objects;
 create policy "equipe envia imagens" on storage.objects
     for insert to authenticated
-    with check (bucket_id = 'site' and exists (select 1 from public.equipe e where e.id = auth.uid()));
+    with check (bucket_id = 'site' and exists (select 1 from public.equipe e where e.id = (select auth.uid())));
 
 -- ---------- Conteudo so para mantenedores ----------
 -- O HTML do site e publico (e o repositorio tambem): o que for exclusivo
@@ -188,14 +190,14 @@ alter table public.conteudo_restrito enable row level security;
 drop policy if exists "le quem tem o nivel" on public.conteudo_restrito;
 create policy "le quem tem o nivel" on public.conteudo_restrito
     for select to authenticated using (
-        exists (select 1 from public.mantenedores m where m.id = auth.uid() and m.nivel = any (niveis))
-        or exists (select 1 from public.equipe e where e.id = auth.uid())
+        exists (select 1 from public.mantenedores m where m.id = (select auth.uid()) and m.nivel = any (niveis))
+        or exists (select 1 from public.equipe e where e.id = (select auth.uid()))
     );
 drop policy if exists "equipe altera" on public.conteudo_restrito;
 create policy "equipe altera" on public.conteudo_restrito
     for all to authenticated
-    using (exists (select 1 from public.equipe e where e.id = auth.uid()))
-    with check (exists (select 1 from public.equipe e where e.id = auth.uid()));
+    using (exists (select 1 from public.equipe e where e.id = (select auth.uid())))
+    with check (exists (select 1 from public.equipe e where e.id = (select auth.uid())));
 revoke all on public.conteudo_restrito from anon;
 grant select, insert, update, delete on public.conteudo_restrito to authenticated;
 
@@ -218,13 +220,13 @@ alter table public.noticias enable row level security;
 drop policy if exists "contas leem" on public.noticias;
 create policy "contas leem" on public.noticias
     for select to authenticated using (
-        publicada or exists (select 1 from public.equipe e where e.id = auth.uid())
+        publicada or exists (select 1 from public.equipe e where e.id = (select auth.uid()))
     );
 drop policy if exists "equipe publica noticias" on public.noticias;
 create policy "equipe publica noticias" on public.noticias
     for all to authenticated
-    using (exists (select 1 from public.equipe e where e.id = auth.uid()))
-    with check (exists (select 1 from public.equipe e where e.id = auth.uid()));
+    using (exists (select 1 from public.equipe e where e.id = (select auth.uid())))
+    with check (exists (select 1 from public.equipe e where e.id = (select auth.uid())));
 revoke all on public.noticias from anon;
 grant select, insert, update, delete on public.noticias to authenticated;
 

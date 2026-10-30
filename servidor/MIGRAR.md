@@ -23,8 +23,6 @@ Falta:
 - **Webhook de pagamento**: publicado, mas desligado (sem `PROVEDOR_PAGAMENTO`)
   até existir plataforma que avise. O `WEBHOOK_TOKEN` já existe; gere outro
   ao ligar, para cadastrar na plataforma.
-- O projeto antigo "conesul.missoes@gmail.com's Project" (região EUA) não é
-  usado e pode ser apagado.
 
 ## 1. O que vocês fazem (antes de me chamar)
 
