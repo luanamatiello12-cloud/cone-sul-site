@@ -465,7 +465,7 @@
         caixa.hidden = false;
         caixa.replaceChildren(el('p', { textContent: 'Carregando…' }));
         const sb = await PORTAL.cliente();
-        const { data, error } = await sb.from('site_edicoes').select('id, criado_em, autor_email, conteudo').eq('pagina', '_config').order('id', { ascending: false }).limit(15);
+        const { data, error } = await sb.rpc('historico_edicoes', { p_pagina: '_config', p_limite: 15 });
         if (error) { caixa.replaceChildren(el('p', { textContent: 'Não foi possível carregar o histórico.' })); return; }
         const quando = (d) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
         const versoes = data || [];

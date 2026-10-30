@@ -4,6 +4,13 @@
    o menu seja editado em um lugar so.
    ========================================================= */
 
+// Aberto dentro de outro site (moldura invisivel para enganar cliques)?
+// Some e tenta abrir o site como pagina principal.
+if (window.top !== window.self) {
+    document.documentElement.style.display = 'none';
+    try { window.top.location = window.location.href; } catch { /* moldura bloqueada: fica escondido */ }
+}
+
 // ---------- Contato (WhatsApp e site da igreja: trocar quando houver) ----------
 const CONTATO = {
     email: 'conesul.missoes@gmail.com',
@@ -1568,8 +1575,8 @@ const EDICAO = {
 
     async historico() {
         const sb = await PORTAL.cliente();
-        const { data, error } = await sb.from('site_edicoes').select('id, criado_em, autor_email, conteudo')
-            .eq('pagina', PAGINA_ARQUIVO).order('id', { ascending: false }).limit(20);
+        // Quem publicou so a equipe ve (funcao historico_edicoes, schema.sql)
+        const { data, error } = await sb.rpc('historico_edicoes', { p_pagina: PAGINA_ARQUIVO, p_limite: 20 });
         if (error) throw new Error('Não foi possível carregar o histórico.');
         return data;
     },

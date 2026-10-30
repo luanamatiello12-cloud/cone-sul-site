@@ -245,3 +245,31 @@ create table if not exists public.registro_atividades (
 );
 alter table public.registro_atividades enable row level security;
 revoke all on public.registro_atividades from anon, authenticated;
+
+-- ---------- Permissoes: so o que o site usa ----------
+-- O Supabase da a anon e authenticated todas as permissoes nas tabelas
+-- novas; as regras acima ja barram, mas aqui fica so o necessario (segunda
+-- camada). Tabela nova = acrescentar aqui o que ela precisa.
+revoke all on all tables in schema public from anon, authenticated;
+-- Edicoes publicadas: todos leem, sem quem publicou (autor, autor_email)
+grant select (id, pagina, conteudo, criado_em) on public.site_edicoes to anon, authenticated;
+grant insert (pagina, conteudo, autor, autor_email) on public.site_edicoes to authenticated;
+grant select on public.equipe to authenticated;
+grant select on public.mantenedores to authenticated;
+grant update (nome, telefone, nascimento, naturalidade, moradia, cristao, congrega, igreja, conferido, senha_provisoria)
+    on public.mantenedores to authenticated;
+grant select, insert, update, delete on public.conteudo_restrito, public.noticias to authenticated;
+
+-- Historico de uma pagina com quem publicou: so para a equipe
+create or replace function public.historico_edicoes(p_pagina text, p_limite int default 20)
+returns table (id bigint, criado_em timestamptz, autor_email text, conteudo jsonb)
+language sql stable security definer set search_path = public as $$
+    select s.id, s.criado_em, s.autor_email, s.conteudo
+    from public.site_edicoes s
+    where s.pagina = p_pagina
+      and exists (select 1 from public.equipe e where e.id = (select auth.uid()))
+    order by s.id desc
+    limit least(greatest(p_limite, 1), 50)
+$$;
+revoke execute on function public.historico_edicoes(text, int) from public, anon;
+grant execute on function public.historico_edicoes(text, int) to authenticated;
