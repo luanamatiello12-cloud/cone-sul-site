@@ -3,6 +3,8 @@
    - Contatos do rodape e links de pagamento dos planos
    - Camisetas (preco, estoque, medidas, fotos, link)
    - Cidades do mapa (fotos com legenda, mostrar/esconder, cidade nova)
+   - Cadastros de mantenedores (so leitura, com contas ligadas: tabela
+     "mantenedores"), com o botao do WhatsApp
    - Noticias (so com contas ligadas: ficam na tabela "noticias")
    Os tres primeiros formam a "configuracao do site" (app.js, aplicarConfig):
    com contas ligadas, Salvar publica no banco (site_edicoes, "_config");
@@ -274,7 +276,76 @@
             ...linhas, novaCidade);
     }
 
-    // ---------- 4. Noticias (contas ligadas) ----------
+    // ---------- 4. Cadastros de mantenedores (contas ligadas) ----------
+    // Quem se cadastrou pelo site (ou veio do Eklesia), com o celular para a
+    // equipe entrar em contato. So leitura: o nivel vem da importacao.
+    const NOMES_NIVEL = Object.fromEntries(NIVEIS.map(n => [n.id, n.nome]));
+    const whats = (t) => {
+        let d = String(t || '').replace(/\D/g, '').replace(/^0+/, '');
+        if (d.length === 10 || d.length === 11) d = '55' + d;   // DDD + numero, sem o 55
+        return d.length >= 12 ? d : '';
+    };
+    const celular = (t) => {
+        const d = String(t || '').replace(/\D/g, '');
+        return d.length >= 10 ? `(${d.slice(0, 2)}) ${d.slice(2, -4)}-${d.slice(-4)}` : d;
+    };
+    async function montarCadastros() {
+        const corpo = $('#pc-cadastros');
+        if (PORTAL.MODO_DEMO) {
+            corpo.replaceChildren(el('p', { className: 'pc-dica', textContent: 'Os cadastros ficam no banco de dados: esta lista funciona quando as contas estiverem ligadas.' }));
+            return;
+        }
+        const sb = await PORTAL.cliente();
+        let todos = [];
+        const filtro = el('select', {},
+            el('option', { value: 'aguardando', textContent: 'Aguardando pagamento (sem nível)' }),
+            el('option', { value: 'nivel', textContent: 'Com nível' }),
+            el('option', { value: 'todos', textContent: 'Todos' }));
+        const busca = el('input', { type: 'search', placeholder: 'Nome, e-mail ou celular' });
+        const resumo = el('p', { className: 'pc-dica', role: 'status', textContent: 'Carregando…' });
+        const lista = el('div', { className: 'pc-cadastros-lista' });
+        const desenhar = () => {
+            const termo = busca.value.trim().toLowerCase();
+            const digitos = termo.replace(/\D/g, '');
+            const vistos = todos.filter(m => (filtro.value === 'todos' || (filtro.value === 'nivel') === !!m.nivel)
+                && (!termo || (m.nome || '').toLowerCase().includes(termo) || m.email.includes(termo) || (digitos && (m.telefone || '').includes(digitos))));
+            const semNivel = todos.filter(m => !m.nivel).length;
+            resumo.textContent = `${todos.length} cadastro(s) · ${semNivel} aguardando pagamento · mostrando ${vistos.length}.`;
+            lista.replaceChildren(...(vistos.length ? vistos.map(m => {
+                const tel = whats(m.telefone);
+                const primeiro = (m.nome || '').trim().split(/\s+/)[0];
+                const msg = `Olá${primeiro ? ', ' + primeiro : ''}! Aqui é da equipe do Projeto Cone Sul. Obrigado pelo seu cadastro como mantenedor!`;
+                return el('div', { className: 'pc-cadastro' },
+                    el('div', {},
+                        el('strong', { textContent: m.nome || m.email }),
+                        el('small', { textContent: [m.email, m.telefone ? celular(m.telefone) : 'sem celular', 'desde ' + new Date(m.criado_em).toLocaleDateString('pt-BR')].join(' · ') })),
+                    el('div', { className: 'pc-noticia-acoes' },
+                        el('span', { className: 'pc-nivel' + (m.nivel ? ' com-nivel' : ''), textContent: m.nivel
+                            ? `${NOMES_NIVEL[m.nivel] || m.nivel} · ${reais(m.valor_mensal)}`
+                            : 'Aguardando pagamento' }),
+                        tel ? el('a', { className: 'pc-whats', href: `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, target: '_blank', rel: 'noopener', textContent: 'WhatsApp' }) : null));
+            }) : [el('p', { className: 'pc-dica', textContent: todos.length ? 'Ninguém nesta seleção.' : 'Nenhum cadastro ainda.' })]));
+        };
+        const carregar = async () => {
+            resumo.textContent = 'Carregando…';
+            const { data, error } = await sb.from('mantenedores')
+                .select('nome, email, telefone, valor_mensal, nivel, criado_em')
+                .order('criado_em', { ascending: false }).limit(1000);
+            if (error) { resumo.textContent = 'Não foi possível carregar os cadastros.'; lista.replaceChildren(); return; }
+            todos = data || [];
+            desenhar();
+        };
+        filtro.addEventListener('change', desenhar);
+        busca.addEventListener('input', desenhar);
+        corpo.replaceChildren(
+            el('p', { className: 'pc-dica', textContent: 'Quem se cadastrou pelo site ou entrou pela importação do Eklesia. O nível aparece depois que a contribuição é importada. O botão WhatsApp abre a conversa com a pessoa.' }),
+            el('div', { className: 'pc-cadastros-filtros' }, campo('Mostrar', filtro), campo('Procurar', busca),
+                el('button', { type: 'button', className: 'btn btn-secondary', textContent: 'Atualizar', onclick: carregar })),
+            resumo, lista);
+        carregar();
+    }
+
+    // ---------- 5. Noticias (contas ligadas) ----------
     const CATEGORIAS = { diario: 'Diário de Campo', noticias: 'Notícias da Missão', historias: 'Histórias e Testemunhos', projetos: 'Projetos e Expansão', contas: 'Prestação de Contas' };
     async function montarNoticias() {
         const corpo = $('#pc-noticias');
@@ -428,9 +499,9 @@
     montarContatos();
     montarProdutos();
     montarCidades();
-    // Noticias so depois de entrar (precisam da sessao)
+    // Noticias e cadastros so depois de entrar (precisam da sessao)
     let noticiasProntas = false;
-    const abrirNoticias = () => { if (!noticiasProntas && !raiz.hidden) { noticiasProntas = true; montarNoticias(); } };
+    const abrirNoticias = () => { if (!noticiasProntas && !raiz.hidden) { noticiasProntas = true; montarNoticias(); montarCadastros(); } };
     new MutationObserver(abrirNoticias).observe(raiz, { attributes: true, attributeFilter: ['hidden'] });
     abrirNoticias();
 })();
