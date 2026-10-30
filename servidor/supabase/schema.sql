@@ -98,6 +98,11 @@ drop policy if exists "ve o proprio cadastro" on public.mantenedores;
 create policy "ve o proprio cadastro" on public.mantenedores
     for select to authenticated using (auth.uid() = id);
 
+-- A equipe ve todos os cadastros (lista no Painel, so leitura)
+drop policy if exists "equipe ve os cadastros" on public.mantenedores;
+create policy "equipe ve os cadastros" on public.mantenedores
+    for select to authenticated using (exists (select 1 from public.equipe e where e.id = auth.uid()));
+
 drop policy if exists "edita o proprio cadastro" on public.mantenedores;
 create policy "edita o proprio cadastro" on public.mantenedores
     for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
