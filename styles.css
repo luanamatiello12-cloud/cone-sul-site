@@ -3723,3 +3723,11 @@ nav .logo img { height: 46px; width: auto; display: block; }
 
 /* Link da Politica de Privacidade nas autorizacoes do cadastro */
 .consentimento a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Area do Mantenedor aberta pela equipe: blocos de um nivel so, com etiqueta */
+.so-nivel-edicao { position: relative; outline: 2px dashed var(--areia); outline-offset: -8px; }
+.so-nivel-edicao::before {
+    content: attr(data-so-nivel); position: absolute; top: 14px; right: 14px; z-index: 2;
+    padding: 0.25rem 0.6rem; background: var(--areia); color: var(--verde-900);
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+}
