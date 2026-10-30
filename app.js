@@ -586,7 +586,10 @@ const PORTAL = {
         // (com type=recovery), e um segundo # impede o cliente de le-lo
         const destino = new URL(pagina, location.href);
         const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: destino.href, captchaToken });
-        if (error) throw new Error('Não foi possível enviar agora. Tente de novo em alguns minutos.');
+        // 429: o Supabase so manda um link por minuto para o mesmo e-mail
+        if (error) throw new Error(error.status === 429
+            ? 'Já enviamos um link há pouco. Confira a caixa de entrada e o spam, ou espere 1 minuto para pedir outro.'
+            : 'Não foi possível enviar agora. Tente de novo em alguns minutos.');
     },
 
     sessao() {
