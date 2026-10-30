@@ -64,10 +64,11 @@ create or replace function public.criar_mantenedor()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare d jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
 begin
-    insert into public.mantenedores (id, email, nome, cpf, nascimento, naturalidade, moradia, cristao, congrega, igreja)
+    insert into public.mantenedores (id, email, nome, cpf, telefone, nascimento, naturalidade, moradia, cristao, congrega, igreja)
     values (
         new.id, new.email,
         d->>'nome', nullif(regexp_replace(coalesce(d->>'cpf', ''), '\D', '', 'g'), ''),
+        nullif(regexp_replace(coalesce(d->>'telefone', ''), '\D', '', 'g'), ''),
         nullif(d->>'nascimento', '')::date, d->>'naturalidade', d->>'moradia',
         (d->>'cristao')::boolean, (d->>'congrega')::boolean, d->>'igreja'
     )

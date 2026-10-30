@@ -8,8 +8,10 @@ abrir o portal com o valor no endereço: `portal.html?demo=1500` (Expansor),
 ## Como funciona, quando ligado
 
 1. A pessoa escolhe um plano (Semeador, Construtor, Expansor). O botão leva primeiro
-   ao **cadastro** (`fazer-parte.html?plano=...`): nome, CPF, nascimento, igreja, e-mail
-   e senha. A conta é criada nesse momento, ainda sem nível.
+   ao **cadastro** (`fazer-parte.html?plano=...`): nome, CPF, nascimento, igreja, celular (WhatsApp), e-mail
+   e senha. A conta é criada nesse momento, ainda sem nível (e só abre depois do
+   e-mail de confirmação). O botão "Eu quero fazer parte" do menu leva ao mesmo
+   cadastro, sem plano, e segue o mesmo caminho.
 2. Concluído o cadastro, o site leva ao **link de pagamento**, que é um só para
    todos os planos (`LINKS_PAGAMENTO.unico` no `app.js`, ou no Painel). A pessoa
    escolhe o valor lá; o nível no login sai do valor contribuído, não do plano
