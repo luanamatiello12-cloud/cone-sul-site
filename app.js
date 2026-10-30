@@ -891,7 +891,14 @@ if (PAGINA === 'portal') {
             : 'Nenhuma contribuição ativa ainda.';
         telasPortal.forEach(t => {
             const exige = SO_NIVEL[t.id];
-            if (exige) t.hidden = !nivel || !exige.includes(nivel.id);
+            // Aberta pela lista do /admin: a equipe ve (e edita) todas, com
+            // a etiqueta de quem ve. O texto delas ja e publico no HTML.
+            const equipeEditando = ABERTA_PARA_EDITAR && !!editorLocal();
+            if (exige) {
+                t.hidden = !equipeEditando && (!nivel || !exige.includes(nivel.id));
+                t.classList.toggle('so-nivel-edicao', equipeEditando);
+                if (equipeEditando) t.dataset.soNivel = 'Visível só para ' + exige.map(id => NIVEIS.find(n => n.id === id)?.nome + 'es').join(' e ');
+            }
         });
     }
 
