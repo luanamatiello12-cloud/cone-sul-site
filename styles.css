@@ -3150,6 +3150,14 @@ button.link-discreto { background: none; border: none; padding: 0; font: inherit
 .portal-senha .btn-primary { background: var(--verde-800); color: var(--creme); box-shadow: none; }
 .portal-senha .btn-primary:hover { background: var(--verde-900); color: var(--areia); }
 @media (max-width: 640px) { .portal-senha .formulario { grid-template-columns: 1fr; } }
+/* Campos claros no cartao branco (o padrao e para fundo verde) */
+.portal-senha .campo input { background: #fff; border-color: #cfcbbd; color: #2a2e2a; }
+.portal-senha .campo input:focus { border-color: var(--verde-800); }
+
+/* Link de "Esqueci minha senha" na area da equipe: so a senha nova */
+.so-senha header nav,
+.so-senha header .menu-toggle,
+.so-senha footer { display: none; }
 
 /* Importar: lista de acessos para mandar pelo WhatsApp */
 .acessos { list-style: none; display: grid; gap: 0.8rem; margin: 1.2rem 0 0; padding: 0; }

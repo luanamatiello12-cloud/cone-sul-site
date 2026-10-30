@@ -2127,6 +2127,8 @@ if (PAGINA === 'editar') {
     const mostrar = (email, soSenha = false) => {
         telaLogin.hidden = !!email;
         telasPainel.forEach(t => { t.hidden = !email || (soSenha && !['editar-topo', 'editar-senha'].includes(t.id)); });
+        // Sem menu e rodape: dali so se sai salvando a senha ou por "Sair"
+        document.documentElement.classList.toggle('so-senha', !!email && soSenha);
         if (email) $('editor-email').textContent = email;
         window.scrollTo(0, 0);
     };
