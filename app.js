@@ -2126,8 +2126,8 @@ if (PAGINA === 'editar') {
     // formulario de senha nova; o painel abre depois de salvar a senha.
     const mostrar = (email, soSenha = false) => {
         telaLogin.hidden = !!email;
-        telasPainel.forEach(t => { t.hidden = !email || (soSenha && !['editar-topo', 'editar-senha'].includes(t.id)); });
-        // Sem menu e rodape: dali so se sai salvando a senha ou por "Sair"
+        telasPainel.forEach(t => { t.hidden = !email || (soSenha && t.id !== 'editar-senha'); });
+        // So o campo da senha nova: sem cabecalho, menu e rodape
         document.documentElement.classList.toggle('so-senha', !!email && soSenha);
         if (email) $('editor-email').textContent = email;
         window.scrollTo(0, 0);

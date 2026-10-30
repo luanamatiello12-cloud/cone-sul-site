@@ -3155,9 +3155,9 @@ button.link-discreto { background: none; border: none; padding: 0; font: inherit
 .portal-senha .campo input:focus { border-color: var(--verde-800); }
 
 /* Link de "Esqueci minha senha" na area da equipe: so a senha nova */
-.so-senha header nav,
-.so-senha header .menu-toggle,
+.so-senha header,
 .so-senha footer { display: none; }
+.so-senha #editar-senha { min-height: 100vh; }
 
 /* Importar: lista de acessos para mandar pelo WhatsApp */
 .acessos { list-style: none; display: grid; gap: 0.8rem; margin: 1.2rem 0 0; padding: 0; }
