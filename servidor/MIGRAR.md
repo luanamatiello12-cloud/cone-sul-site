@@ -16,6 +16,10 @@ Falta:
 - **Domínio**: passo 5 de "O que eu faço", e depois trocar `SITE_URL`,
   `ORIGENS_PERMITIDAS` e o endereço do login (Authentication > URL Configuration).
 - **CAPTCHA** (Turnstile): não configurado.
+- **Verificação em duas etapas da equipe** (prioridade baixa, combinado em
+  30/10/2026): código de 6 números (Google Authenticator) no login do /admin,
+  exigido também pelas regras do banco (`aal2`). Antes, decidir se a equipe
+  segue com a conta única ou contas individuais.
 - **E-mail**: os e-mails saem pelo Gmail `conesul.missoes@gmail.com` (senha de
   app em Authentication > Emails > SMTP Settings), em português, até 30 por
   hora. O Gmail manda até ~500 por dia; com o domínio próprio, vale trocar por
