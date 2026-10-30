@@ -72,7 +72,7 @@ as linhas já organizadas. Só contas da tabela `equipe` conseguem importar.
 1. Criar um projeto em supabase.com, em nome da igreja.
 2. **SQL Editor**: colar e rodar `supabase/schema.sql`.
 3. **Authentication > URL Configuration**: em *Site URL* e *Redirect URLs*, colocar o
-   endereço do site (ex.: `https://luanamatiello12-cloud.github.io/cone-sul-site/`).
+   endereço do site (ex.: `https://missaoconesul.com.br/`).
 4. **Authentication > Email Templates**: traduzir para o português o e-mail de
    **Reset password** ("Esqueci minha senha") e o de **Invite user** (usado só pelo
    webhook de pagamento, se um dia for ligado).
@@ -96,10 +96,10 @@ supabase functions deploy importar-planilha
 supabase functions deploy webhook-pagamento --no-verify-jwt
 supabase secrets set PROVEDOR_PAGAMENTO=asaas \
   WEBHOOK_TOKEN=<uma senha longa inventada> \
-  SITE_URL=https://luanamatiello12-cloud.github.io/cone-sul-site
+  SITE_URL=https://missaoconesul.com.br
 # Endereços de onde a importação pode ser chamada (padrão: o do SITE_URL).
 # Com domínio próprio, listar os dois enquanto durar a troca:
-supabase secrets set ORIGENS_PERMITIDAS=https://conesul.org.br,https://luanamatiello12-cloud.github.io
+supabase secrets set ORIGENS_PERMITIDAS=https://missaoconesul.com.br,https://www.missaoconesul.com.br,https://luanamatiello12-cloud.github.io
 # e a chave da plataforma escolhida:
 supabase secrets set ASAAS_API_KEY=...            # Asaas
 supabase secrets set MERCADOPAGO_ACCESS_TOKEN=... # ou Mercado Pago

@@ -12,9 +12,21 @@ sessão de 15 minutos, e-mails em português pelo Gmail), `CONTAS` preenchido no
 `conesul.missoes@gmail.com` na tabela `equipe`. As edições do navegador **não**
 foram migradas (decisão da equipe).
 
+**Domínio ligado (30/10/2026)**: o site está em **https://missaoconesul.com.br**
+(DNS no Registro.br: quatro registros A para o GitHub Pages e `www` em CNAME para
+`luanamatiello12-cloud.github.io`; arquivo `CNAME` no repositório). O endereço
+antigo (`luanamatiello12-cloud.github.io/cone-sul-site/`) redireciona para o novo.
+No login (Authentication > URL Configuration), *Site URL* é o domínio novo e as
+*Redirect URLs* aceitam o domínio (com e sem `www`), o github.io (por um tempo, para
+links de e-mail já enviados) e `localhost:5500`.
+
 Falta:
-- **Domínio**: passo 5 de "O que eu faço", e depois trocar `SITE_URL`,
-  `ORIGENS_PERMITIDAS` e o endereço do login (Authentication > URL Configuration).
+- **Segredos das funções**: trocar `SITE_URL` para `https://missaoconesul.com.br` e
+  `ORIGENS_PERMITIDAS` para `https://missaoconesul.com.br,https://www.missaoconesul.com.br,https://luanamatiello12-cloud.github.io,http://localhost:5500`
+  (Edge Functions > Secrets). Sem isso, a importação da planilha no /admin é
+  recusada quando aberta pelo domínio novo.
+- **HTTPS**: em Settings > Pages do repositório, marcar *Enforce HTTPS* quando
+  o GitHub liberar o certificado.
 - **CAPTCHA** (Turnstile): não configurado.
 - **Verificação em duas etapas da equipe** (prioridade baixa, combinado em
   30/10/2026): código de 6 números (Google Authenticator) no login do /admin,
