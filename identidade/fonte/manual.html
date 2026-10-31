@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<!-- Modelo do manual de identidade. Nao abra direto: as marcas svg:nome entre chaves duplas
+     sao trocadas pelo SVG correspondente (identidade/svg/nome.svg) pelo
+     exportar.js, que tambem imprime o PDF. Assim as artes entram no PDF
+     como vetor, nunca como imagem. -->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>CONE SUL — Manual de Identidade Visual</title>
+<style>
+@font-face { font-family: 'Advercase'; src: url('../../fonts/advercase-regular.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Advercase'; src: url('../../fonts/advercase-bold.woff2') format('woff2'); font-weight: 700; }
+@page { size: 297mm 210mm; margin: 0; }
+:root {
+  --v900: #0b2215; --v800: #122d1e; --v700: #1b3a28; --v600: #2e5139;
+  --limao: #c9d780; --limao-e: #5f7424; --creme: #fef5e2;
+  --titulo: 'Advercase', Georgia, serif;
+  --texto: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--creme); }
+body { font-family: var(--texto); font-size: 9.5pt; line-height: 1.55; color: #2a2e2a;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+svg { display: block; width: 100%; height: auto; }
+
+.pg { width: 297mm; height: 210mm; position: relative; overflow: hidden; page-break-after: always;
+  padding: 18mm 20mm 16mm; background: var(--creme); }
+.pg:last-child { page-break-after: auto; }
+.escura { background: var(--v800); color: #dfe3dc; }
+.escura h1, .escura h2, .escura h3 { color: var(--creme); }
+
+/* cabecalho e rodape de cada pagina */
+.topo { position: absolute; top: 9mm; left: 20mm; right: 20mm; display: flex; align-items: center; gap: 5mm;
+  font-family: var(--titulo); font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: var(--limao-e); }
+.topo::after { content: ''; flex: 1; height: .3mm; background: currentColor; opacity: .5; order: 1; }
+.topo b { order: 2; font-weight: 400; }
+.escura .topo { color: var(--limao); }
+.num { position: absolute; bottom: 8mm; right: 20mm; font-family: var(--titulo); font-size: 9pt; color: var(--limao-e); }
+.escura .num { color: var(--limao); }
+
+h1 { font-family: var(--titulo); font-weight: 400; font-size: 40pt; line-height: 1.02; color: var(--v800); }
+h2 { font-family: var(--titulo); font-weight: 400; font-size: 26pt; line-height: 1.05; color: var(--v800); margin-bottom: 5mm; }
+h3 { font-family: var(--titulo); font-weight: 700; font-size: 11pt; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--v800); margin-bottom: 2mm; }
+.kicker { font-family: var(--titulo); font-size: 9pt; letter-spacing: .18em; text-transform: uppercase; color: var(--limao-e); margin-bottom: 3mm; }
+.escura .kicker { color: var(--limao); }
+p + p { margin-top: 2.5mm; }
+.lead { font-size: 11.5pt; line-height: 1.5; }
+.peq { font-size: 8pt; line-height: 1.45; opacity: .85; }
+
+.cols { display: grid; gap: 10mm; }
+.c2 { grid-template-columns: 1fr 1fr; }
+.c3 { grid-template-columns: repeat(3, 1fr); }
+.c4 { grid-template-columns: repeat(4, 1fr); }
+.lado { display: grid; grid-template-columns: 82mm 1fr; gap: 14mm; height: 100%; align-items: start; }
+
+.quadro { border-radius: 3mm; display: flex; align-items: center; justify-content: center; padding: 8mm; }
+.q-creme { background: #fffaf0; border: .3mm solid #e6dcc4; }
+.q-verde { background: var(--v800); }
+.q-escuro { background: var(--v900); }
+.q-limao { background: var(--limao); }
+.q-branco { background: #fff; border: .3mm solid #e6dcc4; }
+.legenda { font-size: 7.5pt; margin-top: 2mm; color: #5c6353; }
+.escura .legenda { color: #aab3a4; }
+.fio { height: .3mm; background: var(--limao-e); opacity: .5; margin: 5mm 0; }
+
+/* ---------- capa */
+.capa { padding: 0; display: grid; grid-template-columns: 1fr 1fr; }
+.capa .esq { padding: 22mm 20mm; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 1; }
+.capa .dir { position: relative; }
+.capa .ondas { position: absolute; inset: 0; opacity: .22; }
+.capa .ondas svg { width: 100%; height: 100%; }
+.capa .simb { position: absolute; right: 22mm; top: 14mm; width: 105mm; }
+.capa h1 { font-size: 54pt; color: var(--creme); }
+.capa .sub { font-family: var(--titulo); font-size: 13pt; letter-spacing: .2em; text-transform: uppercase; color: var(--limao); margin-top: 6mm; }
+
+/* ---------- conceito */
+.anot { position: relative; }
+.anot .rot { position: absolute; font-family: var(--titulo); font-size: 8pt; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--v800); white-space: nowrap; display: flex; align-items: center; gap: 2mm; }
+.anot .rot::before { content: ''; width: 12mm; height: .25mm; background: var(--v800); }
+.anot .ponto { position: absolute; width: 3.2mm; height: 3.2mm; margin: -1.6mm 0 0 -1.6mm; border-radius: 50%;
+  background: #b44a2a; box-shadow: 0 0 0 1.2mm rgba(180, 74, 42, .25); }
+
+/* ---------- construcao */
+.grade { position: relative; padding: 0; }
+.grade .area { position: absolute; border: .3mm dashed #b44a2a; }
+.grade .x { position: absolute; background: rgba(180, 74, 42, .14); border: .2mm solid rgba(180, 74, 42, .6);
+  font-family: var(--titulo); font-size: 9pt; color: #b44a2a; display: flex; align-items: center; justify-content: center; }
+
+/* ---------- cores */
+.cor { border-radius: 3mm; overflow: hidden; border: .3mm solid #e6dcc4; background: #fffaf0; }
+.cor .am { height: 34mm; display: flex; align-items: flex-end; padding: 3mm 4mm; font-family: var(--titulo); font-size: 12pt; }
+.cor .dados { padding: 3mm 4mm; font-size: 7.6pt; line-height: 1.6; font-family: 'JetBrains Mono', monospace; color: #3a3f37; }
+.cor .dados b { font-family: var(--texto); font-weight: 600; color: var(--v800); }
+.prop { display: flex; height: 9mm; border-radius: 2mm; overflow: hidden; margin-top: 6mm; }
+
+/* ---------- tipografia */
+.alfabeto { font-family: var(--titulo); font-size: 22pt; line-height: 1.25; color: var(--v800); word-break: break-all; }
+.gigante { font-family: var(--titulo); font-size: 120pt; line-height: .9; color: var(--v800); }
+
+/* ---------- usos incorretos */
+.erro { position: relative; }
+.erro .quadro { height: 40mm; }
+.erro .quadro > div { width: 70%; }
+.erro .marca { position: absolute; top: 2.5mm; right: 2.5mm; width: 6mm; height: 6mm; border-radius: 50%; background: #b44a2a;
+  color: #fff; font: 700 9pt/6mm var(--texto); text-align: center; }
+
+/* ---------- aplicacoes */
+.mock { border-radius: 3mm; overflow: hidden; position: relative; }
+.lista-arq { columns: 2; column-gap: 12mm; font-size: 8.4pt; }
+.lista-arq li { break-inside: avoid; list-style: none; padding: 1.6mm 0; border-bottom: .25mm solid rgba(95, 116, 36, .25); }
+.lista-arq code { font-family: 'JetBrains Mono', monospace; font-size: 7.6pt; color: var(--limao); }
+.sumario li { list-style: none; display: flex; gap: 5mm; padding: 2.2mm 0; border-bottom: .25mm solid rgba(201, 215, 128, .25);
+  font-family: var(--titulo); font-size: 12.5pt; color: var(--creme); }
+.sumario li span { color: var(--limao); width: 9mm; }
+blockquote { font-family: var(--titulo); font-size: 17pt; line-height: 1.3; color: var(--creme); }
+blockquote cite { display: block; font-size: 10pt; letter-spacing: .14em; color: var(--limao); margin-top: 3mm; font-style: normal; }
+</style>
+</head>
+<body>
+
+<!-- 01 CAPA -->
+<section class="pg escura capa">
+  <div class="esq">
+    <div style="width:62mm">{{svg:cone-sul-principal-negativa-sem-fundo}}</div>
+    <div>
+      <h1>Manual de<br>Identidade<br>Visual</h1>
+      <div class="sub">Fronteiras que conectam a Cristo</div>
+    </div>
+    <div class="peq" style="color:#aab3a4">Versão 1.0 · Outubro de 2026 · Iniciativa missionária da Igreja Renovar em Cristo</div>
+  </div>
+  <div class="dir">
+    <div class="ondas">{{svg:apoio-padrao-ondas-limao-transparente}}</div>
+    <div class="simb">{{svg:cone-sul-simbolo-negativa}}</div>
+  </div>
+</section>
+
+<!-- 02 APRESENTACAO -->
+<section class="pg escura">
+  <div class="topo"><b>Apresentação</b></div>
+  <div class="cols c2" style="height:100%; align-items:center">
+    <div>
+      <div class="kicker">Quem somos</div>
+      <h2>Uma resposta ao chamado.</h2>
+      <p class="lead">O CONE SUL é uma iniciativa missionária da Igreja Renovar em Cristo, fundamentada no chamado de Jesus para que o Evangelho seja anunciado até os confins da terra.</p>
+      <p>Este manual reúne as regras de uso da marca: como ela é construída, as versões, as cores, a tipografia e os elementos que a acompanham. Ele existe para que cada camiseta, post, banner ou cartão fale com a mesma voz — em Chapecó, em Assunção, em Buenos Aires ou em Santiago.</p>
+      <div class="fio" style="background:var(--limao)"></div>
+      <blockquote>“...e até aos confins da terra.”<cite>Atos 1:8</cite></blockquote>
+    </div>
+    <ol class="sumario">
+      <li><span>03</span>O símbolo e o conceito</li>
+      <li><span>04</span>Assinaturas</li>
+      <li><span>05</span>Construção e área de proteção</li>
+      <li><span>06</span>Redução mínima</li>
+      <li><span>07</span>Versões cromáticas</li>
+      <li><span>08</span>Paleta de cores</li>
+      <li><span>09</span>Tipografia</li>
+      <li><span>10</span>Elementos de apoio</li>
+      <li><span>11</span>Usos incorretos</li>
+      <li><span>12</span>Aplicações</li>
+      <li><span>13</span>Arquivos da marca</li>
+    </ol>
+  </div>
+  <div class="num">02</div>
+</section>
+
+<!-- 03 CONCEITO -->
+<section class="pg">
+  <div class="topo"><b>O símbolo</b></div>
+  <div class="lado">
+    <div>
+      <div class="kicker">Conceito</div>
+      <h2>Um continente alcançado a partir do Sul.</h2>
+      <p>O símbolo é o mapa da América do Sul dividido em duas leituras.</p>
+      <p><b>Em cheio</b>, os campos da missão: Argentina, Chile, Uruguai, Paraguai e a Região Sul do Brasil — o território que dá nome ao projeto. As divisas aparecem como fios finos: são fronteiras que existem, mas não separam.</p>
+      <p><b>Em linhas</b>, o restante do continente, desenhado por ondas concêntricas que nascem em <b>Chapecó (SC)</b>, a sede. Elas representam o Evangelho se espalhando: a mensagem sai de um ponto e avança, fronteira após fronteira, até os confins da terra.</p>
+      <div class="fio"></div>
+      <p class="peq">Contornos: Natural Earth (domínio público) e malha municipal do IBGE, em projeção de Mercator — os mesmos do mapa do site. O desenho é gerado por script (<code>identidade/fonte/gerar.py</code>) e não deve ser redesenhado à mão.</p>
+    </div>
+    <div style="display:flex; justify-content:center">
+      <div class="anot" style="width:88mm">
+        {{svg:cone-sul-simbolo-bicolor-verde}}
+        <div class="ponto" style="left:{{sede-x}}%; top:{{sede-y}}%"></div>
+        <div class="rot" style="left:{{sede-x}}%; top:{{sede-y}}%; transform:translate(4mm,-50%)">Chapecó · sede</div>
+        <div class="rot" style="left:80%; top:18%">Ondas · o alcance</div>
+        <div class="rot" style="left:62%; top:70%">Campos da missão</div>
+      </div>
+    </div>
+  </div>
+  <div class="num">03</div>
+</section>
+
+<!-- 04 ASSINATURAS -->
+<section class="pg">
+  <div class="topo"><b>Assinaturas</b></div>
+  <div class="kicker">Duas formas de assinar</div>
+  <h2>Principal e horizontal.</h2>
+  <div class="cols c2" style="margin-top:4mm; grid-template-columns: 1fr 1.25fr">
+    <div>
+      <div class="quadro q-creme" style="height:88mm"><div style="width:78%">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div>
+      <h3 style="margin-top:4mm">Assinatura principal</h3>
+      <p>Nome em duas linhas ao lado do símbolo. É a versão preferencial: use sempre que houver espaço, em especial em peças quadradas ou verticais (posts, cartazes, capas, camisetas).</p>
+    </div>
+    <div>
+      <div class="quadro q-creme" style="height:88mm"><div style="width:86%">{{svg:cone-sul-horizontal-positiva-sem-fundo}}</div></div>
+      <h3 style="margin-top:4mm">Assinatura horizontal com assinatura verbal</h3>
+      <p>Para espaços baixos e largos: cabeçalho do site, faixas, rodapés, banners e assinaturas de e-mail. Traz o slogan <i>Fronteiras que conectam a Cristo</i>. Se o slogan ficar menor que 6 pt, use a versão sem ele ou a assinatura principal.</p>
+    </div>
+  </div>
+  <div class="num">04</div>
+</section>
+
+<!-- 05 CONSTRUCAO -->
+<section class="pg">
+  <div class="topo"><b>Construção</b></div>
+  <div class="lado">
+    <div>
+      <div class="kicker">Proporção e respiro</div>
+      <h2>Área de proteção.</h2>
+      <p>A unidade de medida <b>x</b> é a altura da letra “C” do nome. Ao redor de toda a assinatura existe uma área livre de <b>1x</b> em cada lado: nenhum texto, foto recortada, borda de página ou outro logotipo entra nela.</p>
+      <p>A altura do símbolo é <b>3,5x</b> — um pouco mais alta que o bloco de texto, para que o sul do continente “desça” além da linha de base de SUL.</p>
+      <p>As proporções são fixas. Para ampliar ou reduzir, use os arquivos prontos e escale sempre de forma proporcional (com Shift no Illustrator, Canva ou Figma).</p>
+    </div>
+    <div class="grade quadro q-creme" style="height:150mm; padding:0">
+      <div style="position:relative; width:{{larg-construcao}}mm">
+        {{svg:cone-sul-principal-mono-verde}}
+        <div class="area" style="inset:-{{x-mm}}mm"></div>
+        <div class="x" style="left:-{{x-mm}}mm; top:30%; width:{{x-mm}}mm; height:{{x-mm}}mm">x</div>
+        <div class="x" style="left:30%; top:-{{x-mm}}mm; width:{{x-mm}}mm; height:{{x-mm}}mm">x</div>
+        <div class="x" style="right:-{{x-mm}}mm; top:55%; width:{{x-mm}}mm; height:{{x-mm}}mm">x</div>
+        <div class="x" style="left:55%; bottom:-{{x-mm}}mm; width:{{x-mm}}mm; height:{{x-mm}}mm">x</div>
+      </div>
+    </div>
+  </div>
+  <div class="num">05</div>
+</section>
+
+<!-- 06 REDUCAO -->
+<section class="pg">
+  <div class="topo"><b>Redução mínima</b></div>
+  <div class="kicker">Legibilidade</div>
+  <h2>Até onde a marca pode diminuir.</h2>
+  <p style="max-width:170mm">Abaixo destes tamanhos as ondas se fundem e o nome perde leitura. Em peças muito pequenas (bordado, carimbo, ícone de aplicativo, favicon) use apenas o símbolo — e, abaixo de 12 mm, o ícone quadrado em verde.</p>
+  <div class="cols c3" style="margin-top:10mm; align-items:end">
+    <div><div class="quadro q-creme" style="height:58mm; align-items:flex-end"><div style="width:30mm">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div>
+      <h3 style="margin-top:4mm">Principal</h3><p>Impresso: <b>30 mm</b> de largura<br>Tela: <b>120 px</b> de largura</p></div>
+    <div><div class="quadro q-creme" style="height:58mm; align-items:flex-end"><div style="width:40mm">{{svg:cone-sul-horizontal-positiva-sem-fundo}}</div></div>
+      <h3 style="margin-top:4mm">Horizontal com slogan</h3><p>Impresso: <b>40 mm</b> de largura<br>Tela: <b>180 px</b> de largura</p></div>
+    <div><div class="quadro q-creme" style="height:58mm; align-items:flex-end; gap:8mm">
+        <div style="width:7mm">{{svg:cone-sul-simbolo-positiva}}</div>
+        <div style="width:12mm">{{svg:cone-sul-icone-app}}</div></div>
+      <h3 style="margin-top:4mm">Símbolo e ícone</h3><p>Símbolo: <b>12 mm</b> de altura / <b>32 px</b><br>Ícone quadrado: <b>16 px</b> (favicon)</p></div>
+  </div>
+  <div class="num">06</div>
+</section>
+
+<!-- 07 VERSOES -->
+<section class="pg">
+  <div class="topo"><b>Versões cromáticas</b></div>
+  <div class="kicker">Cor e contraste</div>
+  <h2>Uma marca para cada fundo.</h2>
+  <div class="cols c3" style="gap:6mm; margin-top:2mm">
+    <div><div class="quadro q-creme" style="height:48mm"><div style="width:70%">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div>
+      <div class="legenda"><b>Positiva</b> — sobre creme, branco e fundos claros. Versão preferencial em impressos.</div></div>
+    <div><div class="quadro q-verde" style="height:48mm"><div style="width:70%">{{svg:cone-sul-principal-negativa-sem-fundo}}</div></div>
+      <div class="legenda"><b>Negativa</b> — sobre o verde da marca e fotos escuras. Versão preferencial em telas.</div></div>
+    <div><div class="quadro q-limao" style="height:48mm"><div style="width:70%">{{svg:cone-sul-principal-mono-verde}}</div></div>
+      <div class="legenda"><b>Monocromática verde</b> — sobre o verde-limão ou quando só houver uma cor (serigrafia, bordado).</div></div>
+    <div><div class="quadro q-escuro" style="height:48mm"><div style="width:70%">{{svg:cone-sul-principal-mono-creme}}</div></div>
+      <div class="legenda"><b>Monocromática creme</b> — gravação, estampa de uma cor em tecido escuro, fotos.</div></div>
+    <div><div class="quadro q-branco" style="height:48mm"><div style="width:70%">{{svg:cone-sul-principal-mono-preto}}</div></div>
+      <div class="legenda"><b>Preto</b> — fax, carimbo, jornal, documentos em preto e branco.</div></div>
+    <div><div class="quadro q-verde" style="height:48mm"><div style="width:44%">{{svg:cone-sul-icone-app}}</div></div>
+      <div class="legenda"><b>Ícone</b> — perfil de redes sociais, aplicativo, favicon.</div></div>
+  </div>
+  <div class="num">07</div>
+</section>
+
+<!-- 08 CORES -->
+<section class="pg">
+  <div class="topo"><b>Paleta de cores</b></div>
+  <div class="kicker">Paleta</div>
+  <h2>Verde da mata, limão e creme.</h2>
+  <div class="cols c4" style="gap:5mm; margin-top:2mm">
+    <div class="cor"><div class="am" style="background:#122d1e; color:#fef5e2">Verde Cone Sul</div>
+      <div class="dados"><b>Principal</b><br>HEX #122D1E<br>RGB 18 45 30<br>CMYK 80 45 75 65</div></div>
+    <div class="cor"><div class="am" style="background:#c9d780; color:#122d1e">Limão</div>
+      <div class="dados"><b>Destaque</b><br>HEX #C9D780<br>RGB 201 215 128<br>CMYK 25 5 60 0</div></div>
+    <div class="cor"><div class="am" style="background:#fef5e2; color:#122d1e; border-bottom:.3mm solid #e6dcc4">Creme</div>
+      <div class="dados"><b>Fundo claro e letras</b><br>HEX #FEF5E2<br>RGB 254 245 226<br>CMYK 0 3 12 0</div></div>
+    <div class="cor"><div class="am" style="background:#5f7424; color:#fef5e2">Limão escuro</div>
+      <div class="dados"><b>Limão sobre fundo claro</b><br>HEX #5F7424<br>RGB 95 116 36<br>CMYK 55 25 100 25</div></div>
+  </div>
+  <div class="cols c3" style="gap:5mm; margin-top:5mm">
+    <div class="cor" style="display:flex"><div class="am" style="background:#0b2215; color:#fef5e2; height:auto; width:38%; font-size:9pt">Verde 900</div>
+      <div class="dados">HEX #0B2215 · RGB 11 34 21<br>CMYK 85 50 80 75<br>Fundos mais profundos</div></div>
+    <div class="cor" style="display:flex"><div class="am" style="background:#1b3a28; color:#fef5e2; height:auto; width:38%; font-size:9pt">Verde 700</div>
+      <div class="dados">HEX #1B3A28 · RGB 27 58 40<br>CMYK 78 40 72 50<br>Cartões sobre o verde</div></div>
+    <div class="cor" style="display:flex"><div class="am" style="background:#2e5139; color:#fef5e2; height:auto; width:38%; font-size:9pt">Verde 600</div>
+      <div class="dados">HEX #2E5139 · RGB 46 81 57<br>CMYK 72 35 70 35<br>Ondas na versão positiva</div></div>
+  </div>
+  <div class="prop"><div style="flex:55; background:#122d1e"></div><div style="flex:25; background:#fef5e2; border:.3mm solid #e6dcc4"></div><div style="flex:12; background:#c9d780"></div><div style="flex:8; background:#5f7424"></div></div>
+  <p class="peq" style="margin-top:3mm">Proporção de uso: o verde domina, o creme respira, o limão aparece pouco e sempre para destacar. Os valores CMYK são referência para impressão em papel couché; peça prova de cor à gráfica antes de rodar tiragens grandes. Em tecido escuro, o creme e o limão precisam de base branca.</p>
+  <div class="num">08</div>
+</section>
+
+<!-- 09 TIPOGRAFIA -->
+<section class="pg">
+  <div class="topo"><b>Tipografia</b></div>
+  <div class="cols c2" style="gap:14mm">
+    <div>
+      <div class="kicker">Família principal</div>
+      <h2>Advercase</h2>
+      <div class="gigante">Aa</div>
+      <div class="alfabeto" style="margin-top:4mm">ABCDEFGHIJKLM<br>NOPQRSTUVWXYZ<br>abcdefghijklm<br>nopqrstuvwxyz<br>0123456789 ÁÃÇÉÕ</div>
+      <p class="peq" style="margin-top:4mm">Arquivos em <code>fonts/</code>. Na marca, as letras estão convertidas em curvas: os arquivos da logo abrem iguais mesmo sem a fonte instalada.</p>
+    </div>
+    <div>
+      <h3>Títulos e chamadas — Advercase</h3>
+      <p style="font-family:var(--titulo); font-size:30pt; line-height:1.02; color:var(--v800)">PESSOAS QUE AINDA NÃO CONHECEM A CRISTO</p>
+      <p style="font-family:var(--titulo); font-size:11pt; letter-spacing:.2em; color:var(--limao-e); margin-top:3mm">KICKER EM CAIXA ALTA · ESPAÇADO</p>
+      <div class="fio"></div>
+      <h3>Textos corridos — sem serifa</h3>
+      <p>Para parágrafos, legendas e formulários use uma sem serifa limpa: <b>Segoe UI</b> no site e no Windows; <b>Inter</b> (gratuita, Google Fonts) em impressos, apresentações e Canva. Esta página está em Inter.</p>
+      <p style="font-size:8pt; margin-top:3mm">Regular para texto · Semibold para destaques · Nunca abaixo de 7 pt em impresso ou 14 px em tela.</p>
+      <div class="fio"></div>
+      <h3>Regras</h3>
+      <p>Títulos em caixa alta ou em frase, nunca em itálico. Uma ideia por título, com no máximo três linhas. Versículos sempre com a referência (ex.: <i>Atos 1:8</i>) em limão ou em fonte menor.</p>
+    </div>
+  </div>
+  <div class="num">09</div>
+</section>
+
+<!-- 10 ELEMENTOS DE APOIO -->
+<section class="pg escura">
+  <div class="topo"><b>Elementos de apoio</b></div>
+  <div class="kicker">Grafismos</div>
+  <h2>Ondas, rosa dos ventos e fios.</h2>
+  <div class="cols c3" style="gap:8mm; margin-top:4mm">
+    <div><div class="quadro q-escuro" style="height:70mm; padding:0; overflow:hidden">{{svg:apoio-padrao-ondas-limao}}</div>
+      <h3 style="margin-top:4mm">Ondas</h3><p>Arcos concêntricos que saem de um canto da peça, como as ondas do símbolo. Use em fundo, com 15 % a 30 % de opacidade, sem cobrir textos.</p></div>
+    <div><div class="quadro q-escuro" style="height:70mm"><div style="width:44mm">{{svg:apoio-rosa-dos-ventos-limao}}</div></div>
+      <h3 style="margin-top:4mm">Rosa dos ventos</h3><p>Direção e envio. Acompanha mapas e peças sobre os países; sempre com o norte para cima e em uma só cor.</p></div>
+    <div><div class="quadro q-escuro" style="height:70mm; flex-direction:column; align-items:stretch; justify-content:center; gap:6mm; padding:10mm">
+        <div style="display:flex; align-items:center; gap:4mm; font-family:var(--titulo); color:var(--creme); font-size:12pt">CONE SUL<span style="flex:1; height:.35mm; background:var(--limao)"></span>Mateus 10:7</div>
+        <div style="display:flex; align-items:center; gap:4mm; font-family:var(--titulo); color:var(--limao); font-size:9pt; letter-spacing:.18em">ARGENTINA · CHILE · PARAGUAI · URUGUAI · BRASIL</div>
+      </div>
+      <h3 style="margin-top:4mm">Fio de cabeçalho</h3><p>Linha fina em limão ligando o nome à referência bíblica, no topo das artes. Organiza a peça e repete a ideia de conexão.</p></div>
+  </div>
+  <div class="num">10</div>
+</section>
+
+<!-- 11 USOS INCORRETOS -->
+<section class="pg">
+  <div class="topo"><b>Usos incorretos</b></div>
+  <div class="kicker">O que não fazer</div>
+  <h2>Proteja a marca.</h2>
+  <div class="cols c4" style="gap:5mm; margin-top:2mm">
+    <div class="erro"><div class="quadro q-creme"><div style="transform:scaleX(1.45)">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div><span class="marca">×</span><div class="legenda">Não distorcer, achatar ou esticar.</div></div>
+    <div class="erro"><div class="quadro q-creme"><div style="transform:rotate(-14deg)">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div><span class="marca">×</span><div class="legenda">Não girar nem inclinar.</div></div>
+    <div class="erro"><div class="quadro q-creme"><div style="filter:hue-rotate(150deg) saturate(2.5)">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div><span class="marca">×</span><div class="legenda">Não trocar as cores por outras fora da paleta.</div></div>
+    <div class="erro"><div class="quadro q-verde"><div>{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div><span class="marca">×</span><div class="legenda">Não usar a versão positiva sobre fundo escuro.</div></div>
+    <div class="erro"><div class="quadro q-creme"><div style="filter:drop-shadow(1.5mm 1.5mm 1mm rgba(0,0,0,.55))">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div><span class="marca">×</span><div class="legenda">Não aplicar sombra, brilho, contorno ou 3D.</div></div>
+    <div class="erro"><div class="quadro q-creme" style="flex-direction:column; gap:2mm"><div style="width:42%">{{svg:cone-sul-simbolo-positiva}}</div><div style="width:auto; font:700 15pt Arial; color:#122d1e">CONE SUL</div></div><span class="marca">×</span><div class="legenda">Não recompor o nome com outra fonte.</div></div>
+    <div class="erro"><div class="quadro" style="background:#8fa36a"><div>{{svg:cone-sul-principal-mono-creme}}</div></div><span class="marca">×</span><div class="legenda">Não usar sobre fundos de pouco contraste.</div></div>
+    <div class="erro"><div class="quadro q-creme"><div style="opacity:.35">{{svg:cone-sul-principal-positiva-sem-fundo}}</div></div><span class="marca">×</span><div class="legenda">Não aplicar transparência na assinatura.</div></div>
+  </div>
+  <div class="num">11</div>
+</section>
+
+<!-- 12 APLICACOES -->
+<section class="pg">
+  <div class="topo"><b>Aplicações</b></div>
+  <div class="kicker">Exemplos</div>
+  <h2>A marca em uso.</h2>
+  <div class="cols" style="grid-template-columns: 1.15fr 1fr 1fr; gap:6mm; margin-top:2mm; align-items:start">
+    <div>
+      <!-- post 1080x1080 -->
+      <div class="mock q-escuro" style="aspect-ratio:1; padding:7mm; display:flex; flex-direction:column; justify-content:space-between; position:relative">
+        <div style="position:absolute; inset:0; opacity:.18">{{svg:apoio-padrao-ondas-limao-transparente}}</div>
+        <div style="position:relative; display:flex; align-items:center; gap:3mm; font-family:var(--titulo); color:var(--creme); font-size:8pt">CONE SUL<span style="flex:1; height:.3mm; background:var(--limao)"></span>Atos 1:8</div>
+        <div style="position:relative; font-family:var(--titulo); color:var(--creme); font-size:22pt; line-height:1">HÁ FRONTEIRAS<br><span style="color:var(--limao)">QUE AINDA PRECISAM</span><br>SER ATRAVESSADAS</div>
+        <div style="position:relative; width:30mm">{{svg:cone-sul-horizontal-negativa-sem-fundo}}</div>
+      </div>
+      <div class="legenda">Post para redes sociais (1080 × 1080 px)</div>
+    </div>
+    <div>
+      <!-- cartao de visita 90x50 -->
+      <div class="mock q-verde" style="aspect-ratio:9/5; display:flex; align-items:center; justify-content:center"><div style="width:52%">{{svg:cone-sul-principal-negativa-sem-fundo}}</div></div>
+      <div class="mock q-creme" style="aspect-ratio:9/5; margin-top:3mm; padding:5mm; display:flex; flex-direction:column; justify-content:space-between">
+        <div><div style="font-family:var(--titulo); font-size:12pt; color:var(--v800)">Nome do Missionário</div>
+          <div style="font-family:var(--titulo); font-size:6.5pt; letter-spacing:.16em; color:var(--limao-e)">CAMPO PARAGUAI</div></div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; font-size:6.5pt; line-height:1.4">
+          <div>missaoconesul.com.br<br>Chapecó · SC · Brasil</div><div style="width:9mm">{{svg:cone-sul-simbolo-positiva}}</div></div>
+      </div>
+      <div class="legenda">Cartão de visita (90 × 50 mm), frente e verso</div>
+    </div>
+    <div>
+      <!-- camiseta: silhueta simples -->
+      <div class="mock q-creme" style="aspect-ratio:1; display:flex; align-items:center; justify-content:center">
+        <svg viewBox="0 0 200 200" style="width:88%">
+          <path fill="#122d1e" d="M62 22 L38 30 L10 58 L28 82 L44 70 L44 186 L156 186 L156 70 L172 82 L190 58 L162 30 L138 22 C132 36 118 42 100 42 C82 42 68 36 62 22Z"/>
+          <path fill="none" stroke="#0b2215" stroke-width="2" d="M62 22 C68 36 82 42 100 42 C118 42 132 36 138 22"/>
+        </svg>
+        <div style="position:absolute; width:30%; top:30%">{{svg:cone-sul-principal-mono-creme}}</div>
+      </div>
+      <div class="legenda">Camiseta: estampa em uma cor (creme) sobre tecido verde</div>
+    </div>
+  </div>
+  <div class="num">12</div>
+</section>
+
+<!-- 13 ARQUIVOS -->
+<section class="pg escura">
+  <div class="topo"><b>Arquivos da marca</b></div>
+  <div class="cols" style="grid-template-columns: 78mm 1fr; gap:14mm">
+    <div>
+      <div class="kicker">Onde encontrar</div>
+      <h2>Use sempre os arquivos originais.</h2>
+      <p>Todas as artes estão na pasta <code style="color:var(--limao)">identidade/</code> do repositório do site, em dois formatos vetoriais:</p>
+      <p><b style="color:var(--creme)">SVG</b> — para site, Figma, Canva e navegador.<br><b style="color:var(--creme)">PDF vetorial</b> — para gráfica, Illustrator, CorelDRAW e Inkscape. Abre editável, sem perder qualidade em qualquer tamanho.</p>
+      <p>Não use print de tela, foto ou imagem baixada de rede social para reproduzir a marca.</p>
+      <div style="width:44mm; margin-top:10mm">{{svg:cone-sul-principal-negativa-sem-fundo}}</div>
+    </div>
+    <ul class="lista-arq" style="color:#dfe3dc">
+      <li><code>cone-sul-principal-*</code><br>Assinatura principal</li>
+      <li><code>cone-sul-horizontal-*</code><br>Assinatura horizontal com slogan</li>
+      <li><code>cone-sul-simbolo-*</code><br>Só o símbolo</li>
+      <li><code>cone-sul-icone-app / -quadrado</code><br>Ícone para perfil, app e favicon</li>
+      <li><code>…-positiva</code><br>Verde sobre creme</li>
+      <li><code>…-negativa</code><br>Creme e limão sobre verde</li>
+      <li><code>…-sem-fundo</code><br>Mesmas cores, fundo transparente</li>
+      <li><code>…-mono-verde / -mono-creme / -mono-preto</code><br>Uma cor só</li>
+      <li><code>apoio-padrao-ondas-*</code><br>Grafismo de ondas</li>
+      <li><code>apoio-rosa-dos-ventos-*</code><br>Rosa dos ventos</li>
+      <li><code>svg/</code> e <code>pdf/</code><br>Os mesmos nomes nas duas pastas</li>
+      <li><code>fonte/</code><br>Scripts que geram tudo de novo</li>
+    </ul>
+  </div>
+  <div class="num">13</div>
+</section>
+
+</body>
+</html>

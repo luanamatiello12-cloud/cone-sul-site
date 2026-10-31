@@ -6,3 +6,5 @@ exclude:
   - servidor
   - mapa/README.md
   - _config.yml
+  # Manual de identidade e artes da marca: material de bastidor
+  - identidade
