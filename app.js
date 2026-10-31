@@ -655,14 +655,14 @@ const PORTAL = {
     }
 };
 
-// Link de "Esqueci minha senha": o login que ele traz so serve para criar a
+// Link de "Esqueci minha senha" (ou do convite): o login que ele traz so serve para criar a
 // senha nova, na propria pagina do link. Saiu dela (ou recarregou) sem
 // salvar a senha? Esse login e apagado deste navegador antes de qualquer
 // pagina usa-lo. Salvar a senha tira a marca (senhaCriada).
 const CHAVE_SENHA_PENDENTE = 'conesul-senha-pendente';
 const senhaCriada = () => { try { localStorage.removeItem(CHAVE_SENHA_PENDENTE); } catch { /* sem storage */ } };
 if (!PORTAL.MODO_DEMO) try {
-    if (/type=recovery/.test(location.hash)) localStorage.setItem(CHAVE_SENHA_PENDENTE, '1');
+    if (/type=(recovery|invite)/.test(location.hash)) localStorage.setItem(CHAVE_SENHA_PENDENTE, '1');
     else if (localStorage.getItem(CHAVE_SENHA_PENDENTE)) {
         senhaCriada();
         Object.keys(localStorage).filter(k => /^sb-.*-auth-token$/.test(k)).forEach(k => localStorage.removeItem(k));
@@ -857,9 +857,11 @@ if (PAGINA === 'noticias') {
 }
 
 if (PAGINA === 'portal') {
-    // Veio pelo link de "Esqueci minha senha"? (o Supabase poe type=recovery
-    // no endereco; guardar antes de o cliente limpar o endereco)
+    // Veio pelo link de "Esqueci minha senha" ou do convite? (o Supabase poe
+    // type=recovery ou type=invite no endereco; guardar antes de o cliente
+    // limpar o endereco)
     const veioTrocarSenha = /type=recovery/.test(location.hash);
+    const veioConvite = /type=invite/.test(location.hash);
     // Endereco antigo do cadastro (portal.html#cadastro) leva a pagina nova
     const irParaCadastro = () => { if (location.hash === '#cadastro') location.replace('fazer-parte.html'); };
     irParaCadastro();
@@ -969,8 +971,8 @@ if (PAGINA === 'portal') {
     if (!PORTAL.MODO_DEMO) PORTAL.iniciar().then(u => {
         mostrar(u);
         // Chegou pelo link de troca de senha: leva direto ao formulario
-        if (u && veioTrocarSenha) {
-            document.getElementById('senha-titulo').textContent = 'Crie sua nova senha.';
+        if (u && (veioTrocarSenha || veioConvite)) {
+            document.getElementById('senha-titulo').textContent = veioConvite ? 'Crie sua senha.' : 'Crie sua nova senha.';
             document.getElementById('tela-portal-senha').scrollIntoView({ block: 'start' });
             document.getElementById('s-nova').focus();
         }

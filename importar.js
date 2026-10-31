@@ -173,7 +173,12 @@
     }
     function mensagemAcesso(a) {
         const primeiro = (a.nome || '').trim().split(/\s+/)[0];
-        return `Olá${primeiro ? ', ' + primeiro : ''}! Seu acesso à Área do Mantenedor do Cone Sul está pronto.\n\n`
+        const ola = `Olá${primeiro ? ', ' + primeiro : ''}! Seu acesso à Área do Mantenedor do Cone Sul está pronto.\n\n`;
+        // Pessoa nova da importacao: a senha ela cria pelo link do e-mail
+        if (!a.senha) return ola
+            + `Enviamos um e-mail para ${a.email} com o link para você criar a sua senha. Se não achar, confira o spam, `
+            + `ou entre em ${PORTAL_URL} e use "Esqueci minha senha". Obrigado por caminhar conosco!`;
+        return ola
             + `Site: ${PORTAL_URL}\nLogin: ${a.email}\nSenha: ${a.senha}\n\n`
             + 'Por segurança, ao entrar troque esta senha por uma sua (Área do Mantenedor > Trocar senha). Obrigado por caminhar conosco!';
     }
@@ -185,7 +190,7 @@
                 <div class="acesso-dados">
                     <strong>${esc(a.nome) || esc(a.email)}</strong>
                     <span>${esc(a.email)}</span>
-                    <span>Senha: <code>${esc(a.senha)}</code></span>
+                    ${a.senha ? `<span>Senha: <code>${esc(a.senha)}</code></span>` : '<span>Convite enviado por e-mail</span>'}
                     ${tel ? '' : '<span class="acesso-sem-tel">Sem celular no relatório: escolha o contato no WhatsApp</span>'}
                 </div>
                 <div class="acesso-acoes">
@@ -216,8 +221,8 @@
         const retorno = $('importar-retorno');
         if (!registros.length) return;
         if (PORTAL.MODO_DEMO) {
-            retorno.textContent = `Modo demonstração: nada foi gravado. Abaixo, como fica a lista de acessos (senhas de exemplo, que não funcionam).`;
-            mostrarAcessos(registros.map(r => ({ ...r, senha: senhaDemo() })), $('acessos'));
+            retorno.textContent = `Modo demonstração: nada foi gravado e nenhum e-mail foi enviado. Abaixo, como fica a lista de pessoas novas.`;
+            mostrarAcessos(registros, $('acessos'));
             $('passo-acessos').hidden = false;
             return;
         }
@@ -230,7 +235,7 @@
             });
             if (error) throw error;
             if (data.novos?.length) { mostrarAcessos(data.novos, $('acessos')); $('passo-acessos').hidden = false; }
-            retorno.textContent = `Pronto: ${data.criados} login(s) novo(s) com senha provisória, ${data.atualizados} atualizado(s)`
+            retorno.textContent = `Pronto: ${data.criados} login(s) novo(s) (convite enviado por e-mail), ${data.atualizados} atualizado(s)`
                 + (data.desativados ? `, ${data.desativados} sem contribuição neste relatório` : '')
                 + (data.erros?.length ? `. ${data.erros.length} com erro: ${data.erros.slice(0, 3).join('; ')}` : '.');
         } catch (erro) {
