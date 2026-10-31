@@ -139,7 +139,26 @@ function atualizarContatosNaTela() {
         else a.removeAttribute('target');
         // Site da igreja ainda nao existe: o item some do rodape ate ter endereco
         if (k === 'igreja' && a.parentElement.tagName === 'LI') a.parentElement.hidden = CONTATO.igreja === '#';
+        // Rodape: o endereco aparece ao lado do nome (@perfil, telefone, e-mail)
+        if (a.closest('footer') && ['instagram', 'whatsapp', 'email'].includes(k)) {
+            let end = a.querySelector('.contato-endereco');
+            if (!end) { end = document.createElement('span'); end.className = 'contato-endereco'; a.append(' ', end); }
+            end.textContent = enderecoContato(k);
+        }
     });
+}
+// Como o endereco aparece escrito: @perfil, (49) 99999-9999, e-mail
+function enderecoContato(k) {
+    if (k === 'email') return CONTATO.email;
+    try {
+        const u = new URL(CONTATO[k]);
+        if (k === 'instagram') { const perfil = u.pathname.split('/').filter(Boolean)[0]; return perfil ? '@' + perfil : ''; }
+        let d = u.pathname.replace(/\D/g, '');
+        if (d.startsWith('55') && d.length >= 12) d = d.slice(2);
+        if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+        if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+        return d ? '+' + d : '';
+    } catch { return ''; }
 }
 
 // Demonstracao: o que foi salvo neste navegador. Contas ligadas: a ultima
