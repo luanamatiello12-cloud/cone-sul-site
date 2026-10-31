@@ -969,14 +969,20 @@ if (PAGINA === 'portal') {
         }
     };
 
+    // Veio pelo link do e-mail (troca de senha ou convite): mostra so o
+    // formulario de senha; o resto do portal aparece depois de salvar
+    let criandoSenha = false;
+    const telaSenha = document.getElementById('tela-portal-senha');
     mostrar(PORTAL.sessao());
     // Contas reais: confere a sessao no servidor (e a do link do e-mail)
     if (!PORTAL.MODO_DEMO) PORTAL.iniciar().then(u => {
         mostrar(u);
-        // Chegou pelo link de troca de senha: leva direto ao formulario
         if (u && (veioTrocarSenha || veioConvite)) {
+            criandoSenha = true;
+            telasPortal.forEach(t => { t.hidden = t !== telaSenha; });
             document.getElementById('senha-titulo').textContent = veioConvite ? 'Crie sua senha.' : 'Crie sua nova senha.';
-            document.getElementById('tela-portal-senha').scrollIntoView({ block: 'start' });
+            document.getElementById('senha-retorno').textContent = 'Digite a senha nova duas vezes e clique em "Salvar nova senha".';
+            window.scrollTo(0, 0);
             document.getElementById('s-nova').focus();
         }
     }).catch(() => {});
@@ -1063,6 +1069,16 @@ if (PAGINA === 'portal') {
             formSenha.classList.remove('validar');
             document.getElementById('aviso-senha').hidden = true;
             document.getElementById('senha-titulo').textContent = 'Trocar senha.';
+            if (criandoSenha) {
+                // Senha criada pelo link: abre a Area do Mantenedor
+                criandoSenha = false;
+                retorno.textContent = '';
+                mostrar(PORTAL.sessao(), true);
+                const aviso = document.getElementById('aviso-senha');
+                aviso.textContent = 'Senha salva! Das próximas vezes, entre com o seu e-mail e esta senha.';
+                aviso.hidden = false;
+                return;
+            }
             retorno.textContent = PORTAL.MODO_DEMO ? 'Demonstração: com as contas ligadas, a senha nova passa a valer no próximo login.' : 'Senha alterada. Use a nova senha no próximo login.';
         } catch (erro) {
             retorno.textContent = erro.message;
