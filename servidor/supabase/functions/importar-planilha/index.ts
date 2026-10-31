@@ -2,9 +2,10 @@
 // IMPORTAR RELATORIO (Supabase Edge Function)
 // Chamada pela pagina importar.html, com o login de alguem da equipe.
 // Recebe as linhas ja lidas do Excel do Eklesia (agrupadas por e-mail)
-// e grava cada uma como contribuicao: para quem e novo, cria o login com
-// SENHA PROVISORIA e devolve a senha (uma vez so) para a equipe mandar
-// pelo WhatsApp; de quem ja existe, atualiza valor e nivel.
+// e grava cada uma como contribuicao: para quem e novo, cria o login e o
+// Supabase manda o e-mail de convite ("seu cadastro esta pronto"), com o
+// link para a pessoa criar a propria senha; de quem ja existe, atualiza
+// valor e nivel.
 // Opcional: quem veio do Eklesia e nao esta no relatorio perde o nivel.
 // Tambem: { acao: 'nova-senha', email } gera outra senha provisoria.
 // So contas listadas na tabela "equipe" podem usar (schema.sql), e so a
@@ -77,18 +78,18 @@ Deno.serve(async (req) => {
 
     let criados = 0, atualizados = 0;
     const erros: string[] = [];
-    const novos: { email: string; nome?: string; telefone?: string; senha: string }[] = [];
+    const novos: { email: string; nome?: string; telefone?: string }[] = [];
     for (const r of registros) {
         try {
-            const { resultado, senha } = await gravarContribuicao(db, {
+            const { resultado } = await gravarContribuicao(db, {
                 email: r.email, nome: r.nome, cpf: r.cpf, telefone: r.telefone,
                 nascimento: r.nascimento || undefined, moradia: r.moradia, igreja: r.igreja,
                 valorMensal: r.valor,
                 status: r.valor > 0 ? 'ativa' : 'cancelada'
-            }, 'eklesia', 'senha');
+            }, 'eklesia', 'convite');
             if (resultado === 'criado') {
                 criados++;
-                if (senha) novos.push({ email: r.email.trim().toLowerCase(), nome: r.nome, telefone: r.telefone, senha });
+                novos.push({ email: r.email.trim().toLowerCase(), nome: r.nome, telefone: r.telefone });
             } else atualizados++;
         } catch (e) {
             erros.push((e as Error).message);

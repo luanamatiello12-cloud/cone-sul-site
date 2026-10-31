@@ -1,9 +1,10 @@
 // Grava uma contribuicao no cadastro do mantenedor. Usado pelo webhook
 // (plataforma de pagamento) e pela importacao do relatorio (Eklesia).
 // - Sem cadastro com este e-mail: cria a conta, de um destes jeitos:
-//     'convite' (webhook): o Supabase manda o e-mail "seu cadastro esta pronto";
-//     'senha' (importacao): login pronto com SENHA PROVISORIA, devolvida aqui
-//     uma unica vez para a equipe mandar pelo WhatsApp (nao fica guardada).
+//     'convite' (webhook e importacao): o Supabase manda o e-mail "seu
+//     cadastro esta pronto", com o link para criar a senha;
+//     'senha': login pronto com SENHA PROVISORIA, devolvida aqui uma unica
+//     vez para quem chamou (nao fica guardada).
 // - Com cadastro: so preenche os campos vazios (nao apaga o que a pessoa
 //   editou) e atualiza valor e status. O nivel e calculado pelo banco.
 

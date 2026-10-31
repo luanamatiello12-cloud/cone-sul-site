@@ -49,17 +49,22 @@ Eklesia no **Painel** (`admin.html`, bloco "Importar relatório do Eklesia"):
 3. Se a mesma pessoa aparece em várias linhas (várias contribuições no período):
    somar, usar o maior valor ou a última linha.
 4. Conferir a prévia (nível de cada pessoa) e clicar em **Importar cadastros**:
-   - quem é **novo** ganha um login pronto: o e-mail e uma **senha provisória**
-     (`Cone-` e oito letras e números, ex.: `Cone-7KQ4-M9TX`);
+   - quem é **novo** ganha um login e recebe o **e-mail de convite** ("Seu cadastro no
+     Projeto Cone Sul está pronto", modelo *Invite user* do Supabase), com o link para
+     criar a própria senha;
    - quem **já existe** tem valor e nível atualizados (dados que a pessoa já editou não
      são sobrescritos; a senha não muda).
-5. Aparece a lista **Enviar os acessos**: para cada pessoa nova, a senha e o botão
-   **Enviar no WhatsApp**, que abre a conversa com o celular do relatório e a mensagem
-   pronta (site, login e senha). Também dá para copiar a mensagem.
-   **As senhas aparecem só nessa hora** (não ficam guardadas em lugar nenhum): enviar
-   antes de fechar a página. Perdeu? Em **Nova senha provisória**, gerar outra pelo e-mail.
-6. A pessoa entra no portal com e-mail e senha. Enquanto usa a senha provisória, o portal
-   sugere trocar (opcional). **Esqueci minha senha** manda um link por e-mail.
+5. Aparece a lista **Pessoas novas**, com o botão **Enviar no WhatsApp** (opcional), que
+   abre a conversa com o celular do relatório e um aviso pronto para conferir o e-mail.
+   O link do e-mail vale pelo mesmo tempo dos links de troca de senha (hoje 15 minutos,
+   em Authentication > Emails); depois disso, a pessoa usa **Esqueci minha senha**.
+   Os e-mails saem pelo Gmail, até 30 por hora: num relatório com muita gente nova, os
+   que passarem do limite aparecem como erro. Para essas pessoas (ou quem não recebeu),
+   **Nova senha provisória** gera uma senha (`Cone-` e oito letras e números) para
+   mandar pelo WhatsApp; ela aparece só nessa hora.
+6. A pessoa entra no portal: pelo link do convite cai direto em **Crie sua senha**. Com
+   senha provisória, o portal sugere trocar (opcional). **Esqueci minha senha** manda um
+   link por e-mail.
 7. Opcional: "quem não estiver neste relatório perde o nível" (só afeta quem veio do
    Eklesia).
 
