@@ -14,7 +14,7 @@ if (window.top !== window.self) {
 // ---------- Contato (WhatsApp e site da igreja: trocar quando houver) ----------
 const CONTATO = {
     email: 'conesul.missoes@gmail.com',
-    instagram: 'https://www.instagram.com/conesul.missoes/',
+    instagram: 'https://www.instagram.com/missao.conesul/',
     whatsapp: 'https://wa.me/5549991802176',
     igreja: '#'
 };
