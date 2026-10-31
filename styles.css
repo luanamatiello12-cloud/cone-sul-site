@@ -2644,7 +2644,7 @@ body.modo-edicao .bloco-alvo { box-shadow: inset 0 0 0 2px rgba(201, 215, 128, 0
    beneficios, na altura toda da faixa. Expansores (a primeira) e o
    plano em destaque: fundo limao e selo "Mais completo".
    ========================================================= */
-.campanhas { grid-template-columns: 1fr; gap: 1.6rem; }
+.campanhas { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
 .campanha-card {
     position: relative;
     flex-direction: row;
@@ -2724,6 +2724,11 @@ body.modo-edicao .bloco-alvo { box-shadow: inset 0 0 0 2px rgba(201, 215, 128, 0
     }
     .campanha-beneficios { padding: 1.3rem 1.3rem 1.4rem; }
     .campanha-corpo .campanha-btn { margin-top: 1.4rem; justify-self: stretch; }
+}
+@media (max-width: 420px) {
+    /* Celular estreito: o valor quebra a linha em vez de alargar o cartao */
+    .campanha-corpo { min-width: 0; }
+    .campanha-valor strong { white-space: normal; }
 }
 
 /* =========================================================
