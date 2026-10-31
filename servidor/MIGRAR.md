@@ -18,13 +18,10 @@ foram migradas (decisão da equipe).
 antigo (`luanamatiello12-cloud.github.io/cone-sul-site/`) redireciona para o novo.
 No login (Authentication > URL Configuration), *Site URL* é o domínio novo e as
 *Redirect URLs* aceitam o domínio (com e sem `www`), o github.io (por um tempo, para
-links de e-mail já enviados) e `localhost:5500`.
+links de e-mail já enviados) e `localhost:5500`. Os segredos das funções já usam o
+domínio novo (`SITE_URL` e `ORIGENS_PERMITIDAS`, com o github.io mantido na lista).
 
 Falta:
-- **Segredos das funções**: trocar `SITE_URL` para `https://missaoconesul.com.br` e
-  `ORIGENS_PERMITIDAS` para `https://missaoconesul.com.br,https://www.missaoconesul.com.br,https://luanamatiello12-cloud.github.io,http://localhost:5500`
-  (Edge Functions > Secrets). Sem isso, a importação da planilha no /admin é
-  recusada quando aberta pelo domínio novo.
 - **HTTPS**: em Settings > Pages do repositório, marcar *Enforce HTTPS* quando
   o GitHub liberar o certificado.
 - **CAPTCHA** (Turnstile): não configurado.
