@@ -862,6 +862,9 @@ if (PAGINA === 'portal') {
     // limpar o endereco)
     const veioTrocarSenha = /type=recovery/.test(location.hash);
     const veioConvite = /type=invite/.test(location.hash);
+    // Link vencido ou ja usado (ex.: pediu dois e clicou no primeiro): o
+    // Supabase volta com error_code no endereco, sem login
+    const linkInvalido = /error_code=otp_expired|error=access_denied/.test(location.hash);
     // Endereco antigo do cadastro (portal.html#cadastro) leva a pagina nova
     const irParaCadastro = () => { if (location.hash === '#cadastro') location.replace('fazer-parte.html'); };
     irParaCadastro();
@@ -1023,14 +1026,23 @@ if (PAGINA === 'portal') {
         const retorno = document.getElementById('esqueci-retorno');
         formEsqueci.classList.add('validar');
         if (!formEsqueci.checkValidity()) { retorno.textContent = 'Informe um e-mail válido.'; return; }
+        // Um pedido por vez: cada link novo cancela o anterior
+        const botao = formEsqueci.querySelector('[type="submit"]');
+        botao.disabled = true;
+        retorno.textContent = 'Enviando…';
         try {
             await PORTAL.esqueciSenha(document.getElementById('e-email').value.trim(), CAPTCHA.token(formEsqueci));
-            retorno.textContent = 'Pronto! Se este e-mail tiver cadastro, o link para criar uma senha nova chega em alguns minutos.';
+            retorno.textContent = 'Pronto! Se este e-mail tiver cadastro, o link para criar uma senha nova chega em alguns minutos. Use o e-mail mais recente: cada pedido cancela o link anterior.';
         } catch (erro) {
             retorno.textContent = erro.message;
         }
+        botao.disabled = false;
         CAPTCHA.reiniciar(formEsqueci);
     });
+    if (linkInvalido) {
+        trocarForm(true);
+        document.getElementById('esqueci-retorno').textContent = 'Este link expirou ou já foi usado (cada pedido novo cancela o anterior). Peça outro abaixo e use o e-mail mais recente.';
+    }
 
     // Trocar senha (opcional)
     const formSenha = document.getElementById('form-senha');
