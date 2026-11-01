@@ -517,7 +517,7 @@ document.querySelectorAll('.filtro-categorias button').forEach(botao => {
 const NIVEIS = [
     {
         id: 'expansor', nome: 'Expansor', minimo: 1000, faixa: 'A partir de R$ 1.000 por mês',
-        beneficios: ['Devocionais on-line e mensais', 'Acesso presencial e on-line aos workshops', 'Divulgação da sua empresa', 'Acompanhamento pastoral']
+        beneficios: ['Devocionais on-line e mensais', 'Acesso presencial e on-line aos workshops', 'Divulgação da sua empresa', 'Acompanhamento pastoral', 'Summit anual: conferência de liderança para equipar líderes e promover networking']
     },
     {
         id: 'construtor', nome: 'Construtor', minimo: 500, faixa: 'De R$ 500 a R$ 1.000 por mês',
