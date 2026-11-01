@@ -147,6 +147,15 @@ function atualizarContatosNaTela() {
         }
     });
 }
+// Oferta livre: o mesmo link de pagamento dos mantenedores, sem cadastro.
+// Sem link configurado, a faixa some.
+function atualizarOfertaLivre() {
+    document.querySelectorAll('[data-oferta-livre]').forEach(a => {
+        if (LINKS_PAGAMENTO.unico) a.href = LINKS_PAGAMENTO.unico;
+        const faixa = a.closest('.oferta-livre');
+        if (faixa) faixa.hidden = !LINKS_PAGAMENTO.unico;
+    });
+}
 // Como o endereco aparece escrito: @perfil, (49) 99999-9999, e-mail
 function enderecoContato(k) {
     if (k === 'email') return CONTATO.email;
@@ -174,6 +183,7 @@ const CONFIG_PRONTA = !CONTAS_LIGADAS ? Promise.resolve() : Promise.race([
             try { if (c) localStorage.setItem(CHAVE_CONFIG_CACHE, JSON.stringify(c)); else localStorage.removeItem(CHAVE_CONFIG_CACHE); } catch { /* sem storage */ }
             aplicarConfig(c);
             atualizarContatosNaTela();
+            atualizarOfertaLivre();
         })
         .catch(erro => console.warn('Configurações do site indisponíveis:', erro)),
     new Promise(ok => setTimeout(ok, 2500))
@@ -296,6 +306,7 @@ function montarRodape() {
 document.body.insertAdjacentHTML('afterbegin', SPRITE_BANDEIRAS + montarCabecalho());
 document.body.insertAdjacentHTML('beforeend', montarRodape());
 atualizarContatosNaTela();
+atualizarOfertaLivre();
 
 // Menu recolhido no celular
 const nav = document.querySelector('nav');
