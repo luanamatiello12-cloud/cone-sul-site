@@ -2302,9 +2302,6 @@ footer::before {
     .campanha-card img { width: 100%; max-width: none; aspect-ratio: 3 / 1; min-height: 0; }
 }
 
-/* Summit (Expansores com Proposito): aviso de data depois da frase */
-.destaque + .sec-intro { margin-top: 1.2rem; }
-
 /* Oferta livre: faixa abaixo dos planos, sem cadastro */
 .oferta-livre {
     display: flex;
