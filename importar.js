@@ -200,6 +200,45 @@
             </li>`;
         }).join('');
     }
+    // ---------- Aviso de nivel atualizado pelo WhatsApp ----------
+    // Quem ja tinha cadastro nao recebe e-mail na importacao; a equipe pode
+    // avisar pelo WhatsApp quem mudou de nivel.
+    function mensagemNivel(a) {
+        const primeiro = (a.nome || '').trim().split(/\s+/)[0];
+        return `Olá${primeiro ? ', ' + primeiro : ''}! Seu nível de mantenedor do Projeto Cone Sul foi atualizado para ${a.nivelNome}.\n\n`
+            + `Entre na Área do Mantenedor para ver seus benefícios: ${PORTAL_URL}\n\nObrigado por caminhar conosco!`;
+    }
+    function mostrarNiveis(lista, alvo) {
+        alvo.innerHTML = lista.map((a, i) => {
+            const tel = telefoneWhats(a.telefone);
+            const link = `https://wa.me/${tel}?text=${encodeURIComponent(mensagemNivel(a))}`;
+            return `<li class="acesso">
+                <div class="acesso-dados">
+                    <strong>${esc(a.nome) || esc(a.email)}</strong>
+                    <span>${esc(a.email)}</span>
+                    <span>${a.antesNome ? esc(a.antesNome) + ' → ' : 'Novo nível: '}<span class="nivel-tag ${esc(a.nivel)}">${esc(a.nivelNome)}</span></span>
+                    ${tel ? '' : '<span class="acesso-sem-tel">Sem celular no cadastro: escolha o contato no WhatsApp</span>'}
+                </div>
+                <div class="acesso-acoes">
+                    <a class="btn btn-whats" href="${link}" target="_blank" rel="noopener" data-enviado="${i}">Avisar no WhatsApp</a>
+                    <button type="button" class="btn-copiar" data-copiar="${esc(mensagemNivel(a))}">Copiar mensagem</button>
+                </div>
+            </li>`;
+        }).join('');
+    }
+    // Nivel, nome e celular de quem esta na planilha (antes e depois de importar)
+    async function niveisAtuais(sb, emails) {
+        const mapa = new Map();
+        for (let i = 0; i < emails.length; i += 100) {
+            const { data, error } = await sb.from('mantenedores')
+                .select('email, nome, telefone, nivel').in('email', emails.slice(i, i + 100));
+            if (error) throw error;
+            (data || []).forEach(m => mapa.set(String(m.email).toLowerCase(), m));
+        }
+        return mapa;
+    }
+    const NOME_NIVEL = Object.fromEntries(NIVEIS.map(n => [n.id, n.nome]));
+
     document.addEventListener('click', async (e) => {
         const enviar = e.target.closest('[data-enviado]');
         if (enviar) enviar.closest('.acesso').classList.add('enviado');
@@ -224,17 +263,45 @@
             retorno.textContent = `Modo demonstração: nada foi gravado e nenhum e-mail foi enviado. Abaixo, como fica a lista de pessoas novas.`;
             mostrarAcessos(registros, $('acessos'));
             $('passo-acessos').hidden = false;
+            const exemplo = registros.map(r => ({ ...r, nivel: nivelPorValor(r.valor)?.id })).filter(r => r.nivel)
+                .map(r => ({ ...r, nivelNome: NOME_NIVEL[r.nivel] }));
+            mostrarNiveis(exemplo, $('niveis-atualizados'));
+            $('passo-niveis').hidden = !exemplo.length;
             return;
         }
         $('btn-importar').disabled = true;
+        $('passo-niveis').hidden = true;
         retorno.textContent = 'Importando…';
         try {
             const sb = await PORTAL.cliente();
+            const emails = registros.map(r => r.email);
+            // Nivel de antes, para saber quem mudou. Se falhar, a importacao segue sem o aviso.
+            let antes = null;
+            try { antes = await niveisAtuais(sb, emails); } catch { antes = null; }
             const { data, error } = await sb.functions.invoke('importar-planilha', {
                 body: { registros, desativarAusentes: $('desativar-ausentes').checked }
             });
             if (error) throw error;
             if (data.novos?.length) { mostrarAcessos(data.novos, $('acessos')); $('passo-acessos').hidden = false; }
+            if (antes) {
+                try {
+                    const depois = await niveisAtuais(sb, emails);
+                    const novos = new Set((data.novos || []).map(n => String(n.email).toLowerCase()));
+                    const telPlanilha = new Map(registros.map(r => [r.email, r.telefone]));
+                    const mudaram = [];
+                    depois.forEach((m, email) => {
+                        const a = antes.get(email);
+                        // So quem ja tinha cadastro, ficou com nivel e mudou de nivel
+                        if (novos.has(email) || !a || !m.nivel || a.nivel === m.nivel) return;
+                        mudaram.push({
+                            email, nome: m.nome, telefone: m.telefone || telPlanilha.get(email),
+                            nivel: m.nivel, nivelNome: NOME_NIVEL[m.nivel] || m.nivel,
+                            antesNome: a.nivel ? (NOME_NIVEL[a.nivel] || a.nivel) : ''
+                        });
+                    });
+                    if (mudaram.length) { mostrarNiveis(mudaram, $('niveis-atualizados')); $('passo-niveis').hidden = false; }
+                } catch { /* sem a lista de niveis; a importacao ja deu certo */ }
+            }
             retorno.textContent = `Pronto: ${data.criados} login(s) novo(s) (convite enviado por e-mail), ${data.atualizados} atualizado(s)`
                 + (data.desativados ? `, ${data.desativados} sem contribuição neste relatório` : '')
                 + (data.erros?.length ? `. ${data.erros.length} com erro: ${data.erros.slice(0, 3).join('; ')}` : '.');
